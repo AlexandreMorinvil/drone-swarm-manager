@@ -1,10 +1,10 @@
 import { Container } from 'inversify';
 import { Application } from './app';
-import { DateController } from './controllers/date.controller';
-import { IndexController } from './controllers/index.controller';
+import { DateController } from './controllers/data/date.controller';
+import { IndexController } from './controllers/index/index.controller';
 import { Server } from './server';
-import { DateService } from './services/date.service';
-import { IndexService } from './services/index.service';
+import { DateService } from './services/data/date.service';
+import { IndexService } from './services/index/index.service';
 import Types from './types';
 
 export const containerBootstrapper: () => Promise<Container> = async () => {

@@ -45,6 +45,7 @@
         "cors": "2.8.5",
         "debug": "^4.1.1",
         "express": "~4.17.1",
+        "express-ws": "^4.0.0",
         "inversify": "^5.0.1",
         "mongodb": "^3.6.0",
         "morgan": "^1.10.0",

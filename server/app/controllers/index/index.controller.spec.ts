@@ -1,10 +1,10 @@
 import { expect } from 'chai';
 import * as supertest from 'supertest';
-import { Message } from '../../../common/communication/message';
-import { Stubbed, testingContainer } from '../../test/test-utils';
-import { Application } from '../app';
-import { IndexService } from '../services/index.service';
-import Types from '../types';
+import { Message } from '../../../../common/communication/message';
+import { Stubbed, testingContainer } from '../../../test/test-utils';
+import { Application } from '../../app';
+import { IndexService } from '../../services/index/index.service';
+import Types from '../../types';
 
 // tslint:disable:no-any
 const HTTP_STATUS_OK = 200;

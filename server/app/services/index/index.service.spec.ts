@@ -1,8 +1,8 @@
 import { expect } from 'chai';
-import { Message } from '../../../common/communication/message';
-import { Stubbed, testingContainer } from '../../test/test-utils';
-import Types from '../types';
-import { DateService } from './date.service';
+import { Message } from '../../../../common/communication/message';
+import { Stubbed, testingContainer } from '../../../test/test-utils';
+import Types from '../../types';
+import { DateService } from '../data/date.service';
 import { IndexService } from './index.service';
 
 describe('Index service', () => {

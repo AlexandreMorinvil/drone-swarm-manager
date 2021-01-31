@@ -1,6 +1,6 @@
 import { injectable } from 'inversify';
 import 'reflect-metadata';
-import { Message } from '../../../common/communication/message';
+import { Message } from '../../../../common/communication/message';
 
 @injectable()
 export class DateService {

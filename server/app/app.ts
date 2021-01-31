@@ -4,8 +4,8 @@ import * as cors from 'cors';
 import * as express from 'express';
 import { inject, injectable } from 'inversify';
 import * as logger from 'morgan';
-import { DateController } from './controllers/date.controller';
-import { IndexController } from './controllers/index.controller';
+import { DateController } from './controllers/data/date.controller';
+import { IndexController } from './controllers/index/index.controller';
 import Types from './types';
 
 @injectable()

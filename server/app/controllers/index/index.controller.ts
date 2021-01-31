@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response, Router } from 'express';
 import { inject, injectable } from 'inversify';
 
-import { Message } from '../../../common/communication/message';
-import { IndexService } from '../services/index.service';
-import Types from '../types';
+import { Message } from '../../../../common/communication/message';
+import { IndexService } from '../../services/index/index.service';
+import Types from '../../types';
 
 const HTTP_STATUS_CREATED = 201;
 
