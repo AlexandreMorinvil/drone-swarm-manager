@@ -1,4 +1,15 @@
 #app-container {
-    width: 100%;
-    height: 100vh;
+  width: 100%;
+  height: 100vh;
+}
+
+.maint-item {
+  min-height: 100%;
+}
+
+.footer-item {
+  background: rgb(200, 200, 210);
+  padding: 40px;
+  text-align: center;
+  margin: 0px;
 }
