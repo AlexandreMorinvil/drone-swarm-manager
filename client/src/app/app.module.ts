@@ -15,6 +15,7 @@ import { DroneListComponent } from "./components/drone/drone-list/drone-list.com
 import { DroneSelectedBoardComponent } from "./components/drone/drone-selected-board/drone-selected-board.component";
 import { DroneSwarmBoardComponent } from "./components/drone/drone-swarm-board/drone-swarm-board.component";
 import { MapGeneratedBoardComponent } from "./components/map/map-generated-board/map-generated-board.component";
+import { NavigationBarComponent } from "./components/navigation-bar/navigation-bar.component";
 @NgModule({
   declarations: [
     AppComponent,
@@ -25,6 +26,7 @@ import { MapGeneratedBoardComponent } from "./components/map/map-generated-board
     DroneSelectedBoardComponent,
     DroneSwarmBoardComponent,
     MapGeneratedBoardComponent,
+    NavigationBarComponent,
   ],
   imports: [BrowserModule, AppRoutingModule, RouterModule],
   providers: [],
