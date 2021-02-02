@@ -1,0 +1,29 @@
+.page-layout {
+  display: grid;
+  grid-template-rows: 1fr 1fr 3fr;
+  grid-template-columns: 2fr 8fr;
+  grid-template-areas:
+    "drone-list drone-selected"
+    "drone-list drone-swarm"
+    "drone-list generated-map";
+}
+
+.drone-list-area {
+  grid-area: drone-list;
+  background-color: rgb(155, 155, 155);
+}
+
+.drone-selected-area {
+  grid-area: drone-selected;
+  background-color: rgb(205, 205, 205);
+}
+
+.drone-swarm-area {
+    grid-area: drone-swarm;
+    background-color: rgb(225, 225, 225);
+  }
+
+.map-generated-area {
+  grid-area: generated-map;
+  background-color: rgb(215, 215, 215);
+}
