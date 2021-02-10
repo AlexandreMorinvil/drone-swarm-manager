@@ -2,11 +2,13 @@ pipenv is a packaging tool for python
 ## Step 1 : install pipenv on your machine
 *for debian*
 >sudo apt install pipenv
+>
 *for Fedora*
 >sudo dnf install pipenv
+>
 *for FreeBSD*
 >pkg install py36-pipenv
-
+>
 ## Step 2 : Install packages in Pipfile
 >pipenv install
 
