@@ -1,7 +1,6 @@
 import socketio
 from drone import Drone
 from flask import Flask, jsonify, render_template
-from flask_restful import Resource, Api, marshal_with
 from flask_socketio import *
 
 
