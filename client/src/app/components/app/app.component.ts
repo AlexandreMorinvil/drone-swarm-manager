@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import { SocketService } from '@app/services/socket.service';
-import {io} from 'socket.io-client/build/index';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
