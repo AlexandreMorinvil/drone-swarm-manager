@@ -35,11 +35,15 @@ It includes the following:
 ### Technologies :
 
 * [Argos](https://www.argos-sim.info/)
-... a mutli-physics robot simulator
+
+    a mutli-physics robot simulator
+
 * [SocketIO](https://socket.io/)
-... Open source framework that allows real-time bidirectional event-base communication
+
+    Open source framework that allows real-time bidirectional event-base communication⋅⋅⋅
 * [Angular](https://angular.io/)
-... Open Source framework for web developement
+
+    Open Source framework for web developement
 
 ### Requirements :
 * Python3
