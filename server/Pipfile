@@ -9,6 +9,7 @@ flask = "*"
 python-socketio = "*"
 flask-socketio = "*"
 flask-restful = "*"
+cflib = "*"
 
 [dev-packages]
 

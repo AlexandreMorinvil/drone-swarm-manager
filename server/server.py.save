@@ -1,4 +1,3 @@
-
 import socketio
 import json
 from drone import Drone
@@ -22,9 +21,7 @@ drones = [Drone("radio://0/80/250K"), Drone("radio://0/71/250K")]
 @socketio.on('TOGGLE_LED')
 def ledToggler(data):
     print(data['id'])
-    drones[data['id']].toggleLED()
-    print("LED TOGGLER")
-@socketio.on('REFRESH')
+    drones[data['id']].toggleLED()@socketio.on('REFRESH')
 def ledToggler(data):
     data_to_send = {
         'id' : data['id'],

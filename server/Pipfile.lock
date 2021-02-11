@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "8f7b550cb685af8ca664a44810889c1f7b35cd1e888c27fb46441858deeee04a"
+            "sha256": "75d96c0731a31a5c09dbd48a570def0f787fdc217442bb8587434585b46060fc"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -37,6 +37,14 @@
                 "sha256:719a74fb9e33b9bd44cc7f3a8d94bc35e4049deebe19ba7d8e108280cfd59830"
             ],
             "version": "==2020.12.5"
+        },
+        "cflib": {
+            "hashes": [
+                "sha256:01c4c472a14d4a788dec917f0b56b077d6319c767aaf37eb94704057b312eed6",
+                "sha256:f6d45e1749fe2e018a9af312bca384eba03efaa926ab96b24dfbaac455dc0c31"
+            ],
+            "index": "pypi",
+            "version": "==0.1.13.1"
         },
         "chardet": {
             "hashes": [
@@ -181,6 +189,13 @@
                 "sha256:eb10ce3e7736052ed3623d49975ce333bcd712c7bb19a58b9e2089d4057d0798"
             ],
             "version": "==2021.1"
+        },
+        "pyusb": {
+            "hashes": [
+                "sha256:7d449ad916ce58aff60b89aae0b65ac130f289c24d6a5b7b317742eccffafc38",
+                "sha256:f18eb813d3a1439918071234589162c2f209a19adbeffeb1377ce078a4aebc70"
+            ],
+            "version": "==1.1.1"
         },
         "requests": {
             "hashes": [
