@@ -16,6 +16,15 @@ import { DroneSelectedBoardComponent } from "./components/drone/drone-selected-b
 import { DroneSwarmBoardComponent } from "./components/drone/drone-swarm-board/drone-swarm-board.component";
 import { MapGeneratedBoardComponent } from "./components/map/map-generated-board/map-generated-board.component";
 import { NavigationBarComponent } from "./components/navigation-bar/navigation-bar.component";
+
+//Service
+import{SocketService} from "./service/socket.service";
+
+//angular/materials
+import {MatDividerModule} from '@angular/material/divider';
+import {MatListModule} from '@angular/material/list';
+import {MatButtonModule} from '@angular/material/button'
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -28,8 +37,8 @@ import { NavigationBarComponent } from "./components/navigation-bar/navigation-b
     MapGeneratedBoardComponent,
     NavigationBarComponent,
   ],
-  imports: [BrowserModule, AppRoutingModule, RouterModule],
-  providers: [],
+  imports: [BrowserModule, AppRoutingModule, RouterModule, MatDividerModule, MatListModule, MatButtonModule],
+  providers: [SocketService],
   bootstrap: [AppComponent],
 })
 export class AppModule {}
