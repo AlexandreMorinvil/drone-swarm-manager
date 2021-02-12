@@ -7,6 +7,7 @@ import {io, Socket} from 'socket.io-client/build';
   })
 
   export class SocketService {
+    droneId: number = 0;
     private socket: Socket;
     vbat: Number[] = [0.0, 0.0]
     online: Boolean[] = [false, false]
@@ -21,11 +22,12 @@ import {io, Socket} from 'socket.io-client/build';
       });
     }
 
-    public toggle_led(droneID: number) {
-      this.socket.emit('TOGGLE_LED', {id : droneID})
+    public toggle_led() {
+      console.log(this.droneId);
+      this.socket.emit('TOGGLE_LED', {id : this.droneId})
     }
 
-    public refresh(droneID: number) {
-      this.socket.emit('REFRESH', {id : droneID})
+    public refresh() {
+      this.socket.emit('REFRESH', {id : this.droneId})
     }
   }

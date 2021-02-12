@@ -1,1 +1,11 @@
-<div>Drone Selected Board</div>
+<div class="drone-board">
+    <p>Battery Level : {{socketService.vbat[socketService.droneId]}}</p>
+    <div class="led_button">
+        <button mat-button (click)="socketService.toggle_led()">Toggle Led</button>
+    </div>
+    <div>
+        <button mat-button (click)="socketService.refresh()"> Refresh</button>
+    </div>
+
+</div>
+

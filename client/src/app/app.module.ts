@@ -1,7 +1,7 @@
 import { BrowserModule } from "@angular/platform-browser";
 import { NgModule } from "@angular/core";
 import { RouterModule } from "@angular/router";
-
+import { HttpClientModule } from '@angular/common/http';
 import { AppRoutingModule } from "./app-routing.module";
 
 // Page components
@@ -37,8 +37,8 @@ import {MatButtonModule} from '@angular/material/button'
     MapGeneratedBoardComponent,
     NavigationBarComponent,
   ],
-  imports: [BrowserModule, AppRoutingModule, RouterModule, MatDividerModule, MatListModule, MatButtonModule],
-  providers: [SocketService],
+  imports: [BrowserModule, AppRoutingModule, RouterModule, MatDividerModule, MatListModule, MatButtonModule, HttpClientModule],
+  providers: [],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

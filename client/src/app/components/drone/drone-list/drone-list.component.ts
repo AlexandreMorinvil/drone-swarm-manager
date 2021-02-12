@@ -1,6 +1,7 @@
 import { Component, ElementRef, OnInit, ViewChild } from "@angular/core";
 import { MatSelectionList } from "@angular/material/list";
-import * as EventEmitter from "events";
+import { SocketService } from "@app/service/socket.service";
+
 
 @Component({
   selector: "app-drone-list",
@@ -8,9 +9,11 @@ import * as EventEmitter from "events";
   styleUrls: ["./drone-list.component.scss"],
 })
 export class DroneListComponent {
-  @ViewChild('droneId', { static: false }) droneId: MatSelectionList;
+  id: number = 0;
+  @ViewChild('droneId') droneId: MatSelectionList;
+  constructor(public socket: SocketService){}
   onDroneChange(): void {
-    console.log("hi");
+    this.socket.droneId = this.droneId.selectedOptions.selected[0].value;
   }
 
 
