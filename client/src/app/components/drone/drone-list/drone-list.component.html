@@ -1,9 +1,15 @@
 <h3>Drone List</h3>
 <mat-selection-list #droneId [multiple]="false" (selectionChange)="onDroneChange()">
     <mat-divider></mat-divider>
-    <mat-list-option [value]=0 >Drone 1</mat-list-option>
+    <mat-list-option [value]=0 >
+       <p>Drone 1</p>
+       <p>Online : {{socket.online[0]}}</p> 
+    </mat-list-option>
     <mat-divider></mat-divider>
-    <mat-list-option [value]=1 >Drone 2</mat-list-option>
+    <mat-list-option [value]=1 >
+        <p>Drone 2</p>
+        <p>Online : {{socket.online[1]}}</p> 
+    </mat-list-option>
     <mat-divider></mat-divider>
 </mat-selection-list>
 

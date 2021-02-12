@@ -24,6 +24,7 @@ import{SocketService} from "./service/socket.service";
 import {MatDividerModule} from '@angular/material/divider';
 import {MatListModule} from '@angular/material/list';
 import {MatButtonModule} from '@angular/material/button'
+import {MatIconModule} from '@angular/material/icon';
 
 @NgModule({
   declarations: [
@@ -37,7 +38,16 @@ import {MatButtonModule} from '@angular/material/button'
     MapGeneratedBoardComponent,
     NavigationBarComponent,
   ],
-  imports: [BrowserModule, AppRoutingModule, RouterModule, MatDividerModule, MatListModule, MatButtonModule, HttpClientModule],
+  imports: [
+    BrowserModule, 
+    AppRoutingModule, 
+    RouterModule, 
+    MatDividerModule, 
+    MatListModule, 
+    MatButtonModule, 
+    HttpClientModule, 
+    MatIconModule,
+  ],
   providers: [],
   bootstrap: [AppComponent],
 })
