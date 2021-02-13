@@ -42,19 +42,39 @@ void CDemoPdr::ControlStep() {
    CVector3 cPos = m_pcPos->GetReading().Position;
    if ( (m_uiCurrentStep / 10) % 4 == 0 ) {
       cPos.SetX(cPos.GetX()+0.5f);
-      m_pcPropellers->SetAbsolutePosition(cPos);
+	if (cPos.GetX() < 2 || cPos.GetX() < -2) {
+     	   m_pcPropellers->SetAbsolutePosition(cPos);
+	} else {
+	   cPos.SetX(cPos.GetX()-0.5f);
+	   m_pcPropellers->SetAbsolutePosition(cPos);
+	}
    }
    if ((m_uiCurrentStep / 10) % 4 == 1) {
       cPos.SetY(cPos.GetY()-0.5f);
-      m_pcPropellers->SetAbsolutePosition(cPos);
+	if (cPos.GetY() < 2 || cPos.GetY() < -2) {
+	   m_pcPropellers->SetAbsolutePosition(cPos);
+	} else {
+	   cPos.SetY(cPos.GetY()+0.5f);
+	   m_pcPropellers->SetAbsolutePosition(cPos);
+	}
    }
    else if ((m_uiCurrentStep / 10) % 4 == 2) {
       cPos.SetX(cPos.GetX()-0.5f);
-      m_pcPropellers->SetAbsolutePosition(cPos);
+	if (cPos.GetX() < 2 || cPos.GetX() < -2) {
+      	   m_pcPropellers->SetAbsolutePosition(cPos);
+	} else {
+	   cPos.SetX(cPos.GetX()+0.5f);
+	   m_pcPropellers->SetAbsolutePosition(cPos);
+	}
    }
    else if ((m_uiCurrentStep / 10) % 4 == 3) {
       cPos.SetY(cPos.GetY()+0.5f);
-      m_pcPropellers->SetAbsolutePosition(cPos);
+	if (cPos.GetY() < 2 || cPos.GetY() < -2) {
+      	   m_pcPropellers->SetAbsolutePosition(cPos);
+	} else {
+	   cPos.SetY(cPos.GetY()-0.5f);
+	   m_pcPropellers->SetAbsolutePosition(cPos);
+	}
    }
 
    m_uiCurrentStep++;
