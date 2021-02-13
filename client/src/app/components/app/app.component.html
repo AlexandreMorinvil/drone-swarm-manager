@@ -1,12 +1,10 @@
-<h2>Drone 1:</h2>
-<p>Online : {{socket.online[0]}}</p>
-<p>Battery Level : {{socket.vbat[0]}}</p>
-<button mat-button (click)="socket.refresh(0)"> Refresh</button>
-<button mat-button (click)="socket.toggle_led(0)"> Toggle LED</button>
-
-<br>
-<h2>Drone 2:</h2>
-<p>Online : {{socket.online[1]}}</p>
-<p>Battery Level : {{socket.vbat[1]}}</p>
-<button mat-button (click)="socket.refresh(1)"> Refresh</button>
-<button mat-button (click)="socket.toggle_led(1)"> Toggle LED</button>
+<div id="app-container">
+  <app-navigation-bar></app-navigation-bar>
+  <router-outlet class="maint-item"></router-outlet>
+  <footer class="footer-item">
+    <p>
+      © 2021 École Polytechnique Montréal : Alexandre Morinvil, Alexandre
+      Talens, Émilie Vaudrin, Farid El Fakhry, Julio Dandjinou
+    </p>
+  </footer>
+</div>

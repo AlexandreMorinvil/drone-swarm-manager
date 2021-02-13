@@ -10,7 +10,7 @@ import {io, Socket} from 'socket.io-client/build/index';
     private socket: Socket;
     vbat: Number[] = [0.0, 0.0]
     online: Boolean[] = [false, false]
-
+    droneId: number = 0;
     constructor() {}
   
     public initSocket(){
@@ -20,12 +20,14 @@ import {io, Socket} from 'socket.io-client/build/index';
         this.online[data['id']] = data['isConnected'];
       });
     }
-
-    public toggle_led(droneID: number) {
-      this.socket.emit('TOGGLE_LED', {id : droneID})
+    public getBatteryLevel(): Number {
+      return this.vbat[this.droneId];
     }
+    public toggle_led() {
 
-    public refresh(droneID: number) {
-      this.socket.emit('REFRESH', {id : droneID})
+      this.socket.emit('TOGGLE_LED', {id : this.droneId})
+    }
+    public refresh() {
+      this.socket.emit('REFRESH', {id : this.droneId})
     }
   }
