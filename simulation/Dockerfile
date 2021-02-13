@@ -67,9 +67,8 @@ ADD id_ed25519 /root/.ssh/id_ed25519
 RUN touch /root/.ssh/known_hosts
 RUN ssh-keyscan gitlab.com >> /root/.ssh/known_hosts
 RUN cd /root &&\
-    git clone git@gitlab.com:polytechnique-montr-al/inf3995/20211/equipe-204/ground-station.git ground-station &&\
-    cd ground-station &&\
-    git checkout add-simulation
+    git clone git@gitlab.com:polytechnique-montr-al/inf3995/20211/equipe-204/alfred.git alfred &&\
+    cd alfred
 
 # Build code
 RUN cd /root/ground-station/simulation &&\
