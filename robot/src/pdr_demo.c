@@ -39,7 +39,6 @@
 #include "debug.h"
 
 #define NON_BLOCKING 0
-#define LED_LOCK         LED_GREEN_R
 #define DEBUG_MODULE "HELLOWORLD"
 
 struct packetRX {
@@ -59,7 +58,7 @@ ledseqStep_t seq_lock_def[] = {
 
 ledseqContext_t seq_lock = {
   .sequence = seq_lock_def,
-  .led = LED_LOCK,
+  .led = LED_BLUE_L,
 };
 
 
