@@ -31,7 +31,7 @@ void CDemoPdr::Init(TConfigurationNode& t_node) {
       that creation, reset, seeding and cleanup are managed by ARGoS. */
    m_pcRNG = CRandom::CreateRNG("argos");
 
-   m_uiCurrentStep = 500;
+   m_uiCurrentStep = 0;
    Reset();
 }
 
@@ -40,31 +40,37 @@ void CDemoPdr::Init(TConfigurationNode& t_node) {
 
 void CDemoPdr::ControlStep() {
    CVector3 cPos = m_pcPos->GetReading().Position;
-   if ( (m_uiCurrentStep / 10) % 4 == 0 ) {
-      cPos.SetX(cPos.GetX()+0.4f);
-	if (Abs(cPos.GetX()) < 2) {
-     	   m_pcPropellers->SetAbsolutePosition(cPos);
-	} 
+   if (m_uiCurrentStep < 10)
+   {
+        cPos.SetZ(cPos.GetZ()+0.5f);
+      m_pcPropellers->SetAbsolutePosition(cPos);
    }
-   if ((m_uiCurrentStep / 10) % 4 == 1) {
-      cPos.SetY(cPos.GetY()-0.4f);
-	if (Abs(cPos.GetY()) < 2) {
-	   m_pcPropellers->SetAbsolutePosition(cPos);
-	} 
+   else if (m_uiCurrentStep < 20)
+   {
+           cPos.SetX(cPos.GetX()+0.5f);
+        m_pcPropellers->SetAbsolutePosition(cPos);
    }
-   else if ((m_uiCurrentStep / 10) % 4 == 2) {
-      cPos.SetX(cPos.GetX()-0.4f);
-	if (Abs(cPos.GetX()) < 2) {
-      	   m_pcPropellers->SetAbsolutePosition(cPos);
-	} 
+   else if (m_uiCurrentStep < 30)
+   {
+            cPos.SetY(cPos.GetY()-0.5f);
+      m_pcPropellers->SetAbsolutePosition(cPos);
    }
-   else if ((m_uiCurrentStep / 10) % 4 == 3) {
-      cPos.SetY(cPos.GetY()+0.4f);
-	if (Abs(cPos.GetY()) < 2) {
-      	   m_pcPropellers->SetAbsolutePosition(cPos);
-	} 
+   else if (m_uiCurrentStep < 40)
+   {
+           cPos.SetX(cPos.GetX()-0.5f);
+      m_pcPropellers->SetAbsolutePosition(cPos);
    }
-
+   else if (m_uiCurrentStep < 50)
+   {
+           cPos.SetY(cPos.GetY()+0.5f);
+      m_pcPropellers->SetAbsolutePosition(cPos);
+   }
+   else if (m_uiCurrentStep < 60)
+   {
+           cPos.SetZ(cPos.GetZ()-0.25f);
+      m_pcPropellers->SetAbsolutePosition(cPos);
+   }
+   //TakeOff();
    m_uiCurrentStep++;
 }
 
@@ -72,7 +78,8 @@ void CDemoPdr::ControlStep() {
 /****************************************/
 
 void CDemoPdr::Reset() {
-}
+   m_uiCurrentStep = 0;
+ }
 
 bool CDemoPdr::Land() {
    CVector3 cPos = m_pcPos->GetReading().Position;
