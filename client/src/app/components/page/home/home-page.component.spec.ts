@@ -1,21 +1,21 @@
 import { TestBed, waitForAsync } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
-import { AppComponent } from './app.component';
+import { HomePageComponent } from './home-page.component';
 
-describe('AppComponent', () => {
+describe('HomePageComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [
         RouterTestingModule
       ],
       declarations: [
-        AppComponent
+        HomePageComponent
       ],
     }).compileComponents();
   }));
 
   it('should create the app', () => {
-    const fixture = TestBed.createComponent(AppComponent);
+    const fixture = TestBed.createComponent(HomePageComponent);
     const app = fixture.componentInstance;
     expect(app).toBeTruthy();
   });

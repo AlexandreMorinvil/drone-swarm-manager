@@ -1,21 +1,21 @@
 import { TestBed, waitForAsync } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
-import { AppComponent } from './app.component';
+import { MapPageComponent } from './map-page.component';
 
-describe('AppComponent', () => {
+describe('MapPageComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [
         RouterTestingModule
       ],
       declarations: [
-        AppComponent
+        MapPageComponent
       ],
     }).compileComponents();
   }));
 
   it('should create the app', () => {
-    const fixture = TestBed.createComponent(AppComponent);
+    const fixture = TestBed.createComponent(MapPageComponent);
     const app = fixture.componentInstance;
     expect(app).toBeTruthy();
   });
