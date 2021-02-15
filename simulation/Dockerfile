@@ -71,7 +71,7 @@ RUN cd /root &&\
     cd alfred
 
 # Build code
-RUN cd /root/ground-station/simulation &&\
+RUN cd /root/alfred/simulation &&\
     mkdir build && cd build &&\
     cmake -DCMAKE_BUILD_TYPE=Debug .. &&\
     make -j $(nproc)
