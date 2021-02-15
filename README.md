@@ -60,6 +60,13 @@ Some external code source has been used :
 * [argos3-examples](https://github.com/MISTLab/argos3-examples/tree/inf3995)
 * [crazyflie-firmware](https://github.com/bitcraze/crazyflie-firmware)
 
+### Build :
+Clone projet with `--recursive` argument
+
+For server, client and simulation buils, follow their respective README
+
+To load our custom code in the robot. Go to robot directory with `cd robot` and build firmware with `cd crazyflie-firmware && make PLATFORM=cf2`. Then build actual code with `make && makecload`
+
 ## Contributors :
 [Farid El Fakhry](https://gitlab.com/farid.elfakhry)
 
