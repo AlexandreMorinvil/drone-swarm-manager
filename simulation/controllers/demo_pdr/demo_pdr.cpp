@@ -70,7 +70,6 @@ void CDemoPdr::ControlStep() {
            cPos.SetZ(cPos.GetZ()-0.25f);
       m_pcPropellers->SetAbsolutePosition(cPos);
    }
-   //TakeOff();
    m_uiCurrentStep++;
 }
 
@@ -81,21 +80,6 @@ void CDemoPdr::Reset() {
    m_uiCurrentStep = 0;
  }
 
-bool CDemoPdr::Land() {
-   CVector3 cPos = m_pcPos->GetReading().Position;
-   if (Abs(cPos.GetZ()) < 0.01f) return false;
-   cPos.SetZ(0.0f);
-   m_pcPropellers->SetAbsolutePosition(cPos);
-   return true;
-}
-
-bool CDemoPdr::TakeOff() {
-CVector3 cPos = m_pcPos->GetReading().Position;
-   if (Abs(cPos.GetZ() - 2.0f) < 0.01f) return false;
-   cPos.SetZ(2.0f);
-   m_pcPropellers->SetAbsolutePosition(cPos);
-   return true;
-}
 
 /****************************************/
 /****************************************/
