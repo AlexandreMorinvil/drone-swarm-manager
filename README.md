@@ -54,6 +54,12 @@ It includes the following:
 
 ***This solution has been tested to run on archLinux and Ubuntu.***
 
+
+Some external code source has been used :
+
+* [argos3-examples](https://github.com/MISTLab/argos3-examples/tree/inf3995)
+* [crazyflie-firmware](https://github.com/bitcraze/crazyflie-firmware)
+
 ## Contributors :
 [Farid El Fakhry](https://gitlab.com/farid.elfakhry)
 
