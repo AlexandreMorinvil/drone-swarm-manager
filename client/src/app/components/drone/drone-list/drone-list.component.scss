@@ -6,3 +6,14 @@ p{
     margin: 5px;
     font-size: 15px;
 }
+
+img {
+    margin-left: 20px;
+}
+.active {
+    filter: invert(57%) sepia(24%) saturate(5604%) hue-rotate(82deg) brightness(119%) contrast(121%);
+}
+.disable {
+    filter:invert(17%) sepia(83%) saturate(6666%) hue-rotate(357deg) brightness(100%) contrast(114%);
+    
+}

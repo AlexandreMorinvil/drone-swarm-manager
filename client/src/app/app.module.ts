@@ -27,6 +27,7 @@ import {MatButtonModule} from '@angular/material/button'
 import {MatIconModule} from '@angular/material/icon';
 import {MatSidenavModule} from '@angular/material/sidenav';
 
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -49,7 +50,7 @@ import {MatSidenavModule} from '@angular/material/sidenav';
     MatButtonModule, 
     HttpClientModule, 
     MatIconModule,
-    MatSidenavModule, 
+    MatSidenavModule,
   ],
   providers: [SocketService],
   bootstrap: [AppComponent]
