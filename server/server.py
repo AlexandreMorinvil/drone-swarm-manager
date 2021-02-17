@@ -32,6 +32,11 @@ def ledToggler(data):
         'isConnected' : drones[data['id']].getIsConnected()
     }
     socketio.emit('drone_data', data_to_send)
+@socketio.on('TAKEOFF')
+def takeOff(data):
+    print(data['id'])
+    #drones[data['id']].takeOff()
+    print("TAKE OFF")
     
 
 if __name__ == '__main__':
