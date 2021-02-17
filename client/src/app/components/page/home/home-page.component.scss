@@ -1,13 +1,14 @@
 .page-container{
   background-image: url(../../../../assets/drone_logo.PNG);
   background-repeat: no-repeat;
-  background-position: center;
-  background-size: contain;
-  background-position-y: 10px; 
+  background-position: center center;
+  background-size:contain;
+
 }
 
 
 .page-layout {
+
   display: flex;
   flex-direction: column;
   align-items: center;
