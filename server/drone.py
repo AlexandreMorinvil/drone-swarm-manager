@@ -2,21 +2,22 @@ import json
 import logging
 import time
 from threading import Thread
-
+from .server import Vec3
 import struct
-
 import cflib
 from cflib.crazyflie import Crazyflie
 
 logging.basicConfig(level=logging.ERROR)
 
 class Drone :
-    led = False
 
-    def __init__(self, link_uri):
+    __startPos = Vec3(0,0,0)
+    currentPos = Vec3(0,0,0)
+    led = False
+    def __init__(self, link_uri, initialPos: Vec3):
 
         self._cf = Crazyflie()
-
+        self.__startPos = initialPos
         self._cf.connected.add_callback(self._connected)
         self._cf.disconnected.add_callback(self._disconnected)
         self._cf.connection_failed.add_callback(self._connection_failed)
@@ -66,5 +67,4 @@ class Drone :
 
     def getVBat(self):
         return self._vbat
-
 

@@ -1,8 +1,6 @@
 # Exclusion des dépendences du projet. Elles peuvent être regénérées 
 # automatiquement.
-.nyc_output/
-node_modules/
-false/
+__pycache__
 
 # Exclusion des fichiers Javascripts
 out/
