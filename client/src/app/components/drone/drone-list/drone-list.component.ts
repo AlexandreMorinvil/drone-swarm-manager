@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild } from "@angular/core";
+import { Component, ViewChild } from "@angular/core";
 import { MatSelectionList } from "@angular/material/list";
 import { SocketService } from "@app/service/socket.service";
 import { ControlPageComponent } from "@app/components/page/control/control-page.component";

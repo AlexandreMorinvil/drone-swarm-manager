@@ -1,12 +1,13 @@
-<div class="page-container page-layout">
-  <app-drone-list class="drone-list-area"> </app-drone-list>
-  <mat-sidenav-container class="drone-board-container">
-    <mat-sidenav #board class="sidenav" mode="side">
-      <app-drone-selected-board></app-drone-selected-board>
-    </mat-sidenav>
-    <mat-sidenav-content class="drone-board">
-      <app-drone-swarm-board class="drone-swarm-area"></app-drone-swarm-board>
-      <app-map-generated-board class="map-generated-area"></app-map-generated-board>
-    </mat-sidenav-content>
-  </mat-sidenav-container>  
+
+<div class="page-layout">
+    <app-drone-list class="drone-list"></app-drone-list>
+    <mat-sidenav-container>
+      <mat-sidenav #board class="drone-selected-board" mode="over">
+          <app-drone-selected-board></app-drone-selected-board>
+      </mat-sidenav>
+      <mat-sidenav-content class="map-area">
+          <app-map-generated-board></app-map-generated-board>
+      </mat-sidenav-content>
+    </mat-sidenav-container>
 </div>
+

@@ -5,4 +5,5 @@ import { Component } from "@angular/core";
   templateUrl: "./map-generated-board.component.html",
   styleUrls: ["./map-generated-board.component.scss"],
 })
-export class MapGeneratedBoardComponent {}
+export class MapGeneratedBoardComponent {
+}

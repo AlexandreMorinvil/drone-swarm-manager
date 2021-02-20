@@ -26,6 +26,8 @@ export class DroneSelectedBoardComponent implements OnInit{
   }
   takeOff():void {
     this.socketService.takeOff();
-    
+  }
+  returnToBase():void {
+    this.socketService.returnToBase();
   }
 }

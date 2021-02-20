@@ -1,10 +1,10 @@
+
 .page-container{
   background-image: url(../../../../assets/drone_logo.PNG);
   background-repeat: no-repeat;
   background-position: center center;
   background-size:contain;
 }
-
 
 .page-layout {
 
@@ -15,15 +15,13 @@
 }
 
 button {
-  margin: 5px;
-  background-color: rgb(151, 151, 151);
+  margin: 10px;
+  padding: 5px;
   width: 200px;
-  font-size: medium;
-  border: solid;
-}
-
-button:hover{
-  background-color: rgb(126, 125, 125);
+  background-color: #593697;
+  color: white;
+  font-family: Roboto,Helvetica Neue,sans-serif;
+  font-size: 16px;
 }
 
 h1 {

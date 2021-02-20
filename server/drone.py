@@ -27,6 +27,7 @@ class Drone :
         self._cf.open_link(link_uri)
         self._isConnected = False
         self._vbat = 0.0
+        
 
         print('Connecting to %s' % link_uri)
 

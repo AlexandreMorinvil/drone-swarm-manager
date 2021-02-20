@@ -17,6 +17,7 @@ import { DroneSwarmBoardComponent } from "./components/drone/drone-swarm-board/d
 import { MapGeneratedBoardComponent } from "./components/map/map-generated-board/map-generated-board.component";
 import { NavigationBarComponent } from "./components/navigation-bar/navigation-bar.component";
 
+
 //Service
 import{SocketService} from "./service/socket.service";
 
@@ -26,6 +27,9 @@ import {MatListModule} from '@angular/material/list';
 import {MatButtonModule} from '@angular/material/button'
 import {MatIconModule} from '@angular/material/icon';
 import {MatSidenavModule} from '@angular/material/sidenav';
+import {MatToolbarModule} from '@angular/material/toolbar';
+import {MatGridListModule} from '@angular/material/grid-list';
+import {MatCardModule} from '@angular/material/card';
 
 
 @NgModule({
@@ -34,10 +38,10 @@ import {MatSidenavModule} from '@angular/material/sidenav';
     ControlPageComponent,
     HomePageComponent,
     MapPageComponent,
+    MapGeneratedBoardComponent,
     DroneListComponent,
     DroneSelectedBoardComponent,
     DroneSwarmBoardComponent,
-    MapGeneratedBoardComponent,
     NavigationBarComponent,
   ],
   imports: [
@@ -51,6 +55,9 @@ import {MatSidenavModule} from '@angular/material/sidenav';
     HttpClientModule, 
     MatIconModule,
     MatSidenavModule,
+    MatToolbarModule,
+    MatGridListModule,
+    MatCardModule,
   ],
   providers: [SocketService],
   bootstrap: [AppComponent]
