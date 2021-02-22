@@ -1,6 +1,7 @@
 import json
 import logging
 import time
+from .sensor import Sensor
 from threading import Thread
 from .server import Vec3
 import struct
@@ -10,7 +11,7 @@ from cflib.crazyflie import Crazyflie
 logging.basicConfig(level=logging.ERROR)
 
 class Drone :
-
+    sensors = Sensor(0,0,0,0,0,0)
     __startPos = Vec3(0,0,0)
     currentPos = Vec3(0,0,0)
     led = False
@@ -67,4 +68,10 @@ class Drone :
 
     def getVBat(self):
         return self._vbat
-
+    def toJson(self) :
+        return {
+            'sensors'   : self.sensors.toJson(),
+            'currentPos': (self.__startPos + self.currentPos ).toJson(),
+            'batteryLvl': self._vbat,
+            'status'    : self._isConnected
+        }

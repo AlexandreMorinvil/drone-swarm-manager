@@ -7,13 +7,20 @@ class Vec3:
         self.x = x
         self.y = y
         self.z = z
-    def __add__(self, other: Vec3) :
+    def __add__(self, other) :
         return self.x + other.x, self.y + other.y, self.z + other.z
 
-    def __sub__(self, other: Vec3) :
+    def __sub__(self, other) :
         return self.x - other.x, self.y - other.y, self.z - other.z
-
+    def __eq__(self,other) :
+        return self.x == other.x and self.y == other.y and self.z == other.z
     def mul(self, mulp: float) :
         return self.x * mulp, self.y * mulp, self.z * mulp
     def toVec2(self) :
         self.z =0
+    def toJson(self) :
+        return {
+            'x' : self.x,
+            'y' : self.y,
+            'z' : self.z
+        }
