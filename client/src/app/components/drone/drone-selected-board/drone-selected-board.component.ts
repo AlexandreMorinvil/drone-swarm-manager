@@ -21,9 +21,7 @@ export class DroneSelectedBoardComponent implements OnInit{
   toggleLed():void {
     this.socketService.toggle_led();
   }
-  refresh():void {
-    this.socketService.refresh();
-  }
+  
   takeOff():void {
     this.socketService.takeOff();
   }

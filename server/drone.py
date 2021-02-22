@@ -2,18 +2,19 @@ import json
 import logging
 import time
 from threading import Thread
-
+from enum import Enum
 import struct
 
 import cflib
 from cflib.crazyflie import Crazyflie
 
 logging.basicConfig(level=logging.ERROR)
-
+State = Enum('State', 'standBy in_mission crash')
 class Drone :
     led = False
+    state = State.standBy
 
-    def __init__(self, link_uri):
+    def __init__(self, link_uri, id):
 
         self._cf = Crazyflie()
 
@@ -27,6 +28,8 @@ class Drone :
         self._cf.open_link(link_uri)
         self._isConnected = False
         self._vbat = 0.0
+        self._id = id
+        self._speed = 0.0
         
 
         print('Connecting to %s' % link_uri)
@@ -68,4 +71,11 @@ class Drone :
     def getVBat(self):
         return self._vbat
 
+    def getSpeed(self):
+        return self._speed
 
+    def dump(self):
+        return {'id': self._id,
+                'vbat': self._vbat,
+                'isConnected': self._isConnected,
+                'speed': self._speed}

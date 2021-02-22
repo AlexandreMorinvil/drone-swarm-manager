@@ -2,12 +2,10 @@
     <mat-card-title>Drone List</mat-card-title>
     <mat-card-content>
         <mat-selection-list #droneId [multiple]="false" (selectionChange)="onDroneChange()">
-            <mat-list-option [value]=0 (click)="sidebar.board.toggle()">
-                <p>Drone 1</p>
+            <mat-list-option *ngFor="let drone of drones" [value]=drone.droneId (click)="sidebar.board.toggle()">
+                <p>Drone {{drone.droneId + 1}}</p>
             </mat-list-option>
-            <mat-list-option [value]=1 (click)="sidebar.board.toggle()">
-                <p>Drone 2</p>
-            </mat-list-option>
+            
         </mat-selection-list>
     </mat-card-content>
     <mat-card-footer>
