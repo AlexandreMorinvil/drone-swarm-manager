@@ -1,9 +1,8 @@
 import json
 import logging
 import time
-from .sensor import Sensor
-from threading import Thread
-from .server import Vec3
+from sensor import Sensor
+from vec3 import Vec3
 import struct
 import cflib
 from cflib.crazyflie import Crazyflie
@@ -11,7 +10,7 @@ from cflib.crazyflie import Crazyflie
 logging.basicConfig(level=logging.ERROR)
 
 class Drone :
-    sensors = Sensor(0,0,0,0,0,0)
+    sensors = Sensor(0,0,0,0,0,0,0,0,0)
     __startPos = Vec3(0,0,0)
     currentPos = Vec3(0,0,0)
     led = False

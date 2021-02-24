@@ -2,23 +2,6 @@
 # automatiquement.
 __pycache__
 
-# Exclusion des fichiers Javascripts
-out/
-
-# NPM Debug Log
-npm-debug.log
-
-##Typescrit compilation ##
-
-*.js.map
-*.js
-
-
-# Garder les fichiers necessaires pour les tests
-!systemjs.config.js
-!karma.conf.js
-!karma-test-shim.js
-!systemjs.config.extras.js
-!tslint.json
-!tsconfig.json
-!package-lock.json
+# Exclusion des fichiers des IDE
+.idea/
+.vscode/
