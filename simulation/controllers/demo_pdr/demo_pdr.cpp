@@ -11,6 +11,7 @@
 /****************************************/
 
 CDemoPdr::CDemoPdr() :
+   m_pcDistance(NULL),
    m_pcPropellers(NULL),
    m_pcPos(NULL),
    m_uiCurrentStep(0) {}
@@ -19,6 +20,7 @@ CDemoPdr::CDemoPdr() :
 /****************************************/
 
 void CDemoPdr::Init(TConfigurationNode& t_node) {
+   m_pcDistance   = GetSensor  <CCI_CrazyflieDistanceScannerSensor>("crazyflie_distance_scanner");
    m_pcPropellers = GetActuator  <CCI_QuadRotorPositionActuator>("quadrotor_position");
    try {
          m_pcPos = GetSensor  <CCI_PositioningSensor>("positioning");
@@ -40,36 +42,59 @@ void CDemoPdr::Init(TConfigurationNode& t_node) {
 
 void CDemoPdr::ControlStep() {
    CVector3 cPos = m_pcPos->GetReading().Position;
+   //Real angle = m_pcPos->GetReading().Orientation.GetZ(); 
+   CCI_CrazyflieDistanceScannerSensor::TReadingsMap sDistRead = 
+      m_pcDistance->GetReadingsMap();
+   auto iterDistRead = sDistRead.begin();
+   float frontDist = (iterDistRead++)->second;
+   float leftDist = (iterDistRead++)->second;
+   float backDist = (iterDistRead++)->second;
+   float rightDist = (iterDistRead++)->second;
+   /*if (sDistRead.size() == 4) {
+      LOG << "Front dist: " << frontDist  << std::endl;
+      LOG << "Left dist: "  << leftDist  << std::endl;
+      LOG << "Back dist: "  << backDist  << std::endl;
+      LOG << "Right dist: " << rightDist  << std::endl;
+   }*/
+//LOG << m_pcPos->GetReading().Orientation << std::endl;
+
    if (m_uiCurrentStep < 10)
    {
         cPos.SetZ(cPos.GetZ()+0.5f);
       m_pcPropellers->SetAbsolutePosition(cPos);
    }
-   else if (m_uiCurrentStep < 20)
+   else
    {
-           cPos.SetX(cPos.GetX()+0.5f);
-        m_pcPropellers->SetAbsolutePosition(cPos);
+      LOG << "leftDist : " << leftDist << std::endl;
+      CRadians* currentAngle = new CRadians(0.1f);
+      CRadians* useless = new CRadians(0.1f);
+      m_pcPos->GetReading().Orientation.ToEulerAngles(*currentAngle, *useless, *useless);
+      //LOG << "rightDist : " << rightDist << std::endl;
+      /*if (rightDist < 20.0f || frontDist < 20.0f || backDist < 20.0f)
+      {
+          newCVector = new CVector3(
+			 (cos(currentAngle->GetValue() + )*0.4 + cPos.GetX())*1,
+			 (sin(currentAngle->GetValue())*0.4 + cPos.GetY())*1,
+			 cPos.GetZ());
+	 m_pcPropellers->SetAbsolutePosition(*newCVector);
+      }*/
+      if ((leftDist > 80.0f || leftDist == -2) && !isLocked)
+      {
+         //cPos.SetX(cPos.GetX() + 0.2f);
+	 newCVector = new CVector3(
+			 (cos(currentAngle->GetValue())*0.4 + cPos.GetX())*1,
+			 (sin(currentAngle->GetValue())*0.4 + cPos.GetY())*1,
+			 cPos.GetZ());
+	 m_pcPropellers->SetAbsolutePosition(*newCVector);
+      }
+      else
+      {
+	 *currentAngle = *currentAngle + CRadians::PI_OVER_TWO;
+	 firstAngle = currentAngle->GetValue();
+	 m_pcPropellers->SetAbsoluteYaw(*currentAngle);
+      }
    }
-   else if (m_uiCurrentStep < 30)
-   {
-            cPos.SetY(cPos.GetY()-0.5f);
-      m_pcPropellers->SetAbsolutePosition(cPos);
-   }
-   else if (m_uiCurrentStep < 40)
-   {
-           cPos.SetX(cPos.GetX()-0.5f);
-      m_pcPropellers->SetAbsolutePosition(cPos);
-   }
-   else if (m_uiCurrentStep < 50)
-   {
-           cPos.SetY(cPos.GetY()+0.5f);
-      m_pcPropellers->SetAbsolutePosition(cPos);
-   }
-   else if (m_uiCurrentStep < 60)
-   {
-           cPos.SetZ(cPos.GetZ()-0.25f);
-      m_pcPropellers->SetAbsolutePosition(cPos);
-   }
+
    m_uiCurrentStep++;
 }
 

@@ -89,7 +89,7 @@ public:
 
 private:
 
-
+   CCI_CrazyflieDistanceScannerSensor* m_pcDistance;
    CCI_QuadRotorPositionActuator* m_pcPropellers;
    CCI_PositioningSensor* m_pcPos;
 
@@ -98,6 +98,12 @@ private:
 
    /* Current step */
    uint m_uiCurrentStep;
+
+   CVector3* newCVector;
+   Real bestAngle;
+   Real firstAngle;
+   float bestDistance;
+   bool isLocked;
 };
 
 #endif
