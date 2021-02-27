@@ -59,6 +59,14 @@
     <box id="wall_west" size="0.1,4,2" movable="false">
       <body position="-2,0,0" orientation="0,0,0" />
     </box>
+    <box id="wall_center" size="0.1,2,2" movable="false">
+      <body position="0,-1,0" orientation="0,0,0" />
+    </box>
+    <!--<box id="wall_middle" size="0.1,2,2" movable="false">
+      <body position="-1,0,0" orientation="0,0,0" />
+    </box>-->
+
+
 
     <distribute>
       <position method="uniform" min="-1,1,0" max="1,1,0" />
@@ -96,7 +104,7 @@
     <qt-opengl>
       <camera>
       <placements>
-        <placement index="0" position="2,0,4"
+        <placement index="0" position="0,0,5"
                    look_at="0,0,0" up="-1,0,0" 
                    lens_focal_length="20" />
         </placements>

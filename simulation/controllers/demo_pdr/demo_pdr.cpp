@@ -35,6 +35,9 @@ void CDemoPdr::Init(TConfigurationNode& t_node) {
 
    m_uiCurrentStep = 0;
    Reset();
+   lockAngle = *(new CRadians(0.1f));
+   CRadians* useless = new CRadians(0.1f);
+   m_pcPos->GetReading().Orientation.ToEulerAngles(lockAngle, *useless, *useless);   
 }
 
 /****************************************/
@@ -50,48 +53,63 @@ void CDemoPdr::ControlStep() {
    float leftDist = (iterDistRead++)->second;
    float backDist = (iterDistRead++)->second;
    float rightDist = (iterDistRead++)->second;
-   /*if (sDistRead.size() == 4) {
+   if (sDistRead.size() == 4) {
       LOG << "Front dist: " << frontDist  << std::endl;
       LOG << "Left dist: "  << leftDist  << std::endl;
       LOG << "Back dist: "  << backDist  << std::endl;
       LOG << "Right dist: " << rightDist  << std::endl;
-   }*/
+   }
 //LOG << m_pcPos->GetReading().Orientation << std::endl;
 
-   if (m_uiCurrentStep < 10)
+   if (m_uiCurrentStep < 20)
    {
-        cPos.SetZ(cPos.GetZ()+0.5f);
+        cPos.SetZ(cPos.GetZ()+0.25f);
       m_pcPropellers->SetAbsolutePosition(cPos);
    }
    else
    {
-      LOG << "leftDist : " << leftDist << std::endl;
-      CRadians* currentAngle = new CRadians(0.1f);
-      CRadians* useless = new CRadians(0.1f);
-      m_pcPos->GetReading().Orientation.ToEulerAngles(*currentAngle, *useless, *useless);
+      //lockAngle = *(new CRadians(0.1f));
+      //CRadians* useless = new CRadians(0.1f);
+      //m_pcPos->GetReading().Orientation.ToEulerAngles(lockAngle, *useless, *useless); 
+      //LOG << "leftDist : " << leftDist << std::endl;
       //LOG << "rightDist : " << rightDist << std::endl;
-      /*if (rightDist < 20.0f || frontDist < 20.0f || backDist < 20.0f)
+      /*if (backDist < 50.0f)
       {
-          newCVector = new CVector3(
-			 (cos(currentAngle->GetValue() + )*0.4 + cPos.GetX())*1,
+	*currentAngle = *currentAngle - CRadians::PI_OVER_SIX;
+	 m_pcPropellers->SetAbsoluteYaw(*currentAngle);
+	newCVector = new CVector3(
+			 (cos(currentAngle->GetValue())*0.4 + cPos.GetX())*1,
 			 (sin(currentAngle->GetValue())*0.4 + cPos.GetY())*1,
 			 cPos.GetZ());
 	 m_pcPropellers->SetAbsolutePosition(*newCVector);
       }*/
-      if ((leftDist > 80.0f || leftDist == -2) && !isLocked)
+      if ((leftDist > 80.0f || leftDist == -2))
       {
          //cPos.SetX(cPos.GetX() + 0.2f);
 	 newCVector = new CVector3(
-			 (cos(currentAngle->GetValue())*0.4 + cPos.GetX())*1,
-			 (sin(currentAngle->GetValue())*0.4 + cPos.GetY())*1,
+			 (cos(lockAngle.GetValue())*0.4 + cPos.GetX())*1,
+			 (sin(lockAngle.GetValue())*0.4 + cPos.GetY())*1,
 			 cPos.GetZ());
 	 m_pcPropellers->SetAbsolutePosition(*newCVector);
       }
       else
       {
-	 *currentAngle = *currentAngle + CRadians::PI_OVER_TWO;
-	 firstAngle = currentAngle->GetValue();
-	 m_pcPropellers->SetAbsoluteYaw(*currentAngle);
+	 /*LOG << "firstAngle " << firstAngle << std::endl;
+	 LOG << "currentAngle " << currentAngle->GetAbsoluteValue() << std::endl;
+	 if (isLocked && (firstAngle + 0.1f > currentAngle->GetAbsoluteValue()) && (firstAngle - 0.1f < currentAngle->GetAbsoluteValue()))
+	 {
+            isLocked = false;
+	 }
+	 else if (!isLocked)
+	 {*/
+	    lockAngle = *(new CRadians(0.1f));
+            CRadians* useless = new CRadians(0.1f);
+            m_pcPos->GetReading().Orientation.ToEulerAngles(lockAngle, *useless, *useless);     
+	    lockAngle = lockAngle + CRadians::PI_OVER_SIX;
+	    m_pcPropellers->SetAbsoluteYaw(lockAngle);
+            lockAngle = lockAngle + CRadians::PI_OVER_SIX;
+	    //isLocked = true;
+	 //}
       }
    }
 

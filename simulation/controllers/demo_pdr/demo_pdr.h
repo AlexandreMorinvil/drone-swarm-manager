@@ -100,9 +100,9 @@ private:
    uint m_uiCurrentStep;
 
    CVector3* newCVector;
-   Real bestAngle;
+   CRadians lockAngle;
    Real firstAngle;
-   float bestDistance;
+   int count;
    bool isLocked;
 };
 
