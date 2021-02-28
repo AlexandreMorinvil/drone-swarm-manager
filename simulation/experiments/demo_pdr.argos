@@ -59,7 +59,38 @@
     <box id="wall_west" size="0.1,4,2" movable="false">
       <body position="-2,0,0" orientation="0,0,0" />
     </box>
-
+    <!-- walls insertion starts here -->
+    <box id= " wall0" size="0.2,0.2,2" movable="false">
+      <body position="-2, -2, 2" orientation="0,0,0" />
+    </box>
+    <box id= " wall1" size="0.2,0.2,2" movable="false">
+      <body position="-2, 0, 2" orientation="0,0,0" />
+    </box>
+    <box id= " wall2" size="0.2,0.2,2" movable="false">
+      <body position="-2, -1, 2" orientation="0,0,0" />
+    </box>
+    <box id= " wall3" size="0.2,0.2,2" movable="false">
+      <body position="-1, -1, 2" orientation="0,0,0" />
+    </box>
+    <box id= " wall4" size="0.2,0.2,2" movable="false">
+      <body position="1, 0, 2" orientation="0,0,0" />
+    </box>
+    <box id= " wall5" size="0.2,0.2,2" movable="false">
+      <body position="1, 0, 2" orientation="0,0,0" />
+    </box>
+    <box id= " wall6" size="0.2,0.2,2" movable="false">
+      <body position="0, -1, 2" orientation="0,0,0" />
+    </box>
+    <box id= " wall7" size="0.2,0.2,2" movable="false">
+      <body position="-1, -1, 2" orientation="0,0,0" />
+    </box>
+    <box id= " wall8" size="0.2,0.2,2" movable="false">
+      <body position="-1, -2, 2" orientation="0,0,0" />
+    </box>
+    <box id= " wall9" size="0.2,0.2,2" movable="false">
+      <body position="-2, 0, 2" orientation="0,0,0" />
+    </box>
+    <!-- walls insertion ends here -->
     <distribute>
       <position method="uniform" min="-1,1,0" max="1,1,0" />
       <orientation method="uniform" min="0,0,0" max="360,0,0" />
