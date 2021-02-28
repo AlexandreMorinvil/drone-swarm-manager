@@ -7,10 +7,12 @@ from flask import Flask, jsonify, render_template
 from flask_socketio import *
 import cflib
 from cflib.crazyflie import Crazyflie
+from DBconnect import DatabaseConnector
 
 
 app = Flask(__name__)
 socketio = SocketIO(app, host= '192.168.0.173' ,cors_allowed_origins='*')
+db = DatabaseConnector()
 
 # Initialize the low-level drivers (don't list the debug drivers)
 cflib.crtp.init_drivers(enable_debug_driver=False)
@@ -33,7 +35,7 @@ def ledToggler(data):
         'isConnected' : drones[data['id']].getIsConnected()
     }
     socketio.emit('drone_data', data_to_send)
-    
+
 
 if __name__ == '__main__':
     app.run()
