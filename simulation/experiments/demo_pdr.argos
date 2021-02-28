@@ -32,7 +32,8 @@
       <sensors>
         <crazyflie_distance_scanner implementation="rot_z_only"  show_rays="true" />
         <positioning            implementation="default"/>
-        <battery implementation="default"/>
+	<battery implementation="default"/>
+	<range_and_bearing implementation="medium" medium="rab" />
       </sensors>
       <params>
       </params>
