@@ -1,18 +1,21 @@
-<h3>Drone List</h3>
-<mat-selection-list #droneId [multiple]="false" (selectionChange)="onDroneChange()">
-    <mat-divider></mat-divider>
-    <mat-list-option [value]=0 >
-       <p>Drone 1</p>
-       <p>Online : {{socket.online[0]}}</p> 
-    </mat-list-option>
-    <mat-divider></mat-divider>
-    <mat-list-option [value]=1 >
-        <p>Drone 2</p>
-        <p>Online : {{socket.online[1]}}</p> 
-    </mat-list-option>
-    <mat-divider></mat-divider>
-</mat-selection-list>
+<mat-card class="drone-List">
+    <mat-card-title>Drone List</mat-card-title>
+    <mat-card-content>
+        <mat-selection-list #droneId [multiple]="false" (selectionChange)="onDroneChange()">
+            <mat-list-option [value]=0 (click)="sidebar.board.toggle()">
+                <p>Drone 1</p>
+            </mat-list-option>
+            <mat-list-option [value]=1 (click)="sidebar.board.toggle()">
+                <p>Drone 2</p>
+            </mat-list-option>
+        </mat-selection-list>
+    </mat-card-content>
+    <mat-card-footer>
+        Option selected: Drone {{droneId.selectedOptions.selected[0]?.value + 1}}
+    </mat-card-footer>
+</mat-card>
 
-<p>
-    Option selected: Drone {{droneId.selectedOptions.selected[0]?.value + 1}}
- </p>
+
+    
+
+   
