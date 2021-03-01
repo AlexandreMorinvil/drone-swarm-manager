@@ -31,6 +31,7 @@
 /* Definitions for random number generation */
 #include <argos3/core/utility/math/rng.h>
 
+
 /*
  * All the ARGoS stuff in the 'argos' namespace.
  * With this statement, you save typing argos:: every time.
@@ -88,8 +89,8 @@ public:
    bool Land();
 
 private:
-
-
+   CCI_RangeAndBearingSensor* m_pcRABSens;
+   CCI_RangeAndBearingActuator* m_pcRABAct;
    CCI_QuadRotorPositionActuator* m_pcPropellers;
    CCI_PositioningSensor* m_pcPos;
 
@@ -98,6 +99,13 @@ private:
 
    /* Current step */
    uint m_uiCurrentStep;
+
+   struct Packet
+   {
+      float test;
+   };
+
+   void checkIfPacketIsComing();
 };
 
 #endif

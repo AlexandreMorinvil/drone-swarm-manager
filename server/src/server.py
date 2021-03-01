@@ -1,6 +1,7 @@
 
 import socketio
 import json
+from vec3 import Vec3
 from drone import Drone
 import threading
 
@@ -11,7 +12,7 @@ from cflib.crazyflie import Crazyflie
 
 
 app = Flask(__name__)
-socketio = SocketIO(app, cors_allowed_origins='*')
+socketio = SocketIO(app, host= '192.168.0.173' ,cors_allowed_origins='*')
 
 # Initialize the low-level drivers (don't list the debug drivers)
 cflib.crtp.init_drivers(enable_debug_driver=False)
@@ -19,7 +20,11 @@ cflib.crtp.init_drivers(enable_debug_driver=False)
 print('Scanning interfaces for Crazyflies...')
 available = cflib.crtp.scan_interfaces()
 print('Crazyflies found:')
+<<<<<<< HEAD:server/server.py
 drones = [Drone("radio://0/80/250K", 0), Drone("radio://0/71/250K", 1)]
+=======
+drones = [Drone("radio://0/80/250K",Vec3(0,0,0)), Drone("radio://0/71/250K", Vec3(0,0,0))]
+>>>>>>> dev:server/src/server.py
 
 @socketio.on('TOGGLE_LED')
 def ledToggler(data):

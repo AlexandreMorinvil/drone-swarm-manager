@@ -1,23 +1,31 @@
 import json
 import logging
 import time
+from sensor import Sensor
+from vec3 import Vec3
 from threading import Thread
 from enum import Enum
 import struct
-
 import cflib
 from cflib.crazyflie import Crazyflie
 
 logging.basicConfig(level=logging.ERROR)
-State = Enum('State', 'standBy in_mission crash')
-class Drone :
-    led = False
-    state = State.standBy
 
-    def __init__(self, link_uri, id):
+class PacketType(Enum):
+    TX = 0
+    POSITION = 1
+    VELOCITY = 2
+    DISTANCE = 3
+
+class Drone :
+    sensors = Sensor(0,0,0,0,0,0,0,0,0)
+    __startPos = Vec3(0,0,0)
+    currentPos = Vec3(0,0,0)
+    led = False
+    def __init__(self, link_uri, id,initialPos: Vec3):
 
         self._cf = Crazyflie()
-
+        self.__startPos = initialPos
         self._cf.connected.add_callback(self._connected)
         self._cf.disconnected.add_callback(self._disconnected)
         self._cf.connection_failed.add_callback(self._connection_failed)
@@ -56,9 +64,19 @@ class Drone :
         print('Disconnected from %s' % link_uri)
 
     def _app_packet_received(self, data):
-        (is_led_activated, vbattery) = struct.unpack("<bf", data)
-        self._vbat = vbattery
-        print(f"ID : {self._cf.link_uri} | Led status : {is_led_activated}  ---  Battery Voltage : {vbattery}")
+        if data[0] == PacketType.TX.value:
+            (packet_type, is_led_activated, vbattery, rssi) = struct.unpack("<bbfb", data)
+            self._vbat = vbattery
+            print(f"ID : {self._cf.link_uri} | Battery Voltage : {vbattery} | RSSI : {rssi}")
+        elif data[0] == PacketType.POSITION.value:
+            (packet_type, x, y, z) = struct.unpack("<bfff", data)
+            print(f"ID : {self._cf.link_uri} | Position : {x}, {y}, {z}")
+        elif data[0] == PacketType.VELOCITY.value:
+            (packet_type, px, py, pz) = struct.unpack("<bfff", data)
+            print(f"ID : {self._cf.link_uri} | Velocity : {px}, {py}, {pz}")
+        elif data[0] == PacketType.DISTANCE.value:
+            (packet_type, front, back, up, left, right, zrange) = struct.unpack("<bhhhhhh", data)
+            print(f"ID : {self._cf.link_uri} | Front : {front} | Back : {back} | Up : {up} | Left : {left} | Right : {right} | Zrange : {zrange}")
 
     def toggleLED(self):
         self.led = not self.led
@@ -79,3 +97,10 @@ class Drone :
                 'vbat': self._vbat,
                 'isConnected': self._isConnected,
                 'speed': self._speed}
+    def toJson(self) :
+        return {
+            'sensors'   : self.sensors.toJson(),
+            'currentPos': (self.__startPos + self.currentPos ).toJson(),
+            'batteryLvl': self._vbat,
+            'status'    : self._isConnected
+        }
