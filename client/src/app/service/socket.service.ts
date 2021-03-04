@@ -19,19 +19,29 @@ import { Drone } from "./Drone/drone.service";
       this.socket = io("127.0.0.1:5000");
       this.socket.on('drone_data', data => {
         const droneData = JSON.parse(data);
-        for(let i = 0; i < droneData.length; i++){
-          if(this.droneList[droneData[i].id] == null){
-            this.droneList.push(new Drone(droneData[i].vbat, droneData[i].isConnected, droneData[i].id));
-          }
-          else{
-            this.droneList[droneData[i].id].vbat = droneData[i].vbat;
-            this.droneList[droneData[i].id].online = droneData[i].isConnected;
-          }
-          this.vbat[droneData[i].id] = droneData[i].vbat;
-          this.online[droneData[i].id] = droneData[i].isConnected;
-        }
+        this.receiveData(droneData);
         console.log(this.droneList);
       });
+    }
+
+    public receiveData(droneData: any): void {
+      for(let i = 0; i < droneData.length; i++){
+        if(this.droneList[i] == null){
+          this.droneList.push(new Drone(droneData[i].vbat, droneData[i].isConnected, droneData[i].id));
+        }
+        else if(this.droneList[i].droneId != droneData[i].id){
+          this.droneList.splice(i, 1, new Drone(droneData[i].vbat, droneData[i].isConnected, droneData[i].id));
+        }
+        else{
+          this.droneList[droneData[i].id].vbat = droneData[i].vbat;
+          this.droneList[droneData[i].id].online = droneData[i].isConnected;
+        }
+        this.vbat[droneData[i].id] = droneData[i].vbat;
+        this.online[droneData[i].id] = droneData[i].isConnected;
+      }
+      if(this.droneList.length != droneData.length){
+        this.droneList = this.droneList.slice(0, droneData.length);
+      }
     }
 
     public getBatteryLevel(): Number {

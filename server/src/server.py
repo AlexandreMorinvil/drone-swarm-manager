@@ -12,7 +12,7 @@ from cflib.crazyflie import Crazyflie
 
 
 app = Flask(__name__)
-socketio = SocketIO(app, host= '192.168.0.173' ,cors_allowed_origins='*')
+socketio = SocketIO(app ,cors_allowed_origins='*')
 
 # Initialize the low-level drivers (don't list the debug drivers)
 cflib.crtp.init_drivers(enable_debug_driver=False)
@@ -20,11 +20,7 @@ cflib.crtp.init_drivers(enable_debug_driver=False)
 print('Scanning interfaces for Crazyflies...')
 available = cflib.crtp.scan_interfaces()
 print('Crazyflies found:')
-<<<<<<< HEAD:server/server.py
-drones = [Drone("radio://0/80/250K", 0), Drone("radio://0/71/250K", 1)]
-=======
-drones = [Drone("radio://0/80/250K",Vec3(0,0,0)), Drone("radio://0/71/250K", Vec3(0,0,0))]
->>>>>>> dev:server/src/server.py
+drones = [Drone("radio://0/80/250K", 0 ,Vec3(0,0,0)), Drone("radio://0/71/250K",1, Vec3(0,0,0))]
 
 @socketio.on('TOGGLE_LED')
 def ledToggler(data):
@@ -33,8 +29,9 @@ def ledToggler(data):
     print("LED TOGGLER")
 
 def send_data():
+    print("data send")
     data_to_send = json.dumps([drone.dump() for drone in drones])
-    socketio.emit('drone_data', data_to_send)
+    socketio.emit('drone_data', data_to_send, broadcast=True)
 
 @socketio.on('TAKEOFF')
 def takeOff(data):
@@ -53,7 +50,7 @@ def set_interval(func, sec):
     t.start()
     return t
 
-set_interval(send_data, 2)
-
 if __name__ == '__main__':
+    set_interval(send_data, 1)
     app.run()
+

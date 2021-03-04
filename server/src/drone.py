@@ -35,7 +35,7 @@ class Drone :
 
         self._cf.open_link(link_uri)
         self._isConnected = False
-        self._vbat = 0.0
+        self._vbat = 10
         self._id = id
         self._speed = 0.0
         
