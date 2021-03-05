@@ -6,16 +6,12 @@
 #include <argos3/core/utility/math/vector2.h>
 /* Logging */
 #include <argos3/core/utility/logging/argos_log.h>
-#define CRITICAL_VALUE 100.0f
+#define CRITICAL_VALUE 50.0f
 /****************************************/
 /****************************************/
 
 CRadians* decideTurn(float left, float right)
 {
-   if (right < 0.0 || right > left)
-   {
-      return new CRadians(-CRadians::PI_OVER_FOUR);
-   }
    return new CRadians(CRadians::PI_OVER_FOUR);
 }
 CDemoPdr::CDemoPdr() : m_pcDistance(NULL),
@@ -25,7 +21,25 @@ CDemoPdr::CDemoPdr() : m_pcDistance(NULL),
 
 /****************************************/
 /****************************************/
+SensorSide CDemoPdr::CriticalProximity() {
+   float sensor[3]  = {leftDist, backDist, rightDist};
+   float min   = CRITICAL_VALUE;
+   SensorSide minSensor = SensorSide::kDefault;
 
+   for (unsigned i = 0; i < 3; i++) {
+      if (min > sensor[i] && sensor[i] > 0.0) 
+      {
+         min = sensor[i];
+         minSensor = (SensorSide) i;
+      }
+   }
+
+   if (frontDist < 90.0 && frontDist > 0 && minSensor == SensorSide::kDefault){
+      minSensor = SensorSide::kFront;
+   }
+
+   return minSensor;
+}
 void CDemoPdr::Init(TConfigurationNode &t_node)
 {
    m_pcDistance = GetSensor<CCI_CrazyflieDistanceScannerSensor>("crazyflie_distance_scanner");
@@ -62,10 +76,10 @@ void CDemoPdr::ControlStep()
    //Real angle = m_pcPos->GetReading().Orientation.GetZ();
    CCI_CrazyflieDistanceScannerSensor::TReadingsMap sDistRead = m_pcDistance->GetReadingsMap();
    auto iterDistRead = sDistRead.begin();
-   float rightDist = (iterDistRead++)->second;
-   float frontDist = (iterDistRead++)->second;
-   float leftDist = (iterDistRead++)->second;
-   float backDist = (iterDistRead++)->second;
+   rightDist = (iterDistRead++)->second;
+   frontDist = (iterDistRead++)->second;
+   leftDist = (iterDistRead++)->second;
+   backDist = (iterDistRead++)->second;
    if (sDistRead.size() == 4)
    {
       LOG << "Front dist: " << frontDist << std::endl;
@@ -83,51 +97,52 @@ void CDemoPdr::ControlStep()
    }
    else
    {
-      if (frontDist < CRITICAL_VALUE && frontDist >= 0 && count<=0)
-      {
-         if (turnAngle == nullptr)
-         {
-            turnAngle = decideTurn(leftDist, rightDist);
-         }
-         lockAngle += *turnAngle;
-         m_pcPropellers->SetAbsoluteYaw(lockAngle);
-	      count = 40;
+      lockAngle = *(new CRadians(0.1f));
+      CRadians *useless = new CRadians(0.1f);
+      m_pcPos->GetReading().Orientation.ToEulerAngles(lockAngle, *useless, *useless);
+      switch (CriticalProximity()) {
+        case SensorSide::kDefault:
+            LOG << "kDefault" << std::endl;
+            turnAngle = nullptr;
+            newCVector = new CVector3(
+                (cos(lockAngle.GetValue()) * 0.4 + cPos.GetX()) * 1,
+                (sin(lockAngle.GetValue()) * 0.4 + cPos.GetY()) * 1,
+                cPos.GetZ());
+            m_pcPropellers->SetAbsolutePosition(*newCVector);
+            break;
+        case SensorSide::kRight:
+            LOG << "kRight" << std::endl;
+            newCVector = new CVector3(
+                (cos(lockAngle.GetValue() - 1.56) * -0.3 + cPos.GetX()) * 1,
+                (sin(lockAngle.GetValue() - 1.56) * -0.3 + cPos.GetY()) * 1,
+                cPos.GetZ());
+            m_pcPropellers->SetAbsolutePosition(*newCVector);
+            break;
+        case SensorSide::kLeft:
+            LOG << "kLeft" << std::endl;
+            newCVector = new CVector3(
+                (cos(lockAngle.GetValue() - 1.56) * 0.3 + cPos.GetX()) * 1,
+                (sin(lockAngle.GetValue() - 1.56) * 0.3 + cPos.GetY()) * 1,
+                cPos.GetZ());
+            m_pcPropellers->SetAbsolutePosition(*newCVector);
+            break;
+        case SensorSide::kBack:
+            LOG << "kBack" << std::endl;
+            newCVector = new CVector3(
+                (cos(lockAngle.GetValue() + 0.8) * 0.3 + cPos.GetX()) * 1,
+                (sin(lockAngle.GetValue() + 0.8) * 0.3 + cPos.GetY()) * 1,
+                cPos.GetZ());
+            m_pcPropellers->SetAbsolutePosition(*newCVector);
+            break;
+        case SensorSide::kFront:
+            LOG << "lockAngle : " << lockAngle << std::endl;
+            //lockAngle = (lockAngle + CRadians::PI_OVER_FOUR) % 3.14;
+            m_pcPropellers->SetRelativeYaw(CRadians::PI_OVER_FOUR);
+	         //count = 40;
+            break;
+         
       }
-      else if (rightDist < 50.0 && rightDist >= 0)
-      {
-	      newCVector = new CVector3(
-             (cos(lockAngle.GetValue() + 1.56) * 0.1 + cPos.GetX()) * 1,
-             (sin(lockAngle.GetValue() + 1.56) * 0.1 + cPos.GetY()) * 1,
-             cPos.GetZ());
-         m_pcPropellers->SetAbsolutePosition(*newCVector);
-      }
-      else if (leftDist < 50.0 && leftDist >= 0)
-      {
-         newCVector = new CVector3(
-             (cos(lockAngle.GetValue() - 0.8) * 0.1 + cPos.GetX()) * 1,
-             (sin(lockAngle.GetValue() - 0.8) * 0.1 + cPos.GetY()) * 1,
-             cPos.GetZ());
-         m_pcPropellers->SetAbsolutePosition(*newCVector);
-
-      }
-      else if (backDist < 50.0 && backDist >= 0)
-      {
-         newCVector = new CVector3(
-             (cos(lockAngle.GetValue() - 0.8) * 0.1 + cPos.GetX()) * 1,
-             (sin(lockAngle.GetValue() - 0.8) * 0.1 + cPos.GetY()) * 1,
-             cPos.GetZ());
-         m_pcPropellers->SetAbsolutePosition(*newCVector);
-
-      }
-      else if ((frontDist > CRITICAL_VALUE || frontDist == -2) && count<=0) // front
-      {
-         turnAngle = nullptr;
-         newCVector = new CVector3(
-             (cos(lockAngle.GetValue()) * 0.4 + cPos.GetX()) * 1,
-             (sin(lockAngle.GetValue()) * 0.4 + cPos.GetY()) * 1,
-             cPos.GetZ());
-         m_pcPropellers->SetAbsolutePosition(*newCVector);
-      }
+      
    }
    m_uiCurrentStep++;
 }

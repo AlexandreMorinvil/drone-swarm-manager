@@ -37,6 +37,8 @@
  */
 using namespace argos;
 
+enum SensorSide { kLeft, kBack, kRight, kFront, kDefault};
+
 /*
  * A controller is simply an implementation of the CCI_Controller class.
  */
@@ -87,6 +89,8 @@ public:
     */
    bool Land();
 
+   SensorSide CriticalProximity();
+
 private:
 
    CCI_CrazyflieDistanceScannerSensor* m_pcDistance;
@@ -105,6 +109,8 @@ private:
    Real firstAngle;
    int count;
    bool isLocked;
+
+   float leftDist, backDist, frontDist, rightDist;
 };
 
 #endif

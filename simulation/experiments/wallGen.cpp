@@ -35,14 +35,14 @@ void readContentsFrom(string const& filename,string const& startLine, vector<str
 }
 void updateContents(vector<string>& lines){
     const int MAX_WALLS = 30;
-    const int MIN_WALLS =  5;
+    const int MIN_WALLS = 20;
     const int POS_LIMIT =  2; // limit of the walls (assuming it's a square.)
     srand(time(NULL));
     unsigned nWall = rand() % (MAX_WALLS + MIN_WALLS) + MIN_WALLS; // minimum of 5 walls
     for (unsigned i =0; i<nWall; ++i) {
         int x = rand() % (2*POS_LIMIT) - POS_LIMIT; // between -pos_limit and + poslimit
         int y = rand() % (2*POS_LIMIT) - POS_LIMIT; // between -pos_limit and + poslimit
-        string pos = to_string(x) + ", " +to_string(y) + ", 2";
+        string pos = to_string(x) + ", " +to_string(y) + ", 0";
         argosWall("wall"+ to_string(i), pos, lines);
     }
 }
