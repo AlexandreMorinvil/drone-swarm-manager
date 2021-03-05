@@ -1,7 +1,8 @@
 #ignoring .vscode folder but we keep some files for debuging
 /.vscode/chrome
 /.vs/
-
+.idea/
+__pycache__
 package-lock.json
 .DS_Store
 

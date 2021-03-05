@@ -16,6 +16,7 @@ export class DroneSelectedBoardComponent implements OnInit{
    
   }
   getBatteryLevel():Number {
+    console.log(this.socketService.getBatteryLevel());
     return this.socketService.getBatteryLevel();
   }
   toggleLed():void {

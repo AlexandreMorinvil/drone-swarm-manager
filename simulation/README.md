@@ -2,7 +2,7 @@
 
 ## Run simulation with Argos
 **Warning:** You need to associate a SSH key with your gitlab account in order to continue.
-1. Clone this repository : `git clone git@gitlab.com:polytechnique-montr-al/inf3995/20211/equipe-204/ground-station.git`
+1. Clone this repository : `git clone git@gitlab.com:polytechnique-montr-al/inf3995/20211/equipe-204/ALFRED.git`
 2. Go to your `.ssh` folder with `cd ~/.ssh`
 3. Build image with `docker build -f ~/path/to/repo/simulation/Dockerfile . --tag simulation-argos --network host`
 4. Run x11docker client with `x11docker --hostdisplay --hostnet --user=RETAIN -- --privileged simulation-argos`

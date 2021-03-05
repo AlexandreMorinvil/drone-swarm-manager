@@ -3,9 +3,10 @@ import logging
 import time
 from threading import Thread
 from enum import Enum
+from sensor import Sensor
+from vec3 import Vec3
 
 import struct
-
 import cflib
 from cflib.crazyflie import Crazyflie
 
@@ -18,12 +19,14 @@ class PacketType(Enum):
     DISTANCE = 3
 
 class Drone :
+    sensors = Sensor(0,0,0,0,0,0,0,0,0)
+    __startPos = Vec3(0,0,0)
+    currentPos = Vec3(0,0,0)
     led = False
-
-    def __init__(self, link_uri):
+    def __init__(self, link_uri, initialPos: Vec3):
 
         self._cf = Crazyflie()
-
+        self.__startPos = initialPos
         self._cf.connected.add_callback(self._connected)
         self._cf.disconnected.add_callback(self._disconnected)
         self._cf.connection_failed.add_callback(self._connection_failed)
@@ -83,5 +86,10 @@ class Drone :
 
     def getVBat(self):
         return self._vbat
-
-
+    def toJson(self) :
+        return {
+            'sensors'   : self.sensors.toJson(),
+            'currentPos': (self.__startPos + self.currentPos ).toJson(),
+            'batteryLvl': self._vbat,
+            'status'    : self._isConnected
+        }
