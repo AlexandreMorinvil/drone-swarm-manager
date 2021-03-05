@@ -50,6 +50,7 @@ void CDemoPdr::Init(TConfigurationNode &t_node)
    lockAngle = *(new CRadians(0.1f));
    CRadians *useless = new CRadians(0.1f);
    m_pcPos->GetReading().Orientation.ToEulerAngles(lockAngle, *useless, *useless);
+   LOG << "LOCKANGLE : " << lockAngle << std::endl;
 }
 
 /****************************************/
@@ -103,10 +104,10 @@ void CDemoPdr::ControlStep()
       else if (leftDist < 50.0 && leftDist >= 0)
       {
          newCVector = new CVector3(
-             (cos(lockAngle.GetValue() - 0.8) * 0.1) * 1,
-             (sin(lockAngle.GetValue() - 0.8) * 0.1) * 1,
+             (cos(lockAngle.GetValue() - 0.8) * 0.1 + cPos.GetX()) * 1,
+             (sin(lockAngle.GetValue() - 0.8) * 0.1 + cPos.GetY()) * 1,
              cPos.GetZ());
-         m_pcPropellers->SetRelativePosition(*newCVector);
+         m_pcPropellers->SetAbsolutePosition(*newCVector);
 
       }
       else if (backDist < 50.0 && backDist >= 0)
