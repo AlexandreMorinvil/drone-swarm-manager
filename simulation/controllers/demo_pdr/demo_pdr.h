@@ -101,6 +101,7 @@ private:
 
    CVector3* newCVector;
    CRadians lockAngle;
+   CRadians* turnAngle;
    Real firstAngle;
    int count;
    bool isLocked;
