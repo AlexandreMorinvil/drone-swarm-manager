@@ -91,6 +91,8 @@ public:
 
    SensorSide CriticalProximity();
 
+   float computeAngleToFollow();
+
 private:
 
    CCI_CrazyflieDistanceScannerSensor* m_pcDistance;
@@ -109,6 +111,8 @@ private:
    Real firstAngle;
    int count;
    bool isLocked;
+
+   CVector3 cPos;
 
    float leftDist, backDist, frontDist, rightDist;
 };

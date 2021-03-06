@@ -10,6 +10,25 @@
 /****************************************/
 /****************************************/
 
+CVector3* objective = new CVector3(-5,-5,0);
+
+float CDemoPdr::computeAngleToFollow()
+{
+   float xdiff = objective->GetX() - cPos.GetX();
+   float ydiff = objective->GetY() - cPos.GetY();
+   LOG << "xdiff : " << xdiff << std::endl;
+   LOG << "ydiff : " << ydiff << std::endl;
+   float length = sqrt(pow(xdiff, 2) + pow(ydiff, 2));
+   //float angleToFollow = asin(ydiff/length);
+   if (ydiff < 0)
+   {
+      return acos(ydiff/length);
+   }
+   return asin(ydiff/length);
+   //m_pcPropellers->SetAbsoluteYaw(*(new CRadians(angleToFollow)));
+}
+
+
 CRadians* decideTurn(float left, float right)
 {
    return new CRadians(CRadians::PI_OVER_FOUR);
@@ -41,6 +60,7 @@ SensorSide CDemoPdr::CriticalProximity() {
 
    return minSensor;
 }
+
 void CDemoPdr::Init(TConfigurationNode &t_node)
 {
    m_pcDistance = GetSensor<CCI_CrazyflieDistanceScannerSensor>("crazyflie_distance_scanner");
@@ -73,7 +93,7 @@ void CDemoPdr::Init(TConfigurationNode &t_node)
 
 void CDemoPdr::ControlStep()
 {
-   CVector3 cPos = m_pcPos->GetReading().Position;
+   cPos = m_pcPos->GetReading().Position;
    //Real angle = m_pcPos->GetReading().Orientation.GetZ();
    CCI_CrazyflieDistanceScannerSensor::TReadingsMap sDistRead = m_pcDistance->GetReadingsMap();
    auto iterDistRead = sDistRead.begin();
@@ -106,33 +126,36 @@ void CDemoPdr::ControlStep()
             LOG << "kDefault" << std::endl;
             turnAngle = nullptr;
             newCVector = new CVector3(
-                (cos(lockAngle.GetValue()) * 0.4 + cPos.GetX()) * 1,
-                (sin(lockAngle.GetValue()) * 0.4 + cPos.GetY()) * 1,
-                cPos.GetZ());
+               (cos(lockAngle.GetValue()) * 0.4 + cPos.GetX()) * 1,
+               (sin(lockAngle.GetValue()) * 0.4 + cPos.GetY()) * 1,
+               cPos.GetZ());
             m_pcPropellers->SetAbsolutePosition(*newCVector);
+            LOG << "ALLO : " << *(new CRadians(computeAngleToFollow())) << std::endl;
+            m_pcPropellers->SetAbsoluteYaw(*(new CRadians(computeAngleToFollow())));
+            LOG << "ALLO2" << std::endl;
             break;
         case SensorSide::kRight:
             LOG << "kRight" << std::endl;
             newCVector = new CVector3(
-                (cos(lockAngle.GetValue() - 1.56) * -0.4 + cPos.GetX()) * 1,
-                (sin(lockAngle.GetValue() - 1.56) * -0.4 + cPos.GetY()) * 1,
-                cPos.GetZ());
+               (cos(lockAngle.GetValue() - 1.56) * -0.4 + cPos.GetX()) * 1,
+               (sin(lockAngle.GetValue() - 1.56) * -0.4 + cPos.GetY()) * 1,
+               cPos.GetZ());
             m_pcPropellers->SetAbsolutePosition(*newCVector);
             break;
         case SensorSide::kLeft:
             LOG << "kLeft" << std::endl;
             newCVector = new CVector3(
-                (cos(lockAngle.GetValue() - 1.56) * 0.4 + cPos.GetX()) * 1,
-                (sin(lockAngle.GetValue() - 1.56) * 0.4 + cPos.GetY()) * 1,
-                cPos.GetZ());
+               (cos(lockAngle.GetValue() - 1.56) * 0.4 + cPos.GetX()) * 1,
+               (sin(lockAngle.GetValue() - 1.56) * 0.4 + cPos.GetY()) * 1,
+               cPos.GetZ());
             m_pcPropellers->SetAbsolutePosition(*newCVector);
             break;
         case SensorSide::kBack:
             LOG << "kBack" << std::endl;
             newCVector = new CVector3(
-                (cos(lockAngle.GetValue() + 0.8) * 0.4 + cPos.GetX()) * 1,
-                (sin(lockAngle.GetValue() + 0.8) * 0.4 + cPos.GetY()) * 1,
-                cPos.GetZ());
+               (cos(lockAngle.GetValue() + 0.8) * 0.4 + cPos.GetX()) * 1,
+               (sin(lockAngle.GetValue() + 0.8) * 0.4 + cPos.GetY()) * 1,
+               cPos.GetZ());
             m_pcPropellers->SetAbsolutePosition(*newCVector);
             break;
         case SensorSide::kFront:
