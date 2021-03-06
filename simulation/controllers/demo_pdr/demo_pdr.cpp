@@ -10,22 +10,19 @@
 /****************************************/
 /****************************************/
 
-CVector3* objective = new CVector3(-5,-5,0);
+CVector3* objective = new CVector3(0,0,0);
+bool returnToBase = false;
 
 float CDemoPdr::computeAngleToFollow()
 {
    float xdiff = objective->GetX() - cPos.GetX();
    float ydiff = objective->GetY() - cPos.GetY();
-   LOG << "xdiff : " << xdiff << std::endl;
-   LOG << "ydiff : " << ydiff << std::endl;
    float length = sqrt(pow(xdiff, 2) + pow(ydiff, 2));
-   //float angleToFollow = asin(ydiff/length);
-   if (ydiff < 0)
+   if (xdiff > 0)
    {
-      return acos(ydiff/length);
+      return asin(ydiff/length);
    }
-   return asin(ydiff/length);
-   //m_pcPropellers->SetAbsoluteYaw(*(new CRadians(angleToFollow)));
+   return acos(ydiff/length);
 }
 
 
@@ -110,6 +107,11 @@ void CDemoPdr::ControlStep()
    }
    //LOG << m_pcPos->GetReading().Orientation << std::endl;
 
+   if (m_uiCurrentStep > 550)
+   {
+      returnToBase = true;
+   }
+
    count--;
    if (m_uiCurrentStep < 20) // decolage
    {
@@ -121,6 +123,8 @@ void CDemoPdr::ControlStep()
       lockAngle = *(new CRadians(0.1f));
       CRadians *useless = new CRadians(0.1f);
       m_pcPos->GetReading().Orientation.ToEulerAngles(lockAngle, *useless, *useless);
+      
+            
       switch (CriticalProximity()) {
         case SensorSide::kDefault:
             LOG << "kDefault" << std::endl;
@@ -130,10 +134,11 @@ void CDemoPdr::ControlStep()
                (sin(lockAngle.GetValue()) * 0.4 + cPos.GetY()) * 1,
                cPos.GetZ());
             m_pcPropellers->SetAbsolutePosition(*newCVector);
-            LOG << "ALLO : " << *(new CRadians(computeAngleToFollow())) << std::endl;
-            m_pcPropellers->SetAbsoluteYaw(*(new CRadians(computeAngleToFollow())));
-            LOG << "ALLO2" << std::endl;
-            break;
+            if (returnToBase){
+               m_pcPropellers->SetAbsoluteYaw(*(new CRadians(computeAngleToFollow())));
+            }
+         break;
+            
         case SensorSide::kRight:
             LOG << "kRight" << std::endl;
             newCVector = new CVector3(
@@ -160,12 +165,11 @@ void CDemoPdr::ControlStep()
             break;
         case SensorSide::kFront:
             LOG << "lockAngle : " << lockAngle << std::endl;
-            //lockAngle = (lockAngle + CRadians::PI_OVER_FOUR) % 3.14;
-            m_pcPropellers->SetRelativeYaw(CRadians::PI_OVER_FOUR);
+            m_pcPropellers->SetRelativeYaw(CRadians::PI_OVER_FOUR/3);
 	         //count = 40;
             break;
-         
       }
+      
       
    }
    m_uiCurrentStep++;
