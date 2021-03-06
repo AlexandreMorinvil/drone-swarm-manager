@@ -15,11 +15,4 @@ describe('SocketService', () => {
     expect(service).toBeTruthy();
   });
 
-  it('Should push into DroneList the items of droneData when Dronelist is empty', () => {
-    service.droneList = [];
-    console.log('hi');
-    const droneData = [new Drone(10,true,4), new Drone(80,false,3)];
-    service.receiveData(droneData);
-    expect(service.droneList).toEqual(droneData);
-  });
 });
