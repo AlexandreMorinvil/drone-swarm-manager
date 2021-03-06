@@ -10,13 +10,19 @@
 /****************************************/
 /****************************************/
 
-CVector3* objective = new CVector3(0,0,0);
+CVector3 objective = *(new CVector3(0,0,0));
 bool returnToBase = false;
+bool hasArrived = false;
 
 float CDemoPdr::computeAngleToFollow()
 {
-   float xdiff = objective->GetX() - cPos.GetX();
-   float ydiff = objective->GetY() - cPos.GetY();
+   float xdiff = objective.GetX() - cPos.GetX();
+   float ydiff = objective.GetY() - cPos.GetY();
+   if (std::abs(xdiff) < 1 && std::abs(ydiff) < 1)
+   {
+      hasArrived = true;
+      count = 100;
+   }
    float length = sqrt(pow(xdiff, 2) + pow(ydiff, 2));
    if (xdiff > 0)
    {
@@ -83,6 +89,7 @@ void CDemoPdr::Init(TConfigurationNode &t_node)
    CRadians *useless = new CRadians(0.1f);
    m_pcPos->GetReading().Orientation.ToEulerAngles(lockAngle, *useless, *useless);
    LOG << "LOCKANGLE : " << lockAngle << std::endl;
+   objective = m_pcPos->GetReading().Position;
 }
 
 /****************************************/
@@ -107,7 +114,7 @@ void CDemoPdr::ControlStep()
    }
    //LOG << m_pcPos->GetReading().Orientation << std::endl;
 
-   if (m_uiCurrentStep > 550)
+   if (m_uiCurrentStep > 1000)
    {
       returnToBase = true;
    }
@@ -118,7 +125,7 @@ void CDemoPdr::ControlStep()
       cPos.SetZ(cPos.GetZ() + 0.25f);
       m_pcPropellers->SetAbsolutePosition(cPos);
    }
-   else
+   else if (!hasArrived)
    {
       lockAngle = *(new CRadians(0.1f));
       CRadians *useless = new CRadians(0.1f);
@@ -134,7 +141,7 @@ void CDemoPdr::ControlStep()
                (sin(lockAngle.GetValue()) * 0.4 + cPos.GetY()) * 1,
                cPos.GetZ());
             m_pcPropellers->SetAbsolutePosition(*newCVector);
-            if (returnToBase){
+            if (returnToBase) {
                m_pcPropellers->SetAbsoluteYaw(*(new CRadians(computeAngleToFollow())));
             }
          break;
@@ -142,24 +149,24 @@ void CDemoPdr::ControlStep()
         case SensorSide::kRight:
             LOG << "kRight" << std::endl;
             newCVector = new CVector3(
-               (cos(lockAngle.GetValue() - 1.56) * -0.4 + cPos.GetX()) * 1,
-               (sin(lockAngle.GetValue() - 1.56) * -0.4 + cPos.GetY()) * 1,
+               (cos(lockAngle.GetValue() - 1.56) * -0.5 + cPos.GetX()) * 1,
+               (sin(lockAngle.GetValue() - 1.56) * -0.5 + cPos.GetY()) * 1,
                cPos.GetZ());
             m_pcPropellers->SetAbsolutePosition(*newCVector);
             break;
         case SensorSide::kLeft:
             LOG << "kLeft" << std::endl;
             newCVector = new CVector3(
-               (cos(lockAngle.GetValue() - 1.56) * 0.4 + cPos.GetX()) * 1,
-               (sin(lockAngle.GetValue() - 1.56) * 0.4 + cPos.GetY()) * 1,
+               (cos(lockAngle.GetValue() - 1.56) * 0.5 + cPos.GetX()) * 1,
+               (sin(lockAngle.GetValue() - 1.56) * 0.5 + cPos.GetY()) * 1,
                cPos.GetZ());
             m_pcPropellers->SetAbsolutePosition(*newCVector);
             break;
         case SensorSide::kBack:
             LOG << "kBack" << std::endl;
             newCVector = new CVector3(
-               (cos(lockAngle.GetValue() + 0.8) * 0.4 + cPos.GetX()) * 1,
-               (sin(lockAngle.GetValue() + 0.8) * 0.4 + cPos.GetY()) * 1,
+               (cos(lockAngle.GetValue() + 0.8) * 0.5 + cPos.GetX()) * 1,
+               (sin(lockAngle.GetValue() + 0.8) * 0.5 + cPos.GetY()) * 1,
                cPos.GetZ());
             m_pcPropellers->SetAbsolutePosition(*newCVector);
             break;
@@ -169,8 +176,15 @@ void CDemoPdr::ControlStep()
 	         //count = 40;
             break;
       }
-      
-      
+   }
+   else if (hasArrived && count <= 0)
+   {
+      if (cPos.GetZ() > 0.2)
+      {
+         CVector3* test = new CVector3(0,0,-0.1);
+         m_pcPropellers->SetRelativePosition(*test);
+      }
+     
    }
    m_uiCurrentStep++;
 }
