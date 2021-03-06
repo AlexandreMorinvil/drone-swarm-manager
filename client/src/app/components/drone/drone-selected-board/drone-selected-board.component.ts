@@ -1,7 +1,7 @@
 import { Component, OnInit } from "@angular/core";
 
-import {SocketService} from "@app/service/socket.service";
-import { DroneListComponent } from "../drone-list/drone-list.component";
+import {SocketService} from "../../../service/socket/socket.service";
+
 
 @Component({
   selector: "app-drone-selected-board",

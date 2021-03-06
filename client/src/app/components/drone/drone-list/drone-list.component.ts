@@ -1,8 +1,8 @@
 import { Component, ViewChild } from "@angular/core";
 import { MatSelectionList } from "@angular/material/list";
-import { SocketService } from "@app/service/socket.service";
-import { ControlPageComponent } from "@app/components/page/control/control-page.component";
-import {Drone} from "@app/service/Drone/drone.service";
+import { SocketService } from "../../../service/socket/socket.service";
+import { ControlPageComponent } from "../../page/control/control-page.component";
+import {Drone} from "../../../service/drone/drone.service";
 
 
 @Component({

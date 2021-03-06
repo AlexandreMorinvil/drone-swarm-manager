@@ -1,18 +1,24 @@
-import { TestBed, waitForAsync } from "@angular/core/testing";
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { NavigationBarComponent } from "./navigation-bar.component";
 
 describe("NavigationBarComponent", () => {
-  beforeEach(
-    waitForAsync(() => {
-      TestBed.configureTestingModule({
-        declarations: [NavigationBarComponent],
-      }).compileComponents();
+  let component: NavigationBarComponent;
+  let fixture: ComponentFixture<NavigationBarComponent>;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      declarations: [ NavigationBarComponent ]
     })
-  );
+    .compileComponents();
+  });
+
+  beforeEach(() => {
+    fixture = TestBed.createComponent(NavigationBarComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
 
   it("should create the component", () => {
-    const fixture = TestBed.createComponent(NavigationBarComponent);
-    const app = fixture.componentInstance;
-    expect(app).toBeTruthy();
+    expect(component).toBeTruthy();
   });
 });

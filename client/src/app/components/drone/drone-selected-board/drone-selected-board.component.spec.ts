@@ -1,18 +1,24 @@
-import { TestBed, waitForAsync } from "@angular/core/testing";
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { DroneSelectedBoardComponent } from "./drone-selected-board.component";
 
 describe("DroneSelectedBoardComponent", () => {
-  beforeEach(
-    waitForAsync(() => {
-      TestBed.configureTestingModule({
-        declarations: [DroneSelectedBoardComponent],
-      }).compileComponents();
-    })
-  );
+  let component: DroneSelectedBoardComponent;
+  let fixture: ComponentFixture<DroneSelectedBoardComponent>;
 
-  it("should create the component", () => {
-    const fixture = TestBed.createComponent(DroneSelectedBoardComponent);
-    const app = fixture.componentInstance;
-    expect(app).toBeTruthy();
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      declarations: [ DroneSelectedBoardComponent ]
+    })
+    .compileComponents();
+  });
+
+  beforeEach(() => {
+    fixture = TestBed.createComponent(DroneSelectedBoardComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
   });
 });

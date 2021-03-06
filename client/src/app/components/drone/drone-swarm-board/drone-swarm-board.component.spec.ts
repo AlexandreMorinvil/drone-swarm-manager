@@ -1,18 +1,24 @@
-import { TestBed, waitForAsync } from "@angular/core/testing";
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { DroneSwarmBoardComponent } from "./drone-swarm-board.component";
 
 describe("DroneSwarmBoardComponent", () => {
-  beforeEach(
-    waitForAsync(() => {
-      TestBed.configureTestingModule({
-        declarations: [DroneSwarmBoardComponent],
-      }).compileComponents();
-    })
-  );
+  let component: DroneSwarmBoardComponent;
+  let fixture: ComponentFixture<DroneSwarmBoardComponent>;
 
-  it("should create the component", () => {
-    const fixture = TestBed.createComponent(DroneSwarmBoardComponent);
-    const app = fixture.componentInstance;
-    expect(app).toBeTruthy();
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      declarations: [ DroneSwarmBoardComponent ]
+    })
+    .compileComponents();
+  });
+
+  beforeEach(() => {
+    fixture = TestBed.createComponent(DroneSwarmBoardComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
   });
 });

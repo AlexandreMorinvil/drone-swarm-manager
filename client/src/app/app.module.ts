@@ -19,7 +19,7 @@ import { NavigationBarComponent } from "./components/navigation-bar/navigation-b
 
 
 //Service
-import{SocketService} from "./service/socket.service";
+import{SocketService} from "./service/socket/socket.service";
 
 //angular/materials
 import {MatDividerModule} from '@angular/material/divider';
