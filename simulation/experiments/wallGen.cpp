@@ -9,8 +9,13 @@ void argosWall(string id, string position, vector<string>& lines) {
     // generate pseudo random numbers between kMin and kMax (wall size)
     const float kMin = 0.1;
     const float kMax = 1.1;
-    float xSize = 0.8 + ((rand() %20) / 100);
-    float ySize = 0.1 + ((rand() %10) / 100);
+    float xSize = 0.8 + ((rand() %120) / 100);
+    float ySize = 0.1 + ((rand() %40) / 100);
+    if (rand()%2 == 1 ) {
+        xSize = xSize + ySize;
+        ySize = xSize - ySize;
+        xSize = xSize - ySize;
+    }
     lines.push_back("    <box id= \" " + id+  "\" size=\""+to_string(xSize)+ ","+to_string(ySize)+",2\" movable=\"false\">");
     lines.push_back("      <body position=\""+position+"\" orientation=\"0,0,0\" />");
     lines.push_back("    </box>");
@@ -39,13 +44,12 @@ void readContentsFrom(string const& filename,string const& startLine, vector<str
     }
 }
 void updateContents(vector<string>& lines){
-    const int MAX_WALLS = 6;
-    const int MIN_WALLS = 1;
-    const int POS_LIMIT =  2; // limit of the walls (assuming it's a square.)
+    const int MAX_WALLS = 25;
+    const int MIN_WALLS = 12;
     unsigned nWall = rand() % (MAX_WALLS) + MIN_WALLS;
     for (unsigned i =0; i<nWall; ++i) {
-        float x = (float) (rand()) /( (float) (RAND_MAX/4.2)) - 4.2;
-        float y = (float) (rand()) /( (float) (RAND_MAX/4.8)) - 4.8;
+        float x = (float) (rand()) /( (float) (RAND_MAX/8.4)) - 4.2;
+        float y = (float) (rand()) /( (float) (RAND_MAX/9.6)) - 4.8;
         string pos = to_string(x) + ", " +to_string(y) + ", 0";
         argosWall("wall"+ to_string(i), pos, lines);
     }
