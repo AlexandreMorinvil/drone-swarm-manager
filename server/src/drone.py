@@ -1,6 +1,8 @@
 import json
 import logging
 import time
+from sensor import Sensor
+from vec3 import Vec3
 from threading import Thread
 from enum import Enum
 from sensor import Sensor
@@ -37,6 +39,7 @@ class Drone :
         self._cf.open_link(link_uri)
         self._isConnected = False
         self._vbat = 0.0
+        
 
         print('Connecting to %s' % link_uri)
 

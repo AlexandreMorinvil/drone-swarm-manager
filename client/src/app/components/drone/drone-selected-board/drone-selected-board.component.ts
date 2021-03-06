@@ -25,4 +25,10 @@ export class DroneSelectedBoardComponent implements OnInit{
   refresh():void {
     this.socketService.refresh();
   }
+  takeOff():void {
+    this.socketService.takeOff();
+  }
+  returnToBase():void {
+    this.socketService.returnToBase();
+  }
 }

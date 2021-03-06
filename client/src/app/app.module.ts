@@ -2,7 +2,7 @@ import { BrowserModule } from "@angular/platform-browser";
 import { NgModule } from "@angular/core";
 import { RouterModule } from "@angular/router";
 import { HttpClientModule } from '@angular/common/http';
-
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AppRoutingModule } from './app-routing.module';
 // Page components
 import { AppComponent } from "./components/app/app.component";
@@ -17,6 +17,7 @@ import { DroneSwarmBoardComponent } from "./components/drone/drone-swarm-board/d
 import { MapGeneratedBoardComponent } from "./components/map/map-generated-board/map-generated-board.component";
 import { NavigationBarComponent } from "./components/navigation-bar/navigation-bar.component";
 
+
 //Service
 import{SocketService} from "./service/socket.service";
 
@@ -25,6 +26,11 @@ import {MatDividerModule} from '@angular/material/divider';
 import {MatListModule} from '@angular/material/list';
 import {MatButtonModule} from '@angular/material/button'
 import {MatIconModule} from '@angular/material/icon';
+import {MatSidenavModule} from '@angular/material/sidenav';
+import {MatToolbarModule} from '@angular/material/toolbar';
+import {MatGridListModule} from '@angular/material/grid-list';
+import {MatCardModule} from '@angular/material/card';
+
 
 @NgModule({
   declarations: [
@@ -32,14 +38,15 @@ import {MatIconModule} from '@angular/material/icon';
     ControlPageComponent,
     HomePageComponent,
     MapPageComponent,
+    MapGeneratedBoardComponent,
     DroneListComponent,
     DroneSelectedBoardComponent,
     DroneSwarmBoardComponent,
-    MapGeneratedBoardComponent,
     NavigationBarComponent,
   ],
   imports: [
-    BrowserModule, 
+    BrowserModule,
+    BrowserAnimationsModule, 
     AppRoutingModule, 
     RouterModule, 
     MatDividerModule, 
@@ -47,6 +54,10 @@ import {MatIconModule} from '@angular/material/icon';
     MatButtonModule, 
     HttpClientModule, 
     MatIconModule,
+    MatSidenavModule,
+    MatToolbarModule,
+    MatGridListModule,
+    MatCardModule,
   ],
   providers: [SocketService],
   bootstrap: [AppComponent]

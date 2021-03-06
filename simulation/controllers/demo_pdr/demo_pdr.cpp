@@ -6,6 +6,7 @@
 #include <argos3/core/utility/math/vector2.h>
 /* Logging */
 #include <argos3/core/utility/logging/argos_log.h>
+
 #define CRITICAL_VALUE 40.0f
 /****************************************/
 /****************************************/
@@ -66,6 +67,8 @@ SensorSide CDemoPdr::CriticalProximity() {
 
 void CDemoPdr::Init(TConfigurationNode &t_node)
 {
+   m_pcRABSens     = GetSensor <CCI_RangeAndBearingSensor>("range_and_bearing" );
+   m_pcRABAct      = GetActuator <CCI_RangeAndBearingActuator>("range_and_bearing");
    m_pcDistance = GetSensor<CCI_CrazyflieDistanceScannerSensor>("crazyflie_distance_scanner");
    m_pcPropellers = GetActuator<CCI_QuadRotorPositionActuator>("quadrotor_position");
    try
@@ -80,6 +83,7 @@ void CDemoPdr::Init(TConfigurationNode &t_node)
     */
    /* Create a random number generator. We use the 'argos' category so
       that creation, reset, seeding and cleanup are managed by ARGoS. */
+
    m_pcRNG = CRandom::CreateRNG("argos");
 
    count = 0;
@@ -113,6 +117,16 @@ void CDemoPdr::ControlStep()
       LOG << "Right dist: " << rightDist << std::endl;
    }
    //LOG << m_pcPos->GetReading().Orientation << std::endl;
+
+   struct Packet packet;
+      packet.test = 1.5;
+      CByteArray cBuf(10);
+      memcpy(&cBuf[0], &packet, sizeof(packet));
+      if (GetId() == "s0")
+      {
+         LOG << "Send Packet (from: " << GetId() << "): " << packet.test << std::endl;
+         m_pcRABAct->SetData(cBuf);
+      }
 
    if (m_uiCurrentStep > 1000)
    {
@@ -186,6 +200,8 @@ void CDemoPdr::ControlStep()
       }
      
    }
+
+   checkIfPacketIsComing();
    m_uiCurrentStep++;
 }
 
@@ -201,6 +217,19 @@ void CDemoPdr::Reset()
 
 /****************************************/
 /****************************************/
+
+void CDemoPdr::checkIfPacketIsComing()
+{
+   const CCI_RangeAndBearingSensor::TReadings& tMsgs = m_pcRABSens->GetReadings();
+   if (! tMsgs.empty() && GetId() == "s1") {
+     Packet packetReceived = *reinterpret_cast<const Packet*>(tMsgs[0].Data.ToCArray());
+     if (packetReceived.test != 0)
+     {
+        LOG << "Packet Received (from:" << GetId() << " ): " << packetReceived.test << std::endl;
+     }
+   }
+}
+
 
 /*
  * This statement notifies ARGoS of the existence of the controller.
