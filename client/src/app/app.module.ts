@@ -19,7 +19,7 @@ import { NavigationBarComponent } from "./components/navigation-bar/navigation-b
 
 
 //Service
-import{SocketService} from "./service/socket.service";
+import{SocketService} from "./service/socket/socket.service";
 
 //angular/materials
 import {MatDividerModule} from '@angular/material/divider';
@@ -30,6 +30,7 @@ import {MatSidenavModule} from '@angular/material/sidenav';
 import {MatToolbarModule} from '@angular/material/toolbar';
 import {MatGridListModule} from '@angular/material/grid-list';
 import {MatCardModule} from '@angular/material/card';
+
 
 
 @NgModule({

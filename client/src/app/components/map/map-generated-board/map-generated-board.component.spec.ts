@@ -1,18 +1,24 @@
-import { TestBed, waitForAsync } from "@angular/core/testing";
+import { ComponentFixture, TestBed, waitForAsync } from "@angular/core/testing";
 import { MapGeneratedBoardComponent } from "./map-generated-board.component";
 
 describe("MapGeneratedBoardComponent", () => {
-  beforeEach(
-    waitForAsync(() => {
-      TestBed.configureTestingModule({
-        declarations: [MapGeneratedBoardComponent],
-      }).compileComponents();
-    })
-  );
+  let component: MapGeneratedBoardComponent;
+  let fixture: ComponentFixture<MapGeneratedBoardComponent>;
 
-  it("should create the component", () => {
-    const fixture = TestBed.createComponent(MapGeneratedBoardComponent);
-    const app = fixture.componentInstance;
-    expect(app).toBeTruthy();
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      declarations: [ MapGeneratedBoardComponent ]
+    })
+    .compileComponents();
+  });
+
+  beforeEach(() => {
+    fixture = TestBed.createComponent(MapGeneratedBoardComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
   });
 });

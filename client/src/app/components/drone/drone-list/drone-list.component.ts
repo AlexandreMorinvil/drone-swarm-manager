@@ -1,7 +1,8 @@
 import { Component, ViewChild } from "@angular/core";
 import { MatSelectionList } from "@angular/material/list";
-import { SocketService } from "@app/service/socket.service";
-import { ControlPageComponent } from "@app/components/page/control/control-page.component";
+import { SocketService } from "../../../service/socket/socket.service";
+import { ControlPageComponent } from "../../page/control/control-page.component";
+import {Drone} from "../../../service/drone/drone.service";
 
 
 @Component({
@@ -11,8 +12,11 @@ import { ControlPageComponent } from "@app/components/page/control/control-page.
 })
 export class DroneListComponent {
   id: number = 0;
+  drones: Drone[];
   @ViewChild('droneId') droneId: MatSelectionList;
-  constructor(public socket: SocketService, public sidebar: ControlPageComponent){}
+  constructor(public socket: SocketService, public sidebar: ControlPageComponent){
+    this.drones = socket.droneList;
+  }
   onDroneChange(): void {
     this.socket.droneId = this.droneId.selectedOptions.selected[0].value;
   }

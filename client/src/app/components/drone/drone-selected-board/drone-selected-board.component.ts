@@ -1,7 +1,7 @@
 import { Component, OnInit } from "@angular/core";
 
-import {SocketService} from "@app/service/socket.service";
-import { DroneListComponent } from "../drone-list/drone-list.component";
+import {SocketService} from "../../../service/socket/socket.service";
+
 
 @Component({
   selector: "app-drone-selected-board",
@@ -15,16 +15,14 @@ export class DroneSelectedBoardComponent implements OnInit{
     this.socketService.initSocket();
    
   }
+  
   getBatteryLevel():Number {
-    console.log(this.socketService.getBatteryLevel());
     return this.socketService.getBatteryLevel();
   }
   toggleLed():void {
     this.socketService.toggle_led();
   }
-  refresh():void {
-    this.socketService.refresh();
-  }
+  
   takeOff():void {
     this.socketService.takeOff();
   }
