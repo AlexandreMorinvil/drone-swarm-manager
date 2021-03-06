@@ -6,7 +6,7 @@
 #include <argos3/core/utility/math/vector2.h>
 /* Logging */
 #include <argos3/core/utility/logging/argos_log.h>
-#define CRITICAL_VALUE 50.0f
+#define CRITICAL_VALUE 40.0f
 /****************************************/
 /****************************************/
 
@@ -34,7 +34,8 @@ SensorSide CDemoPdr::CriticalProximity() {
       }
    }
 
-   if (frontDist < 90.0 && frontDist > 0 && minSensor == SensorSide::kDefault){
+   if (((frontDist < 90.0 && frontDist > 0) && minSensor == SensorSide::kDefault)
+        || (frontDist < min && frontDist > 0)){
       minSensor = SensorSide::kFront;
    }
 
@@ -113,24 +114,24 @@ void CDemoPdr::ControlStep()
         case SensorSide::kRight:
             LOG << "kRight" << std::endl;
             newCVector = new CVector3(
-                (cos(lockAngle.GetValue() - 1.56) * -0.3 + cPos.GetX()) * 1,
-                (sin(lockAngle.GetValue() - 1.56) * -0.3 + cPos.GetY()) * 1,
+                (cos(lockAngle.GetValue() - 1.56) * -0.4 + cPos.GetX()) * 1,
+                (sin(lockAngle.GetValue() - 1.56) * -0.4 + cPos.GetY()) * 1,
                 cPos.GetZ());
             m_pcPropellers->SetAbsolutePosition(*newCVector);
             break;
         case SensorSide::kLeft:
             LOG << "kLeft" << std::endl;
             newCVector = new CVector3(
-                (cos(lockAngle.GetValue() - 1.56) * 0.3 + cPos.GetX()) * 1,
-                (sin(lockAngle.GetValue() - 1.56) * 0.3 + cPos.GetY()) * 1,
+                (cos(lockAngle.GetValue() - 1.56) * 0.4 + cPos.GetX()) * 1,
+                (sin(lockAngle.GetValue() - 1.56) * 0.4 + cPos.GetY()) * 1,
                 cPos.GetZ());
             m_pcPropellers->SetAbsolutePosition(*newCVector);
             break;
         case SensorSide::kBack:
             LOG << "kBack" << std::endl;
             newCVector = new CVector3(
-                (cos(lockAngle.GetValue() + 0.8) * 0.3 + cPos.GetX()) * 1,
-                (sin(lockAngle.GetValue() + 0.8) * 0.3 + cPos.GetY()) * 1,
+                (cos(lockAngle.GetValue() + 0.8) * 0.4 + cPos.GetX()) * 1,
+                (sin(lockAngle.GetValue() + 0.8) * 0.4 + cPos.GetY()) * 1,
                 cPos.GetZ());
             m_pcPropellers->SetAbsolutePosition(*newCVector);
             break;
