@@ -6,7 +6,17 @@
 using namespace std;
 
 void argosWall(string id, string position, vector<string>& lines) {
-    lines.push_back("    <box id= \" " + id+  "\" size=\"0.2,0.2,2\" movable=\"false\">");
+    // generate pseudo random numbers between kMin and kMax (wall size)
+    const float kMin = 0.1;
+    const float kMax = 1.1;
+    float xSize = 0.8 + ((rand() %120) / 100);
+    float ySize = 0.1 + ((rand() %40) / 100);
+    if (rand()%2 == 1 ) {
+        xSize = xSize + ySize;
+        ySize = xSize - ySize;
+        xSize = xSize - ySize;
+    }
+    lines.push_back("    <box id= \" " + id+  "\" size=\""+to_string(xSize)+ ","+to_string(ySize)+",2\" movable=\"false\">");
     lines.push_back("      <body position=\""+position+"\" orientation=\"0,0,0\" />");
     lines.push_back("    </box>");
 }
@@ -34,14 +44,12 @@ void readContentsFrom(string const& filename,string const& startLine, vector<str
     }
 }
 void updateContents(vector<string>& lines){
-    const int MAX_WALLS = 30;
-    const int MIN_WALLS = 20;
-    const int POS_LIMIT =  2; // limit of the walls (assuming it's a square.)
-    srand(time(NULL));
-    unsigned nWall = rand() % (MAX_WALLS + MIN_WALLS) + MIN_WALLS; // minimum of 5 walls
+    const int MAX_WALLS = 25;
+    const int MIN_WALLS = 12;
+    unsigned nWall = rand() % (MAX_WALLS) + MIN_WALLS;
     for (unsigned i =0; i<nWall; ++i) {
-        int x = rand() % (2*POS_LIMIT) - POS_LIMIT; // between -pos_limit and + poslimit
-        int y = rand() % (2*POS_LIMIT) - POS_LIMIT; // between -pos_limit and + poslimit
+        float x = (float) (rand()) /( (float) (RAND_MAX/8.4)) - 4.2;
+        float y = (float) (rand()) /( (float) (RAND_MAX/9.6)) - 4.8;
         string pos = to_string(x) + ", " +to_string(y) + ", 0";
         argosWall("wall"+ to_string(i), pos, lines);
     }
@@ -55,7 +63,9 @@ void WriteContents(string const& filename,vector<string> const& lines){
     }
     file.close();
 }
+
 int main() {
+    srand(time(NULL));
     const string filename  = "demo_pdr.argos";
     const string startLine = "    <!-- walls insertion starts here -->";
     const string stopline  = "    <!-- walls insertion ends here -->";
