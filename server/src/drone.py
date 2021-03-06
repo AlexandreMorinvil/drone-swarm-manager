@@ -36,7 +36,7 @@ class Drone :
 
         self._cf.open_link(link_uri)
         self._isConnected = False
-        self._vbat = 0.0
+        self._vbat = 3.757
         
 
         print('Connecting to %s' % link_uri)
@@ -86,7 +86,69 @@ class Drone :
         return self._isConnected
 
     def getVBat(self):
-        return self._vbat
+        if(self._vbat <= 4.3 & self._vbat >= 4.2):
+            return 100
+        if(self._vbat <4.2 & self._vbat >= 4.15):
+            return 95
+        
+        if(self._vbat < 4.15 & self._vbat >= 4.1):
+            return 90
+        
+        if(self._vbat < 4.1 & self._vbat >= 4.05):
+            return 85
+        
+        if(self._vbat < 4.05 & self._vbat >= 4.025):
+            return 80
+        
+        if(self._vbat < 4.025 & self._vbat >= 4.0):
+            return 75
+        
+        if(self._vbat < 4.0 & self._vbat >= 3.95):
+            return 70
+        
+        if(self._vbat < 3.95 & self._vbat >= 3.90):
+            return 65
+        
+        if(self._vbat < 3.9 & self._vbat >= 3.8875):
+            return 60
+        
+        if(self._vbat < 3.875 & self._vbat >= 3.8625):
+            return 55
+        
+        if(self._vbat < 3.8625 & self._vbat >= 3.85):
+            return 50
+        
+        if(self._vbat < 3.85 & self._vbat >= 3.8375):
+            return 45
+        
+        if(self._vbat < 3.875 & self._vbat >= 3.825):
+            return 40
+        
+        if(self._vbat < 3.825 & self._vbat >= 3.8):
+            return 35
+        
+        if(self._vbat < 3.8 & self._vbat >= 3.775):
+            return 30
+        
+        if(self._vbat < 3.775 & self._vbat >= 3.75):
+            return 25
+        
+        if(self._vbat < 3.75 & self._vbat >= 3.725):
+            return 20
+        
+        if(self._vbat < 3.725 & self._vbat >= 3.7):
+            return 10
+        
+        if(self._vbat < 3.7 & self._vbat >= 3.6):
+            return 5
+        
+        if(self._vbat < 3.6 & self._vbat >= 3.5):
+            return 3
+        
+        if(self._vbat < 3.5):
+            return 0
+        
+
     def toJson(self) :
         return {
             'sensors'   : self.sensors.toJson(),

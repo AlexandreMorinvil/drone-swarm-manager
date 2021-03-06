@@ -29,14 +29,14 @@ def ledToggler(data):
 def ledToggler(data):
     data_to_send = {
         'id' : data['id'],
-        'vbat' : drones[data['id']].getVBat(),
+        'vbat' : 30,
         'isConnected' : drones[data['id']].getIsConnected()
     }
     socketio.emit('drone_data', data_to_send)
 @socketio.on('TAKEOFF')
 def takeOff(data):
     print("TAKE OFF")
-@socketio('RETURN_BASE')
+@socketio.on('RETURN_BASE')
 def returnToBase(data):
     print("Returning to base")  
 
