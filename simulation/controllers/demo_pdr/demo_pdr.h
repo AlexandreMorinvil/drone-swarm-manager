@@ -38,6 +38,8 @@
  */
 using namespace argos;
 
+enum SensorSide { kLeft, kBack, kRight, kFront, kDefault};
+
 /*
  * A controller is simply an implementation of the CCI_Controller class.
  */
@@ -88,7 +90,13 @@ public:
     */
    bool Land();
 
+   SensorSide CriticalProximity();
+
+   float computeAngleToFollow();
+
 private:
+
+   CCI_CrazyflieDistanceScannerSensor* m_pcDistance;
    CCI_RangeAndBearingSensor* m_pcRABSens;
    CCI_RangeAndBearingActuator* m_pcRABAct;
    CCI_QuadRotorPositionActuator* m_pcPropellers;
@@ -100,6 +108,16 @@ private:
    /* Current step */
    uint m_uiCurrentStep;
 
+   CVector3* newCVector;
+   CRadians lockAngle;
+   CRadians* turnAngle;
+   Real firstAngle;
+   int count;
+   bool isLocked;
+
+   CVector3 cPos;
+
+   float leftDist, backDist, frontDist, rightDist;
    struct Packet
    {
       float test;

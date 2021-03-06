@@ -5,6 +5,8 @@ from sensor import Sensor
 from vec3 import Vec3
 from threading import Thread
 from enum import Enum
+from sensor import Sensor
+from vec3 import Vec3
 
 import struct
 import cflib
