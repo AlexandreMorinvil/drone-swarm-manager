@@ -31,8 +31,9 @@ class Drone :
     sensors = Sensor(0,0,0,0,0,0,0,0,0)
     __startPos = Vec3(0,0,0)
     currentPos = Vec3(0,0,0)
-    led = False
-    def __init__(self, link_uri, id,initialPos: Vec3):
+    led = True
+
+    def __init__(self, link_uri, initialPos: Vec3, id):
 
         self._cf = Crazyflie()
         self.__startPos = initialPos
@@ -48,8 +49,7 @@ class Drone :
         self._state = DroneState.READY.value
         self._vbat = 10
         self._id = id
-        self._speed = 0.0
-        
+        self._speed = 0.0        
 
         print('Connecting to %s' % link_uri)
 
