@@ -69,6 +69,14 @@ struct PacketDistance {
 CVector3 objective = *(new CVector3(0,0,0));
 
 
+int CDemoPdr::getIntId()
+{
+   std::regex regular_exp("[0-9].*");
+   std::smatch sm;
+   regex_search(GetId(), sm, regular_exp);
+   return stoi(sm[0]);
+}
+
 void CDemoPdr::connectToServer()
 {
    sock = 0;
@@ -84,7 +92,7 @@ void CDemoPdr::connectToServer()
    std::regex regular_exp("[0-9].*");
    std::smatch sm;
    regex_search(GetId(), sm, regular_exp);
-   serv_addr.sin_port = htons(DEFAULT_PORT + stoi(sm[0]));
+   serv_addr.sin_port = htons(DEFAULT_PORT + getIntId());
    
 
    // Convert IPv4 and IPv6 addresses from text to binary form 
@@ -255,7 +263,6 @@ void CDemoPdr::ControlStep()
    
    valRead = recv(sock , buffer, sizeof(buffer), 0);
    if (valRead != -1){
-      LOG << "RECEIVED FROM " << GetId() << std::endl;
       stateMode = *reinterpret_cast<const StateMode*>(buffer);
    }
 
@@ -266,18 +273,7 @@ void CDemoPdr::ControlStep()
    leftDist = (iterDistRead++)->second;
    backDist = (iterDistRead++)->second;
 
-   /* ---------------------------
-      ---- P2P COMMUNICATION ----
-   /* ---------------------------
-   /*struct Packet packet;
-   packet.test = 1.5;
-   CByteArray cBuf(10);
-   memcpy(&cBuf[0], &packet, sizeof(packet));
-   if (GetId() == "s0")
-   {
-      LOG << "Send Packet (from: " << GetId() << "): " << packet.test << std::endl;
-      m_pcRABAct->SetData(cBuf);
-   }*/
+   sendPacketToOtherRobots();
 
    if (stateMode == kStandby)
    {
@@ -344,6 +340,35 @@ void CDemoPdr::ControlStep()
      
    }
    m_uiCurrentStep++;
+}
+
+
+
+void CDemoPdr::checkIfPacketIsComing()
+{
+   const CCI_RangeAndBearingSensor::TReadings& tMsgs = m_pcRABSens->GetReadings();
+   if (! tMsgs.empty() && GetId() == "s1") {
+      LOG << "RANGE " << tMsgs[0].Range << std::endl;
+      //PacketP2P packetReceived = *reinterpret_cast<const PacketP2P*>(tMsgs[0].Data.ToCArray());
+      //if (packetReceived.test != 0)
+      //{
+      //   LOG << "Packet Received (from:" << GetId() << " ): " << packetReceived.test << std::endl;
+      //}
+   }
+}
+
+void CDemoPdr::sendPacketToOtherRobots()
+{
+   /* ---------------------------
+      ---- P2P COMMUNICATION ----
+      --------------------------- */
+   struct PacketP2P packet;
+   packet.id = getIntId();
+   packet.currentAltitude = cPos.GetZ();
+   packet.iAmLocked = iAmLocked;
+   CByteArray cBuf(10);
+   //LOG << "Send Packet (from: " << GetId() << "): " << packet.test << std::endl;
+   m_pcRABAct->SetData(cBuf);
 }
 
 

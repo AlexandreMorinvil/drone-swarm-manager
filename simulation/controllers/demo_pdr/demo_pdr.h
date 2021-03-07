@@ -99,6 +99,12 @@ public:
 
   void connectToServer();
 
+  void checkIfPacketIsComing();
+
+  void sendPacketToOtherRobots();
+
+  int getIntId();
+
 private:
 
    CCI_CrazyflieDistanceScannerSensor* m_pcDistance;
@@ -181,9 +187,13 @@ struct PacketDistance {
   CVector3 cPos;
 
   float leftDist, backDist, frontDist, rightDist;
-  struct Packet
+  bool iAmLocked;
+  
+  struct PacketP2P
   {
-    float test;
+    uint8_t id;
+    float currentAltitude;
+    bool iAmLocked;
   };
 
 };
