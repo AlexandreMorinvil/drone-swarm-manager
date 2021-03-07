@@ -148,6 +148,7 @@ struct PacketTX {
   bool isLedActivated;
   float vbat;
   uint8_t rssiToBase;
+  StateMode stateMode;
 } __attribute__((packed));
 
 struct PacketVelocity {

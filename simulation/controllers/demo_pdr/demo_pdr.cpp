@@ -148,6 +148,7 @@ void CDemoPdr::sendTelemetry()
    packetTx.packetType = tx;
    packetTx.isLedActivated = true;
    packetTx.vbat = sBatRead.AvailableCharge;
+   packetTx.stateMode = stateMode;
    packetTx.rssiToBase = 0;
    send(sock, &packetTx, sizeof(packetTx), 0 );
 }
@@ -240,6 +241,11 @@ void CDemoPdr::ControlStep()
       connectToServer();
    }
 
+   if (m_pcBattery->GetReading().AvailableCharge < 0.3 && stateMode == kTakeOff)
+   {
+      stateMode = kReturnToBase;
+   }
+
 
    currentAngle = *(new CRadians(0.1f));
    CRadians *useless = new CRadians(0.1f);
@@ -249,6 +255,7 @@ void CDemoPdr::ControlStep()
 
    sendTelemetry();
 
+   LOG << cPos.GetX() << std::endl;
    
    valRead = recv(sock , buffer, sizeof(buffer), 0);
    if (valRead != -1){
