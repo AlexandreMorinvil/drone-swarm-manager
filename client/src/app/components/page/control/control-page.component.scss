@@ -1,25 +1,27 @@
-@import '@angular/material/prebuilt-themes/deeppurple-amber.css';
+@import "@angular/material/prebuilt-themes/deeppurple-amber.css";
 
 .page-layout {
   display: grid;
-  grid-template-columns: 1.5fr 7.5fr;
-  grid-template-areas:
-    "drone-list map";
+  grid-template-columns: 350px 7.5fr;
+  grid-template-areas: "drone-list map";
   height: 100%;
 }
 
-.drone-list{
+.drone-list {
   grid-area: "drone-list";
-  background-color: "secondary";
+  background-color: lightgrey;
+  border-right: #bdbdbd solid 1px;
 }
+
 .map-area {
   grid-area: "map";
-  background-color: rgb(220, 205, 245);
-
+  display: grid;
+  grid-template-rows: 100px 1fr;
+  background-color: rgb(238, 233, 247);
 }
 
 .drone-selected-board {
   background-color: rgb(79, 53, 109);
-  color:snow;
-  width: 20%;
+  color: snow;
+  width: 250px;
 }

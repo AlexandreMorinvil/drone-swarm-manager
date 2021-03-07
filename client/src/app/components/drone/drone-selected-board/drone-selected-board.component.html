@@ -1,27 +1,27 @@
 <div class="drone-board">
-    <h1>Info :</h1>
-    <p>Battery Level : {{getBatteryLevel()}}</p>
-    <mat-divider></mat-divider>
-    <h1>Action :</h1>
-    <div class="led_button">
-        <button mat-button (click)="toggleLed()">Toggle Led</button>
-    </div>
-    <div class="refresh">
-        <button mat-button (click)="refresh()"> Refresh</button>
-    </div>
-    <mat-divider></mat-divider>
-    <h1>Fly :</h1>
-    <div class="take-off">
-        <button mat-button (click)="takeOff()">
-            <mat-icon>flight_takeoff</mat-icon>
-            Take Off</button>
-    </div>
-    <div class="return-to-base">
-        <button mat-button (click)="returnToBase()">
-            <mat-icon>flight_land</mat-icon>
-            Return to base
-        </button>
-    </div>
+  <h1>Info :</h1>
+  <p>Battery Level : {{ drone.getBatteryLevel() }}</p>
 
+  <mat-divider></mat-divider>
+
+  <h1>Action :</h1>
+  <div class="led_button">
+    <button mat-button (click)="sendToggleLedRequest()">Led</button>
+  </div>
+
+  <mat-divider></mat-divider>
+  <h1>Control :</h1>
+  <div class="take-off">
+    <button mat-button (click)="sendTakeOffRequest()">
+      <mat-icon>flight_takeoff</mat-icon>
+      Take Off
+    </button>
+  </div>
+  
+  <div class="return-to-base">
+    <button mat-button (click)="sendReturnToBaseRequest()">
+      <mat-icon>flight_land</mat-icon>
+      Return to base
+    </button>
+  </div>
 </div>
-
