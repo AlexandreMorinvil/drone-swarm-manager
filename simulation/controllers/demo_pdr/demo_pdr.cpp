@@ -1,3 +1,10 @@
+#include <stdio.h> 
+#include <sys/socket.h> 
+#include <arpa/inet.h> 
+#include <unistd.h> 
+#include <string.h>
+#include <fcntl.h>
+
 /* Include the controller definition */
 #include "demo_pdr.h"
 /* Function definitions for XML parsing */
@@ -7,13 +14,143 @@
 /* Logging */
 #include <argos3/core/utility/logging/argos_log.h>
 
+#define PORT1 8001
+#define PORT2 8002
 #define CRITICAL_VALUE 40.0f
+
+typedef enum {
+   tx,
+   position,
+   attitude,
+   velocity,
+   distance
+} PacketType;
+
+struct packetRX {
+  bool led_activation;
+} __attribute__((packed));
+
+struct PacketPosition {
+  PacketType packetType;
+  float x;
+  float y;
+  float z;
+} __attribute__((packed));
+
+struct PacketTX {
+  PacketType packetType;
+  bool isLedActivated;
+  float vbat;
+  uint8_t rssiToBase;
+} __attribute__((packed));
+
+struct PacketVelocity {
+  PacketType packetType;
+  float px;
+  float py;
+  float pz;
+} __attribute__((packed));
+
+struct PacketDistance {
+  PacketType packetType;
+  uint16_t front;
+  uint16_t back;
+  uint16_t up;
+  uint16_t left;
+  uint16_t right;
+  uint16_t zrange;
+} __attribute__((packed));
+
+
+
 /****************************************/
 /****************************************/
 
 CVector3 objective = *(new CVector3(0,0,0));
-bool returnToBase = false;
-bool hasArrived = false;
+
+
+void CDemoPdr::connectToServer()
+{
+   sock = 0;
+   isConnected = true;
+
+   if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) 
+   { 
+      printf("\n Socket creation error \n"); 
+      return; 
+   }
+   
+   serv_addr.sin_family = AF_INET;
+   LOG << GetId() << std::endl;
+   if (GetId() == "s0") {
+      serv_addr.sin_port = htons(PORT1);
+      LOG << serv_addr.sin_port << std::endl;
+   }
+   else if (GetId() == "s1") {
+      serv_addr.sin_port = htons(PORT2);
+      LOG << serv_addr.sin_port << std::endl;
+   }
+   
+
+   // Convert IPv4 and IPv6 addresses from text to binary form 
+   if(inet_pton(AF_INET, "127.0.0.1", &serv_addr.sin_addr)<=0)  
+   { 
+      printf("\nInvalid address/ Address not supported \n"); 
+      return; 
+   }
+
+   // Unblock socket connect
+   int flags = fcntl(sock, F_GETFL);
+   fcntl(sock, F_SETFL, flags | O_NONBLOCK);
+   
+   if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) 
+   { 
+      printf("\nConnection Failed \n"); 
+      return; 
+   }
+
+   
+
+}
+
+void CDemoPdr::sendTelemetry()
+{
+   // Unblock socket
+   int flags = fcntl(sock, F_GETFL);
+   fcntl(sock, F_SETFL, flags | O_NONBLOCK);
+
+   struct PacketPosition packetPosition;
+   packetPosition.x = cPos.GetX();
+   packetPosition.y = cPos.GetY();
+   packetPosition.z = cPos.GetZ();
+   packetPosition.packetType = position;
+   send(sock, &packetPosition, sizeof(packetPosition), 0 );
+
+   struct PacketVelocity packetVelocity;
+   packetVelocity.packetType = velocity;
+   packetVelocity.px = 0;
+   packetVelocity.py = 0;
+   packetVelocity.pz = 0;
+   send(sock, &packetVelocity, sizeof(packetVelocity), 0 );
+
+   struct PacketDistance packetDistance;
+   packetDistance.packetType = distance;
+   packetDistance.front = 0;
+   packetDistance.left = 0;
+   packetDistance.right = 0;
+   packetDistance.up = 0;
+   packetDistance.back = 0;
+   packetDistance.zrange = 0;
+   send(sock, &packetDistance, sizeof(packetDistance), 0 );
+
+   const CCI_BatterySensor::SReading& sBatRead = m_pcBattery->GetReading();
+   struct PacketTX packetTx;
+   packetTx.packetType = tx;
+   packetTx.isLedActivated = true;
+   packetTx.vbat = sBatRead.AvailableCharge;
+   packetTx.rssiToBase = 0;
+   send(sock, &packetTx, sizeof(packetTx), 0 );
+}
 
 float CDemoPdr::computeAngleToFollow()
 {
@@ -21,7 +158,7 @@ float CDemoPdr::computeAngleToFollow()
    float ydiff = objective.GetY() - cPos.GetY();
    if (std::abs(xdiff) < 1 && std::abs(ydiff) < 1)
    {
-      hasArrived = true;
+      stateMode = kLanding;
       count = 100;
    }
    float length = sqrt(pow(xdiff, 2) + pow(ydiff, 2));
@@ -33,14 +170,11 @@ float CDemoPdr::computeAngleToFollow()
 }
 
 
-CRadians* decideTurn(float left, float right)
-{
-   return new CRadians(CRadians::PI_OVER_FOUR);
-}
 CDemoPdr::CDemoPdr() : m_pcDistance(NULL),
                        m_pcPropellers(NULL),
                        m_pcPos(NULL),
                        m_uiCurrentStep(0) {}
+
 
 /****************************************/
 /****************************************/
@@ -73,6 +207,7 @@ void CDemoPdr::Init(TConfigurationNode &t_node)
    m_pcPropellers = GetActuator<CCI_QuadRotorPositionActuator>("quadrotor_position");
    try
    {
+      m_pcBattery = GetSensor<CCI_BatterySensor>("battery");
       m_pcPos = GetSensor<CCI_PositioningSensor>("positioning");
    }
    catch (CARGoSException &ex)
@@ -83,17 +218,16 @@ void CDemoPdr::Init(TConfigurationNode &t_node)
     */
    /* Create a random number generator. We use the 'argos' category so
       that creation, reset, seeding and cleanup are managed by ARGoS. */
-
    m_pcRNG = CRandom::CreateRNG("argos");
 
    count = 0;
+
    m_uiCurrentStep = 0;
    Reset();
-   lockAngle = *(new CRadians(0.1f));
-   CRadians *useless = new CRadians(0.1f);
-   m_pcPos->GetReading().Orientation.ToEulerAngles(lockAngle, *useless, *useless);
-   LOG << "LOCKANGLE : " << lockAngle << std::endl;
+   
    objective = m_pcPos->GetReading().Position;
+
+   stateMode = kStandby;
 }
 
 /****************************************/
@@ -101,36 +235,50 @@ void CDemoPdr::Init(TConfigurationNode &t_node)
 
 void CDemoPdr::ControlStep()
 {
+   if (!isConnected)
+   {
+      connectToServer();
+   }
+
+
+   currentAngle = *(new CRadians(0.1f));
+   CRadians *useless = new CRadians(0.1f);
+   m_pcPos->GetReading().Orientation.ToEulerAngles(currentAngle, *useless, *useless);
+
    cPos = m_pcPos->GetReading().Position;
-   //Real angle = m_pcPos->GetReading().Orientation.GetZ();
+
+   sendTelemetry();
+
+   
+   valRead = recv(sock , buffer, sizeof(buffer), 0);
+   if (valRead != -1){
+      LOG << "RECEIVED FROM " << GetId() << std::endl;
+      stateMode = *reinterpret_cast<const StateMode*>(buffer);
+   }
+
    CCI_CrazyflieDistanceScannerSensor::TReadingsMap sDistRead = m_pcDistance->GetReadingsMap();
    auto iterDistRead = sDistRead.begin();
    rightDist = (iterDistRead++)->second;
    frontDist = (iterDistRead++)->second;
    leftDist = (iterDistRead++)->second;
    backDist = (iterDistRead++)->second;
-   if (sDistRead.size() == 4)
-   {
-      LOG << "Front dist: " << frontDist << std::endl;
-      LOG << "Left dist: " << leftDist << std::endl;
-      LOG << "Back dist: " << backDist << std::endl;
-      LOG << "Right dist: " << rightDist << std::endl;
-   }
-   //LOG << m_pcPos->GetReading().Orientation << std::endl;
 
-   struct Packet packet;
-      packet.test = 1.5;
-      CByteArray cBuf(10);
-      memcpy(&cBuf[0], &packet, sizeof(packet));
-      if (GetId() == "s0")
-      {
-         LOG << "Send Packet (from: " << GetId() << "): " << packet.test << std::endl;
-         m_pcRABAct->SetData(cBuf);
-      }
-
-   if (m_uiCurrentStep > 1000)
+   /* ---------------------------
+      ---- P2P COMMUNICATION ----
+   /* ---------------------------
+   /*struct Packet packet;
+   packet.test = 1.5;
+   CByteArray cBuf(10);
+   memcpy(&cBuf[0], &packet, sizeof(packet));
+   if (GetId() == "s0")
    {
-      returnToBase = true;
+      LOG << "Send Packet (from: " << GetId() << "): " << packet.test << std::endl;
+      m_pcRABAct->SetData(cBuf);
+   }*/
+
+   if (stateMode == kStandby)
+   {
+      return;
    }
 
    count--;
@@ -139,23 +287,17 @@ void CDemoPdr::ControlStep()
       cPos.SetZ(cPos.GetZ() + 0.25f);
       m_pcPropellers->SetAbsolutePosition(cPos);
    }
-   else if (!hasArrived)
+   else if (stateMode == kTakeOff || stateMode == kReturnToBase)
    {
-      lockAngle = *(new CRadians(0.1f));
-      CRadians *useless = new CRadians(0.1f);
-      m_pcPos->GetReading().Orientation.ToEulerAngles(lockAngle, *useless, *useless);
-      
-            
       switch (CriticalProximity()) {
         case SensorSide::kDefault:
             LOG << "kDefault" << std::endl;
-            turnAngle = nullptr;
             newCVector = new CVector3(
-               (cos(lockAngle.GetValue()) * 0.4 + cPos.GetX()) * 1,
-               (sin(lockAngle.GetValue()) * 0.4 + cPos.GetY()) * 1,
+               (cos(currentAngle.GetValue()) * 0.4 + cPos.GetX()) * 1,
+               (sin(currentAngle.GetValue()) * 0.4 + cPos.GetY()) * 1,
                cPos.GetZ());
             m_pcPropellers->SetAbsolutePosition(*newCVector);
-            if (returnToBase) {
+            if (stateMode == kReturnToBase) {
                m_pcPropellers->SetAbsoluteYaw(*(new CRadians(computeAngleToFollow())));
             }
          break;
@@ -163,35 +305,33 @@ void CDemoPdr::ControlStep()
         case SensorSide::kRight:
             LOG << "kRight" << std::endl;
             newCVector = new CVector3(
-               (cos(lockAngle.GetValue() - 1.56) * -0.5 + cPos.GetX()) * 1,
-               (sin(lockAngle.GetValue() - 1.56) * -0.5 + cPos.GetY()) * 1,
+               (cos(currentAngle.GetValue() - 1.56) * -0.5 + cPos.GetX()) * 1,
+               (sin(currentAngle.GetValue() - 1.56) * -0.5 + cPos.GetY()) * 1,
                cPos.GetZ());
             m_pcPropellers->SetAbsolutePosition(*newCVector);
             break;
         case SensorSide::kLeft:
             LOG << "kLeft" << std::endl;
             newCVector = new CVector3(
-               (cos(lockAngle.GetValue() - 1.56) * 0.5 + cPos.GetX()) * 1,
-               (sin(lockAngle.GetValue() - 1.56) * 0.5 + cPos.GetY()) * 1,
+               (cos(currentAngle.GetValue() - 1.56) * 0.5 + cPos.GetX()) * 1,
+               (sin(currentAngle.GetValue() - 1.56) * 0.5 + cPos.GetY()) * 1,
                cPos.GetZ());
             m_pcPropellers->SetAbsolutePosition(*newCVector);
             break;
         case SensorSide::kBack:
             LOG << "kBack" << std::endl;
             newCVector = new CVector3(
-               (cos(lockAngle.GetValue() + 0.8) * 0.5 + cPos.GetX()) * 1,
-               (sin(lockAngle.GetValue() + 0.8) * 0.5 + cPos.GetY()) * 1,
+               (cos(currentAngle.GetValue() + 0.8) * 0.5 + cPos.GetX()) * 1,
+               (sin(currentAngle.GetValue() + 0.8) * 0.5 + cPos.GetY()) * 1,
                cPos.GetZ());
             m_pcPropellers->SetAbsolutePosition(*newCVector);
             break;
         case SensorSide::kFront:
-            LOG << "lockAngle : " << lockAngle << std::endl;
             m_pcPropellers->SetRelativeYaw(CRadians::PI_OVER_FOUR/3);
-	         //count = 40;
             break;
       }
    }
-   else if (hasArrived && count <= 0)
+   else if (stateMode == kLanding && count <= 0)
    {
       if (cPos.GetZ() > 0.2)
       {
@@ -200,8 +340,6 @@ void CDemoPdr::ControlStep()
       }
      
    }
-
-   checkIfPacketIsComing();
    m_uiCurrentStep++;
 }
 
@@ -210,26 +348,12 @@ void CDemoPdr::ControlStep()
 /****************************************/
 /****************************************/
 
-void CDemoPdr::Reset()
-{
+void CDemoPdr::Reset() {
    m_uiCurrentStep = 0;
-}
+ }
 
 /****************************************/
 /****************************************/
-
-void CDemoPdr::checkIfPacketIsComing()
-{
-   const CCI_RangeAndBearingSensor::TReadings& tMsgs = m_pcRABSens->GetReadings();
-   if (! tMsgs.empty() && GetId() == "s1") {
-     Packet packetReceived = *reinterpret_cast<const Packet*>(tMsgs[0].Data.ToCArray());
-     if (packetReceived.test != 0)
-     {
-        LOG << "Packet Received (from:" << GetId() << " ): " << packetReceived.test << std::endl;
-     }
-   }
-}
-
 
 /*
  * This statement notifies ARGoS of the existence of the controller.

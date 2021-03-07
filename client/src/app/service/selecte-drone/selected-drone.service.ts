@@ -17,11 +17,11 @@ export class SelectedDroneService {
   }
 
   sendTakeOffRequest(): void {
-    this.validateDroneAvailability(this.droneControlService.sendToogleLedRequest);
+    this.validateDroneAvailability(this.droneControlService.sendTakeOffRequest);
   }
 
   sendReturnToBaseRequest(): void {
-    this.validateDroneAvailability(this.droneControlService.sendToogleLedRequest);
+    this.validateDroneAvailability(this.droneControlService.sendReturnToBaseRequest);
   }
 
   validateDroneAvailability(callback: (droneId: number) => void): boolean {
