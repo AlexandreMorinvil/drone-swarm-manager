@@ -4,6 +4,7 @@
 #include <unistd.h> 
 #include <string.h>
 #include <fcntl.h>
+#include <regex>
 
 /* Include the controller definition */
 #include "demo_pdr.h"
@@ -14,8 +15,7 @@
 /* Logging */
 #include <argos3/core/utility/logging/argos_log.h>
 
-#define PORT1 8001
-#define PORT2 8002
+#define DEFAULT_PORT 8000
 #define CRITICAL_VALUE 40.0f
 
 typedef enum {
@@ -79,17 +79,12 @@ void CDemoPdr::connectToServer()
       printf("\n Socket creation error \n"); 
       return; 
    }
-   
    serv_addr.sin_family = AF_INET;
-   LOG << GetId() << std::endl;
-   if (GetId() == "s0") {
-      serv_addr.sin_port = htons(PORT1);
-      LOG << serv_addr.sin_port << std::endl;
-   }
-   else if (GetId() == "s1") {
-      serv_addr.sin_port = htons(PORT2);
-      LOG << serv_addr.sin_port << std::endl;
-   }
+
+   std::regex regular_exp("[0-9].*");
+   std::smatch sm;
+   regex_search(GetId(), sm, regular_exp);
+   serv_addr.sin_port = htons(DEFAULT_PORT + stoi(sm[0]));
    
 
    // Convert IPv4 and IPv6 addresses from text to binary form 
@@ -103,13 +98,14 @@ void CDemoPdr::connectToServer()
    int flags = fcntl(sock, F_GETFL);
    fcntl(sock, F_SETFL, flags | O_NONBLOCK);
    
-   if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) 
+   int test =  connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
+   if (test < 0) 
    { 
-      printf("\nConnection Failed \n"); 
+      LOG << "test " << test << std::endl;
+      printf("\nConnection Failed \n");
       return; 
    }
-
-   
+      
 
 }
 
@@ -148,6 +144,7 @@ void CDemoPdr::sendTelemetry()
    packetTx.packetType = tx;
    packetTx.isLedActivated = true;
    packetTx.vbat = sBatRead.AvailableCharge;
+   packetTx.stateMode = stateMode;
    packetTx.rssiToBase = 0;
    send(sock, &packetTx, sizeof(packetTx), 0 );
 }
@@ -240,6 +237,11 @@ void CDemoPdr::ControlStep()
       connectToServer();
    }
 
+   if (m_pcBattery->GetReading().AvailableCharge < 0.3 && stateMode == kTakeOff)
+   {
+      stateMode = kReturnToBase;
+   }
+
 
    currentAngle = *(new CRadians(0.1f));
    CRadians *useless = new CRadians(0.1f);
@@ -249,6 +251,7 @@ void CDemoPdr::ControlStep()
 
    sendTelemetry();
 
+   LOG << cPos.GetX() << std::endl;
    
    valRead = recv(sock , buffer, sizeof(buffer), 0);
    if (valRead != -1){

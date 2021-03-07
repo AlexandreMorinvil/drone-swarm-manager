@@ -4,12 +4,12 @@ export const UNSET_DRONE_INDEX: number = -1;
 export const ALL_DRONE_INDEX: number = -2;
 
 enum DroneState {
-  READY = 0,
-  UPDATE = 1,
-  IN_MISSION = 2,
-  RETURN_TO_BASE = 3,
-  LANDING = 4,
-  FAIL = 5,
+  STANDBY = 0,
+  TAKE_OFF = 1,
+  RETURN_TO_BASE = 2,
+  LANDING = 3,
+  FAIL = 4,
+  UPDATE = 5,
 }
 
 export class Drone {
@@ -22,7 +22,7 @@ export class Drone {
 
   constructor(
     droneId: number = UNSET_DRONE_INDEX,
-    state: number = DroneState.READY,
+    state: number = DroneState.STANDBY,
     batteryLevel: number = 0.0,
     isConnected: Boolean = false,
     currentPosition: Vec3 = new Vec3(),
@@ -49,16 +49,16 @@ export class Drone {
   }
 
   getBatteryLevel(): number {
-    return this.batteryLevel;
+    return this.batteryLevel * 100;
   }
 
   getDroneStateText(): string {
     switch (this.state) {
-      case DroneState.READY:
-        return "READY";
+      case DroneState.STANDBY:
+        return "STANDBY";
       case DroneState.UPDATE:
         return "UPDATE";
-      case DroneState.IN_MISSION:
+      case DroneState.TAKE_OFF:
         return "IN MISSION";
       case DroneState.RETURN_TO_BASE:
         return "RETURN TO BASE";
