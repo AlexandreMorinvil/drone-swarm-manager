@@ -21,6 +21,8 @@ class Mode(Enum):
 app = Flask(__name__)
 socketio = SocketIO(app ,cors_allowed_origins='*')
 
+default_port = 8000
+
 # Select mode
 mode = Mode.SIMULATION
 
@@ -30,18 +32,22 @@ cflib.crtp.init_drivers(enable_debug_driver=False)
 print('Scanning interfaces for Crazyflies...')
 available = cflib.crtp.scan_interfaces()
 print('Crazyflies found:')
-drones = [Drone("radio://0/80/250K",Vec3(0,0,0),0), Drone("radio://0/72/250K",Vec3(0,0,0),1)]
-socks = [ArgosServer(0, 8001), ArgosServer(1, 8002)]
-t1 = threading.Thread(target=socks[0].waiting_connection, name='waiting_connection')
-t2 = threading.Thread(target=socks[1].waiting_connection, name='waiting_connection')
-t1.start()
-t2.start()
 
+if (mode == Mode.REAL_TIME):
+    drones = [Drone("radio://0/80/250K",Vec3(0,0,0),0), Drone("radio://0/72/250K",Vec3(0,0,0),1)]
+else:
+    drones = []
 
+socks = []
+for i in range(4):
+    socks.append(ArgosServer(i, default_port + i))
+    t = threading.Thread(target=socks[i].waiting_connection, name='waiting_connection')
+    t.start()
 
-if mode == Mode.SIMULATION:
-    drones[0] = socks[0].drone_argos
-    drones[1] = socks[1].drone_argos
+    ## NEEDS REFACTOR
+    if mode == Mode.SIMULATION:
+        drones.append(socks[i].drone_argos)
+
 
 def setMode(mode_choosen):
     mode = mode_choosen
@@ -55,11 +61,19 @@ def ledToggler(data):
 
 @socketio.on('TAKEOFF')
 def takeOff(data):
-    socks[data['id']].send_data(StateMode.TAKE_OFF.value, "<i")
+    if (data['id'] == -2):
+        for i in range(4):
+            socks[i].send_data(StateMode.TAKE_OFF.value, "<i")
+    else:
+        socks[data['id']].send_data(StateMode.TAKE_OFF.value, "<i")
     
 @socketio.on('RETURN_BASE')
 def returnToBase(data):
-    socks[data['id']].send_data(StateMode.RETURN_TO_BASE.value, "<i")
+    if (data['id'] == -2):
+        for i in range(4):
+            socks[i].send_data(StateMode.RETURN_TO_BASE.value, "<i")
+    else:
+        socks[data['id']].send_data(StateMode.RETURN_TO_BASE.value, "<i")
 
 def sendPosition():
     position_json = json.dumps({"x": socks[0].drone_argos.currentPos.x, "y": socks[0].drone_argos.currentPos.y, "z": socks[0].drone_argos.currentPos.z})
@@ -88,10 +102,11 @@ def set_interval(func, sec):
     return t
 
 if __name__ == '__main__':
-    t1 = threading.Thread(target=socks[0].receive_data, name='receive_data')
 
-    if (socks[0].data_received != None):
-        t1.start()
+    for i in range(4):
+        t = threading.Thread(target=socks[i].receive_data, name='receive_data')
+        if (socks[i].data_received != None):
+            t.start()
     
     #t2 = threading.Thread(target=socks[1].receive_data, name='receive_data')
     #t2.start()
