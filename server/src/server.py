@@ -1,7 +1,7 @@
 import socketio
 import json
 from vec3 import Vec3
-from drone import Drone
+from drone import *
 import threading
 
 from flask import Flask, jsonify, render_template
@@ -17,12 +17,6 @@ class Mode(Enum):
     REAL_TIME = 0
     SIMULATION = 1
 
-class StateMode(Enum):
-    STANDBY = 0
-    TAKE_OFF = 1
-    RETURN_TO_BASE = 2
-    LANDING = 3
-
 
 app = Flask(__name__)
 socketio = SocketIO(app ,cors_allowed_origins='*')
@@ -36,7 +30,7 @@ cflib.crtp.init_drivers(enable_debug_driver=False)
 print('Scanning interfaces for Crazyflies...')
 available = cflib.crtp.scan_interfaces()
 print('Crazyflies found:')
-drones = [Drone("radio://0/80/250K",Vec3(0,0,0),3), Drone("radio://0/72/250K",Vec3(0,0,0),1)]
+drones = [Drone("radio://0/80/250K",Vec3(0,0,0),0), Drone("radio://0/72/250K",Vec3(0,0,0),1)]
 socks = [ArgosServer(0, 8001), ArgosServer(1, 8002)]
 t1 = threading.Thread(target=socks[0].waiting_connection, name='waiting_connection')
 t2 = threading.Thread(target=socks[1].waiting_connection, name='waiting_connection')
@@ -94,8 +88,11 @@ def set_interval(func, sec):
     return t
 
 if __name__ == '__main__':
-    #t1 = threading.Thread(target=socks[0].receive_data, name='receive_data')
-    #t1.start()
+    t1 = threading.Thread(target=socks[0].receive_data, name='receive_data')
+
+    if (socks[0].data_received != None):
+        t1.start()
+    
     #t2 = threading.Thread(target=socks[1].receive_data, name='receive_data')
     #t2.start()
     set_interval(sendPosition, 1)

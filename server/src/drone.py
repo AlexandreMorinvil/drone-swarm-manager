@@ -19,13 +19,13 @@ class PacketType(Enum):
     VELOCITY = 2
     DISTANCE = 3
 
-class DroneState(Enum):
-    READY = 0
-    UPDATE = 1
-    IN_MISSION = 2
-    RETURN_TO_BASE = 3
-    LANDING = 4
-    FAIL = 5
+class StateMode(Enum):
+    STANDBY = 0
+    TAKE_OFF = 1
+    RETURN_TO_BASE = 2
+    LANDING = 3
+    FAIL = 4
+    UPDATE = 5
 
 class Drone :
     sensors = Sensor(0,0,0,0,0,0,0,0,0)
@@ -46,7 +46,7 @@ class Drone :
 
         self._cf.open_link(link_uri)
         self._isConnected = False
-        self._state = DroneState.READY.value
+        self._state = StateMode.STANDBY.value
         self._vbat = 10
         self._id = id
         self._speed = 0.0        

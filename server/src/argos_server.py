@@ -37,6 +37,7 @@ class ArgosServer() :
 
         # show who connected to us
         print ('connection from', self.client_address)
+        self.receive_data()
 
     def send_data(self, packet, format_packer):
         data = struct.pack(format_packer, packet)
@@ -52,11 +53,12 @@ class ArgosServer() :
             self.data_received += bytearray(16 - len(self.data_received)) 
 
             if PacketType(self.data_received[0]) == PacketType.TX:
-                (a, b, packet_type, is_led_activated, vbattery, rssi) = struct.unpack("<hffbfb", self.data_received)
+                (packet_type, is_led_activated, vbattery, rssi, stateMode, a) = struct.unpack("<ibfbih", self.data_received)
                 self.drone_argos._vbat = vbattery
+                self.drone_argos._state = stateMode
 
             elif PacketType(self.data_received[0]) == PacketType.POSITION:
-                (a, b, c, packet_type, x, y, z) = struct.unpack("<bbbbfff", self.data_received)
+                (packet_type, x, y, z) = struct.unpack("<ifff", self.data_received)
                 self.drone_argos.currentPos.x = x
                 self.drone_argos.currentPos.y = y
                 self.drone_argos.currentPos.z = z
