@@ -1,34 +1,26 @@
-import { Component, OnInit } from "@angular/core";
-
-import {SocketService} from "@app/service/socket.service";
-import { DroneListComponent } from "../drone-list/drone-list.component";
-
+import { Component } from "@angular/core";
+import { Drone } from "@app/class/drone";
+import { SelectedDroneService } from "@app/service/selecte-drone/selected-drone.service";
 @Component({
   selector: "app-drone-selected-board",
   templateUrl: "./drone-selected-board.component.html",
   styleUrls: ["./drone-selected-board.component.scss"],
 })
-export class DroneSelectedBoardComponent implements OnInit{
-  constructor(private socketService: SocketService){}
+export class DroneSelectedBoardComponent {
+  constructor(public selectedDroneService: SelectedDroneService) {}
 
-  ngOnInit():void{
-    this.socketService.initSocket();
-   
+  sendToggleLedRequest(): void {
+    this.selectedDroneService.sendToogleLedRequest();
   }
-  getBatteryLevel():Number {
-    console.log(this.socketService.getBatteryLevel());
-    return this.socketService.getBatteryLevel();
+
+  sendTakeOffRequest(): void {
+    this.selectedDroneService.sendTakeOffRequest();
   }
-  toggleLed():void {
-    this.socketService.toggle_led();
+  sendReturnToBaseRequest(): void {
+    this.selectedDroneService.sendReturnToBaseRequest();
   }
-  refresh():void {
-    this.socketService.refresh();
-  }
-  takeOff():void {
-    this.socketService.takeOff();
-  }
-  returnToBase():void {
-    this.socketService.returnToBase();
+
+  public get drone(): Drone {
+    return this.selectedDroneService.drone;
   }
 }

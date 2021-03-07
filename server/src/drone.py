@@ -7,7 +7,6 @@ from threading import Thread
 from enum import Enum
 from sensor import Sensor
 from vec3 import Vec3
-
 import struct
 import cflib
 from cflib.crazyflie import Crazyflie
@@ -20,12 +19,20 @@ class PacketType(Enum):
     VELOCITY = 2
     DISTANCE = 3
 
+class DroneState(Enum):
+    READY = 0
+    UPDATE = 1
+    IN_MISSION = 2
+    RETURN_TO_BASE = 3
+    LANDING = 4
+    FAIL = 5
+
 class Drone :
     sensors = Sensor(0,0,0,0,0,0,0,0,0)
     __startPos = Vec3(0,0,0)
     currentPos = Vec3(0,0,0)
     led = False
-    def __init__(self, link_uri, initialPos: Vec3):
+    def __init__(self, link_uri, id,initialPos: Vec3):
 
         self._cf = Crazyflie()
         self.__startPos = initialPos
@@ -38,7 +45,10 @@ class Drone :
 
         self._cf.open_link(link_uri)
         self._isConnected = False
-        self._vbat = 0.0
+        self._state = DroneState.READY.value
+        self._vbat = 10
+        self._id = id
+        self._speed = 0.0
         
 
         print('Connecting to %s' % link_uri)
@@ -89,10 +99,19 @@ class Drone :
 
     def getVBat(self):
         return self._vbat
-    def toJson(self) :
-        return {
-            'sensors'   : self.sensors.toJson(),
-            'currentPos': (self.__startPos + self.currentPos ).toJson(),
-            'batteryLvl': self._vbat,
-            'status'    : self._isConnected
-        }
+
+    def getSpeed(self):
+        return self._speed
+
+    def dump(self):
+        posAbs = self.__startPos + self.currentPos
+        return {'id': self._id,
+                'state': self._state,
+                'vbat': self._vbat,
+                'isConnected': self._isConnected,
+                'left':  (posAbs +self.sensors.getEdgeLeft()).toJson() ,
+                'front': (posAbs + self.sensors.getEdgeFront()).toJson(),
+                'right': (posAbs + self.sensors.getEdgeRight()).toJson(),
+                'currentPos': posAbs.toJson(),
+                'currentSpeed': self._speed,
+                }

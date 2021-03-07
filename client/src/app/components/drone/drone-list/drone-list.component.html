@@ -1,21 +1,29 @@
-<mat-card class="drone-List">
-    <mat-card-title>Drone List</mat-card-title>
-    <mat-card-content>
-        <mat-selection-list #droneId [multiple]="false" (selectionChange)="onDroneChange()">
-            <mat-list-option [value]=0 (click)="sidebar.board.toggle()">
-                <p>Drone 1</p>
-            </mat-list-option>
-            <mat-list-option [value]=1 (click)="sidebar.board.toggle()">
-                <p>Drone 2</p>
-            </mat-list-option>
-        </mat-selection-list>
-    </mat-card-content>
-    <mat-card-footer>
-        Option selected: Drone {{droneId.selectedOptions.selected[0]?.value + 1}}
-    </mat-card-footer>
-</mat-card>
+<div>
+  <mat-card class="title-card" [ngClass]="isConnected ? 'connected-title-card' : 'disconnected-title-card'">
+    <mat-card-title class="sidebar-title" disabled> {{ connectionStatus }}</mat-card-title>
+  </mat-card>
 
+  <mat-card
+    *ngFor="let drone of drones"
+    class="drone-card"
+    [class.disconnected-card]="!isConnected"
+    (click)="toogleSelectedDroneBoard(drone.droneId)"
+  >
+    <div class="drone-id-area">
+      <span><img src="assets/icon/drone-icon.svg" class="drone-icon" alt="*" /></span>
+      <span class="drone-id"> ID : {{ drone.droneId }} </span>
+    </div>
 
-    
+    <div class="drone-position-area">
+      <span> SPEED : {{ drone.getSpeed() }} </span>
+    </div>
 
-   
+    <div class="drone-state-area">
+      <span class="drone-state">{{ drone.getDroneStateText() }}</span>
+    </div>
+
+    <div class="drone-battery-area">
+      <progress max="100" [value]="drone.batteryLevel"></progress>
+    </div>
+  </mat-card>
+</div>

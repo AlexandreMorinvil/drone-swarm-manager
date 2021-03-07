@@ -7,5 +7,13 @@ import { MatSidenav } from "@angular/material/sidenav";
   styleUrls: ["./control-page.component.scss", "../page.component.scss"],
 })
 export class ControlPageComponent {
-  @ViewChild('board') board: MatSidenav;
+  @ViewChild("droneSelectedBoard") board: MatSidenav;
+
+  constructor() {}
+
+  toogleSelectedDroneBoard(isNewSelection: boolean = true): void {
+    if (!this.board) return;
+    if (isNewSelection) this.board.open();
+    else this.board.toggle();
+  }
 }
