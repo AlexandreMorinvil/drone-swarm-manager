@@ -121,8 +121,7 @@ void CDemoPdr::setPosVelocity() {
    if (m_uiCurrentStep % 10 == 9) {
       posFinal = cPos;
    }
-   LOG << "Initial Pos : " << posInitial << std::endl << "Final Pos : " << posFinal;
-
+   
 }
 
 
