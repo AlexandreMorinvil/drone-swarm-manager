@@ -106,12 +106,10 @@ void CDemoPdr::connectToServer()
    isConnected = true;
 
    
-   if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) 
+   if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) 
    { 
       printf("\nConnection Failed \n");
    }
-      
-
 }
 
 void CDemoPdr::setPosVelocity() {
