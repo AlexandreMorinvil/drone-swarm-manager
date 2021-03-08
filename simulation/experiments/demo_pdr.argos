@@ -61,32 +61,53 @@
       <body position="-5,0,0" orientation="0,0,0" />
     </box>
     <!-- walls insertion starts here -->
-    <box id= " wall0" size="0.500000,1.200000,2" movable="false">
-      <body position="0.502420, -2.604535, 0" orientation="0,0,0" />
+    <box id= " wall0" size="0.100000,1.200000,2" movable="false">
+      <body position="-3.142025, -1.781655, 0" orientation="0,0,0" />
     </box>
-    <box id= " wall1" size="0.500000,1.200000,2" movable="false">
-      <body position="1.949679, 1.633295, 0" orientation="0,0,0" />
+    <box id= " wall1" size="0.100000,1.200000,2" movable="false">
+      <body position="2.133357, -4.258173, 0" orientation="0,0,0" />
     </box>
-    <box id= " wall2" size="0.500000,2.200000,2" movable="false">
-      <body position="-1.928571, 2.439247, 0" orientation="0,0,0" />
+    <box id= " wall2" size="0.100000,2.200000,2" movable="false">
+      <body position="3.680079, -0.260628, 0" orientation="0,0,0" />
     </box>
-    <box id= " wall3" size="0.500000,1.200000,2" movable="false">
-      <body position="-3.473360, 1.600445, 0" orientation="0,0,0" />
+    <box id= " wall3" size="1.200000,0.100000,2" movable="false">
+      <body position="1.958831, 3.273869, 0" orientation="0,0,0" />
     </box>
-    <box id= " wall4" size="1.200000,0.500000,2" movable="false">
-      <body position="-3.885159, 3.062434, 0" orientation="0,0,0" />
+    <box id= " wall4" size="0.100000,2.200000,2" movable="false">
+      <body position="3.172402, -4.007054, 0" orientation="0,0,0" />
     </box>
-    <box id= " wall5" size="1.200000,0.500000,2" movable="false">
-      <body position="2.411120, 2.762640, 0" orientation="0,0,0" />
+    <box id= " wall5" size="0.100000,1.200000,2" movable="false">
+      <body position="-2.530214, -2.221045, 0" orientation="0,0,0" />
     </box>
-    <box id= " wall6" size="0.500000,2.200000,2" movable="false">
-      <body position="-0.890196, -1.769369, 0" orientation="0,0,0" />
+    <box id= " wall6" size="0.100000,1.200000,2" movable="false">
+      <body position="2.124558, 0.504246, 0" orientation="0,0,0" />
     </box>
-    <box id= " wall7" size="2.200000,0.500000,2" movable="false">
-      <body position="-3.752658, 4.161020, 0" orientation="0,0,0" />
+    <box id= " wall7" size="1.200000,0.100000,2" movable="false">
+      <body position="-4.001201, 3.395781, 0" orientation="0,0,0" />
     </box>
-    <box id= " wall8" size="1.200000,0.500000,2" movable="false">
-      <body position="3.822471, 1.116173, 0" orientation="0,0,0" />
+    <box id= " wall8" size="1.200000,0.100000,2" movable="false">
+      <body position="-2.446024, 3.556291, 0" orientation="0,0,0" />
+    </box>
+    <box id= " wall9" size="0.100000,1.200000,2" movable="false">
+      <body position="-3.341979, 2.715080, 0" orientation="0,0,0" />
+    </box>
+    <box id= " wall10" size="1.200000,0.100000,2" movable="false">
+      <body position="-0.897241, -2.400290, 0" orientation="0,0,0" />
+    </box>
+    <box id= " wall11" size="2.200000,0.100000,2" movable="false">
+      <body position="-3.382630, 2.487704, 0" orientation="0,0,0" />
+    </box>
+    <box id= " wall12" size="0.100000,1.200000,2" movable="false">
+      <body position="-0.845826, -1.888039, 0" orientation="0,0,0" />
+    </box>
+    <box id= " wall13" size="1.200000,0.100000,2" movable="false">
+      <body position="2.081417, -2.476664, 0" orientation="0,0,0" />
+    </box>
+    <box id= " wall14" size="1.200000,0.100000,2" movable="false">
+      <body position="0.112699, -4.583185, 0" orientation="0,0,0" />
+    </box>
+    <box id= " wall15" size="0.100000,1.200000,2" movable="false">
+      <body position="-3.663792, -1.487834, 0" orientation="0,0,0" />
     </box>
     <!-- walls insertion ends here -->
     <distribute>

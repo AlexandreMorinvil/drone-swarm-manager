@@ -7,10 +7,8 @@ using namespace std;
 
 void argosWall(string id, string position, vector<string>& lines) {
     // generate pseudo random numbers between kMin and kMax (wall size)
-    const float kMin = 0.1;
-    const float kMax = 1.1;
     float xSize = 1.2 + ((rand() %120) / 100);
-    float ySize = 0.5 + ((rand() %40) / 100);
+    float ySize = 0.1 + ((rand() %40) / 100);
     if (rand()%2 == 1 ) {
         xSize = xSize + ySize;
         ySize = xSize - ySize;
@@ -44,7 +42,7 @@ void readContentsFrom(string const& filename,string const& startLine, vector<str
     }
 }
 void updateContents(vector<string>& lines){
-    const int MAX_WALLS = 8;
+    const int MAX_WALLS = 10;
     const int MIN_WALLS = 7;
     unsigned nWall = rand() % (MAX_WALLS) + MIN_WALLS;
     for (unsigned i =0; i<nWall; ++i) {

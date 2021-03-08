@@ -93,6 +93,8 @@ public:
 
   SensorSide CriticalProximity();
 
+  SensorSide CriticalProximity2();
+
   float computeAngleToFollow();
 
   void sendTelemetry();
