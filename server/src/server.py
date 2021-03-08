@@ -106,7 +106,7 @@ if __name__ == '__main__':
     set_interval(send_data, 1)
     app.run()
 
-    #while True:
-    #    for i in range(4):
-    #        if (socks[i].data_received != None):
-    #            socks[i].start_receive_data()
+    while True:
+        for i in range(4):
+            if (socks[i].data_received != None):
+                socks[i].start_receive_data()

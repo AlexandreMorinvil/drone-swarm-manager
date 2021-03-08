@@ -18,8 +18,9 @@
 #include<argos3/plugins/simulator/entities/box_entity.h>
 
 
+
 #define DEFAULT_PORT 8000
-#define CRITICAL_VALUE 40.0f
+#define CRITICAL_VALUE 70.0f
 
 typedef enum {
    tx,
@@ -69,8 +70,14 @@ struct PacketDistance {
 /****************************************/
 /****************************************/
 
-CVector3 objective = *(new CVector3(0,0,0));
 
+int CDemoPdr::getIntId()
+{
+   std::regex regular_exp("[0-9].*");
+   std::smatch sm;
+   regex_search(GetId(), sm, regular_exp);
+   return stoi(sm[0]);
+}
 
 
 void CDemoPdr::connectToServer()
@@ -98,16 +105,33 @@ void CDemoPdr::connectToServer()
       return; 
    }
 
-   // Unblock socket connect
    int flags = fcntl(sock, F_GETFL);
    fcntl(sock, F_SETFL, flags | O_NONBLOCK);
+
+   isConnected = true;
+
    
-   int test =  connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
-   if (test < 0) 
+   if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) 
    { 
-      LOG << "test " << test << std::endl;
       printf("\nConnection Failed \n");
       return; 
+
+      /*int error = 0;
+      socklen_t len = sizeof (error);
+      int retval = getsockopt (sock, SOL_SOCKET, SO_ERROR, &error, &len);
+      fprintf(stderr, "error getting socket error code: %s\n", strerror(retval));
+      fprintf(stderr, "socket error: %s\n", strerror(error));
+      if (retval != 0) {
+         /* there was a problem getting the error code */
+         /*fprintf(stderr, "error getting socket error code: %s\n", strerror(retval));
+         return;
+      }
+
+      if (error != 0) {
+         /* socket has a non zero error status */
+         /*fprintf(stderr, "socket error: %s\n", strerror(error));
+      }
+      return; */
    }
       
 
@@ -180,6 +204,7 @@ float CDemoPdr::computeAngleToFollow()
       return asin(ydiff/length);
    }
    return acos(ydiff/length);
+
 }
 
 
@@ -192,6 +217,27 @@ CDemoPdr::CDemoPdr() : m_pcDistance(NULL),
 /****************************************/
 /****************************************/
 SensorSide CDemoPdr::CriticalProximity() {
+   float sensor[4]  = {leftDist, backDist, rightDist, frontDist};
+   float min   = CRITICAL_VALUE;
+   SensorSide minSensor = SensorSide::kDefault;
+
+   for (unsigned i = 0; i < 4; i++) {
+      if (min > sensor[i] && sensor[i] > 0.0) 
+      {
+         min = sensor[i];
+         minSensor = (SensorSide) i;
+      }
+   }
+
+   if (((frontDist < 130.0 && frontDist > 0) && minSensor == SensorSide::kDefault)
+        || (frontDist < min && frontDist > 0)){
+      minSensor = SensorSide::kFront;
+   } 
+
+   return minSensor;
+}
+
+SensorSide CDemoPdr::CriticalProximity2() {
    float sensor[3]  = {leftDist, backDist, rightDist};
    float min   = CRITICAL_VALUE;
    SensorSide minSensor = SensorSide::kDefault;
@@ -207,10 +253,33 @@ SensorSide CDemoPdr::CriticalProximity() {
    if (((frontDist < 90.0 && frontDist > 0) && minSensor == SensorSide::kDefault)
         || (frontDist < min && frontDist > 0)){
       minSensor = SensorSide::kFront;
-   }
+   } 
 
    return minSensor;
 }
+
+
+
+
+SensorSide CDemoPdr::FreeSide() {
+   float sensor[4]  = {leftDist, backDist, rightDist, frontDist};
+   SensorSide closeSens = CriticalProximity();
+   if (closeSens == SensorSide::kDefault) return closeSens;
+   SensorSide oppSens = (SensorSide) ((closeSens +2) % 4);
+   if (sensor[oppSens] == -2 || sensor[oppSens] > 2 * CRITICAL_VALUE ) return oppSens;
+   float max   = sensor[closeSens];
+   SensorSide maxSensor = SensorSide::kDefault;
+   for (unsigned i = 0; i < 4; i++) {
+      if (sensor[i] == -2 ) return (SensorSide) i;
+      if (max < sensor[i]) {
+         max = sensor[i];
+         maxSensor = (SensorSide) i;
+      }
+   }
+   return maxSensor;
+}
+
+
 
 void CDemoPdr::Init(TConfigurationNode &t_node)
 {
@@ -228,7 +297,6 @@ void CDemoPdr::Init(TConfigurationNode &t_node)
    catch (CARGoSException &ex)
    {
    }
-
 
    /*
     * Initialize other stuff
@@ -273,11 +341,9 @@ void CDemoPdr::ControlStep()
    setPosVelocity();
    sendTelemetry();
 
-   LOG << cPos.GetX() << std::endl;
    
    valRead = recv(sock , buffer, sizeof(buffer), 0);
    if (valRead != -1){
-      LOG << "RECEIVED FROM " << GetId() << std::endl;
       stateMode = *reinterpret_cast<const StateMode*>(buffer);
    }
 
@@ -301,6 +367,7 @@ void CDemoPdr::ControlStep()
       m_pcRABAct->SetData(cBuf);
    }*/
 
+
    if (stateMode == kStandby)
    {
       return;
@@ -312,10 +379,16 @@ void CDemoPdr::ControlStep()
       cPos.SetZ(cPos.GetZ() + 0.25f);
       m_pcPropellers->SetAbsolutePosition(cPos);
    }
-   else if (stateMode == kTakeOff || stateMode == kReturnToBase)
+
+   else if ((stateMode == kTakeOff || stateMode == kReturnToBase) && count <= 0)
    {
-      switch (CriticalProximity()) {
+      LOG << "angle : " << currentAngle << std::endl;
+
+     switch (FreeSide()) {
         case SensorSide::kDefault:
+        case SensorSide::kFront:
+            LOG << "kDefault" << std::endl;
+            // avance
             newCVector = new CVector3(
                (cos(currentAngle.GetValue()) * 0.4 + cPos.GetX()) * 1,
                (sin(currentAngle.GetValue()) * 0.4 + cPos.GetY()) * 1,
@@ -326,47 +399,101 @@ void CDemoPdr::ControlStep()
             }
          break;
             
-        case SensorSide::kRight:
-            LOG << "kRight" << std::endl;
-            newCVector = new CVector3(
-               (cos(currentAngle.GetValue() - 1.56) * -0.5 + cPos.GetX()) * 1,
-               (sin(currentAngle.GetValue() - 1.56) * -0.5 + cPos.GetY()) * 1,
-               cPos.GetZ());
-            m_pcPropellers->SetAbsolutePosition(*newCVector);
-            break;
         case SensorSide::kLeft:
             LOG << "kLeft" << std::endl;
+            // go left
             newCVector = new CVector3(
-               (cos(currentAngle.GetValue() - 1.56) * 0.5 + cPos.GetX()) * 1,
-               (sin(currentAngle.GetValue() - 1.56) * 0.5 + cPos.GetY()) * 1,
+               (cos(0.8 - currentAngle.GetValue()) * -0.3 + cPos.GetX()) * 1,
+               (sin(0.8 - currentAngle.GetValue()) * 0.3 + cPos.GetY()) * 1,
                cPos.GetZ());
             m_pcPropellers->SetAbsolutePosition(*newCVector);
+            if (stateMode != kReturnToBase)
+               m_pcPropellers->SetRelativeYaw(CRadians::PI_OVER_FOUR/3);
+            break;
+        case SensorSide::kRight:
+            LOG << "kRight" << std::endl;
+            //go right
+            newCVector = new CVector3(
+               (cos(0.8 - currentAngle.GetValue()) * 0.3 + cPos.GetX()) * 1,
+               (sin(0.8 - currentAngle.GetValue()) * -0.3 + cPos.GetY()) * 1,
+               cPos.GetZ());
+            m_pcPropellers->SetAbsolutePosition(*newCVector);
+            if (stateMode != kReturnToBase)
+               m_pcPropellers->SetRelativeYaw(-CRadians::PI_OVER_FOUR/3);
             break;
         case SensorSide::kBack:
             LOG << "kBack" << std::endl;
-            newCVector = new CVector3(
-               (cos(currentAngle.GetValue() + 0.8) * 0.5 + cPos.GetX()) * 1,
-               (sin(currentAngle.GetValue() + 0.8) * 0.5 + cPos.GetY()) * 1,
+            if (stateMode != kReturnToBase)
+               m_pcPropellers->SetRelativeYaw(CRadians::PI_OVER_FOUR);
+             newCVector = new CVector3(
+               (cos(currentAngle.GetValue() + 0.8) * 0.9 + cPos.GetX()) * 1,
+               (sin(currentAngle.GetValue() + 0.8) * 0.9 + cPos.GetY()) * 1,
                cPos.GetZ());
             m_pcPropellers->SetAbsolutePosition(*newCVector);
             break;
-        case SensorSide::kFront:
-            m_pcPropellers->SetRelativeYaw(CRadians::PI_OVER_FOUR/3);
-            break;
+
       }
    }
-   else if (stateMode == kLanding && count <= 0)
+
+   if (stateMode != kLanding && cPos.GetZ() < 0.2)
    {
-      if (cPos.GetZ() > 0.2)
-      {
-         CVector3* test = new CVector3(0,0,-0.1);
-         m_pcPropellers->SetRelativePosition(*test);
-      }
-     
+      CVector3* test = new CVector3(cPos.GetX(), cPos.GetY(), 0.2);
+      m_pcPropellers->SetRelativePosition(*test);
    }
+
    m_uiCurrentStep++;
 }
 
+void CDemoPdr::checkIfPacketIsComing()
+{
+   const CCI_RangeAndBearingSensor::TReadings& tMsgs = m_pcRABSens->GetReadings();
+   if (count <= 0 && stateMode == kTakeOff)
+   {
+      if (!tMsgs.empty())
+      {
+         int idMax = -1;
+         float targetAltitude = 0.0;
+         for (int i = 0; i < tMsgs.size(); i++) {
+            if (tMsgs[i].Range < 300.0)
+            {
+               PacketP2P packetReceived = *reinterpret_cast<const PacketP2P*>(tMsgs[i].Data.ToCArray());
+               if (packetReceived.id > idMax
+                     && packetReceived.id < getIntId()
+                     && (packetReceived.currentAltitude - 0.1) < cPos.GetZ() && (packetReceived.currentAltitude + 0.1) > cPos.GetZ())
+               {
+                  idMax = packetReceived.id;
+                  targetAltitude = std::max(0.5, packetReceived.currentAltitude - 0.25);
+               }
+            }
+         }
+         if (idMax != -1 && cPos.GetZ() > 0.5)
+         {
+            CVector3* newAltitude = new CVector3(cPos.GetX(), cPos.GetY(), targetAltitude);
+            m_pcPropellers->SetAbsolutePosition(*newAltitude);
+            count = 50;
+         }
+      }
+      else if (count <= 0)
+      {
+         CVector3* newAltitude = new CVector3(cPos.GetX(), cPos.GetY(), 1.0);
+         m_pcPropellers->SetAbsolutePosition(*newAltitude);
+      }
+   }
+   
+}
+
+void CDemoPdr::sendPacketToOtherRobots()
+{
+   /* ---------------------------
+      ---- P2P COMMUNICATION ----
+      --------------------------- */
+   struct PacketP2P packet;
+   packet.id = getIntId();
+   packet.currentAltitude = cPos.GetZ();
+   CByteArray cBuf(10);
+   memcpy(&cBuf[0], &packet, sizeof(packet));
+   m_pcRABAct->SetData(cBuf);
+}
 
 
 /****************************************/
