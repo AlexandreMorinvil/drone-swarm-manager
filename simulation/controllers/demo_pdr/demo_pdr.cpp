@@ -291,6 +291,11 @@ void CDemoPdr::ControlStep()
 
    cPos = m_pcPos->GetReading().Position;
 
+
+   checkIfPacketIsComing();
+   sendPacketToOtherRobots();
+
+
    setPosVelocity();
    sendTelemetry();
 
@@ -379,6 +384,17 @@ void CDemoPdr::ControlStep()
       CVector3* test = new CVector3(cPos.GetX(), cPos.GetY(), 0.2);
       m_pcPropellers->SetRelativePosition(*test);
    }
+
+   if (stateMode == kLanding && count <= 0)
+   {
+      if (cPos.GetZ() > 0.2)
+      {
+         CVector3* test = new CVector3(0,0,-0.1);
+         m_pcPropellers->SetRelativePosition(*test);
+      }
+     
+   }
+
 
    m_uiCurrentStep++;
 }
