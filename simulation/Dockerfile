@@ -69,7 +69,7 @@ RUN ssh-keyscan gitlab.com >> /root/.ssh/known_hosts
 RUN cd /root &&\
     git clone git@gitlab.com:polytechnique-montr-al/inf3995/20211/equipe-204/alfred.git alfred &&\
     cd alfred &&\
-    git checkout feature/communication-server-argos
+    git checkout predev
 
 # Build code
 RUN cd /root/alfred/simulation &&\

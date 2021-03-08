@@ -49,7 +49,7 @@ class Drone :
         self._state = StateMode.STANDBY.value
         self._vbat = 10
         self._id = id
-        self._speed = 0.0        
+        self._speed = Vec3(0, 0, 0)      
 
         print('Connecting to %s' % link_uri)
 

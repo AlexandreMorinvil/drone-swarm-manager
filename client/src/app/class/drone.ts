@@ -18,7 +18,7 @@ export class Drone {
   batteryLevel: number;
   private isConnected: Boolean;
   private currentPosition: Vec3;
-  private currentSpeed: number;
+  private currentSpeed: Vec3;
 
   constructor(
     droneId: number = UNSET_DRONE_INDEX,
@@ -26,7 +26,7 @@ export class Drone {
     batteryLevel: number = 0.0,
     isConnected: Boolean = false,
     currentPosition: Vec3 = new Vec3(),
-    currentSpeed: number = 0.0
+    currentSpeed: Vec3 = new Vec3()
   ) {
     this.droneId = droneId;
     this.state = state;
