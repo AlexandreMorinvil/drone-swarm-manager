@@ -105,6 +105,12 @@ public:
 
   SensorSide FreeSide();
 
+  int getIntId();
+
+  void checkIfPacketIsComing();
+
+  void sendPacketToOtherRobots();
+
 private:
 
    CCI_CrazyflieDistanceScannerSensor* m_pcDistance;
@@ -184,13 +190,15 @@ struct PacketDistance {
   CRadians currentAngle;
   int count;
   StateMode stateMode;
+  CVector3 objective;
 
   CVector3 cPos;
 
   float leftDist, backDist, frontDist, rightDist;
-  struct Packet
+  struct PacketP2P
   {
-    float test;
+    uint8_t id;
+    float currentAltitude;
   };
 
 };
