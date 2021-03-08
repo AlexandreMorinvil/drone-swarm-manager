@@ -24,8 +24,11 @@ class ArgosServer() :
         self.sent_data = None
         self.point = Vec3(0,0,0)
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+<<<<<<< HEAD
         print(port)
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+=======
+>>>>>>> predev
         self.sock.bind(('localhost', port))
          # listen for incoming connections (server mode) with one connection at a time
         self.sock.listen()
@@ -44,6 +47,7 @@ class ArgosServer() :
         self.connection.send(data)
         print('data send ')
         print(data)
+
 
         
     def receive_data(self):
@@ -72,7 +76,7 @@ class ArgosServer() :
                 print("Data received : ", px, py, pz)
                 
             elif PacketType(self.data_received[0]) == PacketType.DISTANCE:
-                (a, b, packet_type, front, back, up, left, right, zrange) = struct.unpack("<hbbhhhhhh", self.data_received)
+                (packet_type, front, back, up, left, right, zrange, a, b) = struct.unpack("<hbhhhhhhb", self.data_received)
                 self.drone_argos.sensors.front = front
                 self.drone_argos.sensors.back = back
                 self.drone_argos.sensors.up = up
