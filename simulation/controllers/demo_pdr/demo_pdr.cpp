@@ -379,7 +379,8 @@ void CDemoPdr::ControlStep()
       cPos.SetZ(cPos.GetZ() + 0.25f);
       m_pcPropellers->SetAbsolutePosition(cPos);
    }
-   else if ((stateMode == kTakeOff) && count <= 0)
+
+   else if ((stateMode == kTakeOff || stateMode == kReturnToBase) && count <= 0)
    {
       LOG << "angle : " << currentAngle << std::endl;
 
@@ -393,93 +394,47 @@ void CDemoPdr::ControlStep()
                (sin(currentAngle.GetValue()) * 0.4 + cPos.GetY()) * 1,
                cPos.GetZ());
             m_pcPropellers->SetAbsolutePosition(*newCVector);
+            if (stateMode == kReturnToBase) {
+               m_pcPropellers->SetAbsoluteYaw(*(new CRadians(computeAngleToFollow())));
+            }
          break;
             
         case SensorSide::kLeft:
             LOG << "kLeft" << std::endl;
             // go left
             newCVector = new CVector3(
-               (cos(0.8 - currentAngle.GetValue()) * -0.9 + cPos.GetX()) * 1,
-               (sin(0.8 - currentAngle.GetValue()) * 0.9 + cPos.GetY()) * 1,
+               (cos(0.8 - currentAngle.GetValue()) * -0.3 + cPos.GetX()) * 1,
+               (sin(0.8 - currentAngle.GetValue()) * 0.3 + cPos.GetY()) * 1,
                cPos.GetZ());
-            m_pcPropellers->SetRelativeYaw(CRadians::PI_OVER_FOUR/3);
             m_pcPropellers->SetAbsolutePosition(*newCVector);
+            if (stateMode != kReturnToBase)
+               m_pcPropellers->SetRelativeYaw(CRadians::PI_OVER_FOUR/3);
             break;
         case SensorSide::kRight:
             LOG << "kRight" << std::endl;
             //go right
             newCVector = new CVector3(
-               (cos(0.8 - currentAngle.GetValue()) * 0.9 + cPos.GetX()) * 1,
-               (sin(0.8 - currentAngle.GetValue()) * -0.9 + cPos.GetY()) * 1,
+               (cos(0.8 - currentAngle.GetValue()) * 0.3 + cPos.GetX()) * 1,
+               (sin(0.8 - currentAngle.GetValue()) * -0.3 + cPos.GetY()) * 1,
                cPos.GetZ());
-            m_pcPropellers->SetRelativeYaw(-CRadians::PI_OVER_FOUR/3);
             m_pcPropellers->SetAbsolutePosition(*newCVector);
+            if (stateMode != kReturnToBase)
+               m_pcPropellers->SetRelativeYaw(-CRadians::PI_OVER_FOUR/3);
             break;
         case SensorSide::kBack:
             LOG << "kBack" << std::endl;
-            // turn around
-            m_pcPropellers->SetRelativeYaw(CRadians::PI_OVER_FOUR);
+            if (stateMode != kReturnToBase)
+               m_pcPropellers->SetRelativeYaw(CRadians::PI_OVER_FOUR);
              newCVector = new CVector3(
-               (cos(currentAngle.GetValue() + 3.14) * 0.9 + cPos.GetX()) * 1,
-               (sin(currentAngle.GetValue() + 3.14) * 0.9 + cPos.GetY()) * 1,
+               (cos(currentAngle.GetValue() + 0.8) * 0.9 + cPos.GetX()) * 1,
+               (sin(currentAngle.GetValue() + 0.8) * 0.9 + cPos.GetY()) * 1,
                cPos.GetZ());
             m_pcPropellers->SetAbsolutePosition(*newCVector);
             break;
+
       }
    }
 
-   else if ((stateMode == kReturnToBase) && count <= 0)
-   {
-      switch (CriticalProximity()) {
-        case SensorSide::kDefault:
-            newCVector = new CVector3(
-               (cos(currentAngle.GetValue()) * 0.4 + cPos.GetX()) * 1,
-               (sin(currentAngle.GetValue()) * 0.4 + cPos.GetY()) * 1,
-               cPos.GetZ());
-            m_pcPropellers->SetAbsolutePosition(*newCVector);
-            if (stateMode == kReturnToBase) {
-               m_pcPropellers->SetAbsoluteYaw(*(new CRadians(computeAngleToFollow())));
-            }
-         break;
-            
-        case SensorSide::kRight:
-            LOG << "kRight" << std::endl;
-            newCVector = new CVector3(
-               (cos(currentAngle.GetValue() - 1.56) * -0.5 + cPos.GetX()) * 1,
-               (sin(currentAngle.GetValue() - 1.56) * -0.5 + cPos.GetY()) * 1,
-               cPos.GetZ());
-            m_pcPropellers->SetAbsolutePosition(*newCVector);
-            break;
-        case SensorSide::kLeft:
-            LOG << "kLeft" << std::endl;
-            newCVector = new CVector3(
-               (cos(currentAngle.GetValue() - 1.56) * 0.5 + cPos.GetX()) * 1,
-               (sin(currentAngle.GetValue() - 1.56) * 0.5 + cPos.GetY()) * 1,
-               cPos.GetZ());
-            m_pcPropellers->SetAbsolutePosition(*newCVector);
-            break;
-        case SensorSide::kBack:
-            LOG << "kBack" << std::endl;
-            newCVector = new CVector3(
-               (cos(currentAngle.GetValue() + 0.8) * 0.5 + cPos.GetX()) * 1,
-               (sin(currentAngle.GetValue() + 0.8) * 0.5 + cPos.GetY()) * 1,
-               cPos.GetZ());
-            m_pcPropellers->SetAbsolutePosition(*newCVector);
-            break;
-        case SensorSide::kFront:
-            m_pcPropellers->SetRelativeYaw(CRadians::PI_OVER_FOUR/3);
-            break;
-      }
-
-   }
-   else if (stateMode == kLanding && count <= 0)
-   {
-      if (cPos.GetZ() > 0.2)
-      {
-         CVector3* test = new CVector3(0,0,-0.1);
-         m_pcPropellers->SetRelativePosition(*test);
-      }
-   }
    if (stateMode != kLanding && cPos.GetZ() < 0.2)
    {
       CVector3* test = new CVector3(cPos.GetX(), cPos.GetY(), 0.2);
