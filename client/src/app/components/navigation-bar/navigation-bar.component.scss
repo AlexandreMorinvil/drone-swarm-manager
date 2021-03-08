@@ -1,5 +1,8 @@
-.navigation-bar-container {
-  background-color: rgb(40, 40, 50);
-  color: white;
-  height: 56px;
+@import '@angular/material/prebuilt-themes/deeppurple-amber.css';
+span{
+    padding: 15px;
+}
+
+span:hover {
+    cursor: pointer;
 }

@@ -1,10 +1,8 @@
-.drone-board {
-    display: flex;
-    flex-direction: column;
-}
+@import '@angular/material/prebuilt-themes/deeppurple-amber.css';
+
 button {
     font-size: 13px;
-    width:100px;
+    width:120px;
     height:40px;
     text-align:center;
     margin: 10px;
@@ -12,4 +10,25 @@ button {
 
 p {
     margin: 10px;
+    font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+h1 {
+    font-family: Roboto, "Helvetica Neue", sans-serif;
+    font-size: 24px;
+    font-weight: 500;
+    margin: 5px;
+}
+
+
+.take-off button {
+    margin-right: 10px;
+    align-items: center;
+}
+.take-off {
+    align-items: center;
+}
+
+.return-to-base button {
+    width: 150px;
 }

@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "configblock.h": "c",
+        "stdint.h": "c",
+        "app_channel.h": "c"
+    }
+}

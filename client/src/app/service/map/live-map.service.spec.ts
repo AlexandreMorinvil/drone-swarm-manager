@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 
-import { SocketService } from './socket.service';
+import { LiveMapService } from './live-map.service';
 
-describe('SocketService', () => {
-  let service: SocketService;
+describe('LiveMapService', () => {
+  let service: LiveMapService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(SocketService);
+    service = TestBed.inject(LiveMapService);
   });
 
   it('should be created', () => {

@@ -33,21 +33,58 @@
 #include "configblock.h"
 #include <string.h>
 #include <stdio.h>
+#include <stdint.h>
 #include "FreeRTOS.h"
 #include "timers.h"
+#include "estimator_kalman.h"
+#include "param.h"
 
 #include "debug.h"
 
 #define NON_BLOCKING 0
 #define DEBUG_MODULE "HELLOWORLD"
 
+
+typedef enum {
+    tx,
+    position,
+    velocity,
+    distance
+} PacketType;
+
 struct packetRX {
-  bool led_activation;
+  bool ledActivation;
 } __attribute__((packed));
 
-struct packetTX {
-  bool is_led_activated;
+struct PacketTX {
+  PacketType packetType;
+  bool isLedActivated;
   float vbat;
+  uint8_t rssiToBase;
+} __attribute__((packed));
+
+struct PacketPosition {
+  PacketType packetType;
+  float x;
+  float y;
+  float z;
+} __attribute__((packed));
+
+struct PacketVelocity {
+  PacketType packetType;
+  float px;
+  float py;
+  float pz;
+} __attribute__((packed));
+
+struct PacketDistance {
+  PacketType packetType;
+  uint16_t front;
+  uint16_t back;
+  uint16_t up;
+  uint16_t left;
+  uint16_t right;
+  uint16_t zrange;
 } __attribute__((packed));
 
 bool isLedActivated = false;
@@ -64,9 +101,7 @@ ledseqContext_t seq_lock = {
 
 static xTimerHandle timer;
 
-
-P2PPacket initializeP2PPacket()
-{
+P2PPacket initializeP2PPacket() {
   static P2PPacket p_reply;
   p_reply.port=0x00;
   uint64_t address = configblockGetRadioAddress();
@@ -76,9 +111,8 @@ P2PPacket initializeP2PPacket()
 }
 
 
-void processRXPacketReceived(struct packetRX rxPacket)
-{
-  if ((bool)rxPacket.led_activation) {
+void processRXPacketReceived(struct packetRX rxPacket){
+  if ((bool)rxPacket.ledActivation) {
     ledseqRun(&seq_lock);
     isLedActivated = true;
   }
@@ -88,53 +122,67 @@ void processRXPacketReceived(struct packetRX rxPacket)
   }
 }
 
-void processTXPacketReceived(struct packetTX txPacket)
-{
-  if (crtpIsConnected())
-  {
-    appchannelSendPacket(&txPacket, sizeof(txPacket));
-  }
-}
 
-void sendInfos()
-{
-  logVarId_t logIdPm = logGetVarId("pm", "vbat");
-  struct packetTX txPacket;
-  txPacket.is_led_activated = isLedActivated;
-  txPacket.vbat = logGetFloat(logIdPm);
+void sendInfos() {
+  struct PacketTX packetTX;
+  struct PacketDistance packetDistance;
+  struct PacketPosition packetPosition;
+  struct PacketVelocity packetVelocity;
 
-  if (crtpIsConnected())
-  {
-    appchannelSendPacket(&txPacket, sizeof(txPacket));
+  packetTX.isLedActivated = isLedActivated;
+  packetTX.vbat = logGetFloat(logGetVarId("pm", "vbat"));
+  packetTX.rssiToBase = logGetInt(logGetVarId("radio", "rssi"));
+  packetTX.packetType = tx;
+
+  packetPosition.x = logGetFloat(logGetVarId("stateEstimate", "x"));
+  packetPosition.y = logGetFloat(logGetVarId("stateEstimate", "y"));
+  packetPosition.z = logGetFloat(logGetVarId("stateEstimate", "z"));
+  packetPosition.packetType = position;
+
+  packetVelocity.px = logGetFloat(logGetVarId("kalman", "varPX"));
+  packetVelocity.py = logGetFloat(logGetVarId("kalman", "varPY"));
+  packetVelocity.pz = logGetFloat(logGetVarId("kalman", "varPZ"));
+  packetVelocity.packetType = velocity;
+
+  packetDistance.front = logGetUint(logGetVarId("range", "front"));
+  packetDistance.back = logGetUint(logGetVarId("range", "back"));
+  packetDistance.up = logGetUint(logGetVarId("range", "up"));
+  packetDistance.left = logGetUint(logGetVarId("range", "left"));
+  packetDistance.right = logGetUint(logGetVarId("range", "right"));
+  packetDistance.zrange = logGetUint(logGetVarId("range", "zrange"));
+  packetDistance.packetType = distance;
+
+  if (crtpIsConnected()) {
+    appchannelSendPacket(&packetTX, sizeof(packetTX));
+    appchannelSendPacket(&packetDistance, sizeof(packetDistance));
+    appchannelSendPacket(&packetPosition, sizeof(packetPosition));
+    appchannelSendPacket(&packetVelocity, sizeof(packetVelocity));
   }
 
   // Send info to other robots
-  /*P2PPacket p_reply = initializeP2PPacket();
-  memcpy(&p_reply.data[1], &txPacket, sizeof(txPacket));
-  p_reply.size = sizeof(txPacket)+1;
-  radiolinkSendP2PPacketBroadcast(&p_reply);*/
+  P2PPacket p_reply = initializeP2PPacket();
+  memcpy(&p_reply.data[1], &packetTX, sizeof(packetTX));
+  p_reply.size = sizeof(packetTX)+1;
+  radiolinkSendP2PPacketBroadcast(&p_reply);
 }
 
 
-void p2pcallbackHandler(P2PPacket *p)
-{
-  /*if (p->size == sizeof(struct packetTX))
-  {
-    struct packetTX packet;
-    memcpy(&packet, &p->data[1], sizeof(packet));
-    processTXPacketReceived(packet);
+void p2pcallbackHandler(P2PPacket *p) {
+  if (p->rssi < 48) {
+    ledseqRun(&seq_lock);
+    isLedActivated = true;
   }
-  if (p->size == sizeof(struct packetRX))
-  {
-    struct packetRX packet;
-    memcpy(&packet, &p->data[1], sizeof(packet));
-    processRXPacketReceived(packet);
-  }*/
+  else {
+    isLedActivated = false;
+    ledseqStop(&seq_lock);
+  }
 }
 
 void appMain()
 {
+  vTaskDelay(M2T(3000));
   struct packetRX rxPacket;
+  
   ledseqRegisterSequence(&seq_lock);
 
   p2pRegisterCB(p2pcallbackHandler);
@@ -142,14 +190,9 @@ void appMain()
   xTimerStart(timer, 500);
   sendInfos();
 
-  while(1) {    
+  while(1) {
     if (appchannelReceivePacket(&rxPacket, sizeof(rxPacket), NON_BLOCKING)) {
-
       processRXPacketReceived(rxPacket);
-      //P2PPacket p_reply = initializeP2PPacket();
-      //memcpy(&p_reply.data[1], &rxPacket, sizeof(rxPacket));
-      //p_reply.size = sizeof(rxPacket)+1;
-      //radiolinkSendP2PPacketBroadcast(&p_reply);
     }
   }
 }

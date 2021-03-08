@@ -1,8 +1,108 @@
-mat-list-option:hover {
-    background-color: rgb(184, 181, 181);
+@import "@angular/material/prebuilt-themes/deeppurple-amber.css";
+
+.title-card {
+  margin: 2px;
 }
 
-p{
-    margin: 5px;
-    font-size: 15px;
+.drone-card {
+  padding: 5px;
+  margin: 5px;
+  height: auto;
+  min-height: auto;
+}
+
+.sidebar-title {
+  text-align: center;
+}
+
+.connected-title-card {
+  background-color: lawngreen;
+  color: green;
+}
+
+.disconnected-title-card {
+  background-color: darkgrey;
+  color: grey;
+}
+
+.disconnected-card {
+  background-color: lightgray;
+  color: grey;
+}
+
+.drone-card:hover {
+  -webkit-filter: brightness(90%);
+  filter: brightness(90%);
+}
+
+// Drone card
+.drone-card {
+  display: grid;
+  grid-template-columns: 2fr 3fr;
+  grid-template-areas:
+    "drone-id    drone-position"
+    "drone-state drone-battery";
+}
+
+.drone-id-area {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-area: "drone-id";
+  margin: auto;
+}
+
+.drone-id-area > *,
+.drone-state-area > * {
+  display: flex;
+  align-items: center;
+}
+
+.drone-state-area > * {
+  justify-content: center;
+}
+
+.drone-state-area {
+  grid-area: "drone-state";
+  margin: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.drone-battery-area {
+  grid-area: "drone-battery";
+  margin: auto;
+}
+
+.drone-position-area {
+  grid-area: "drone-position";
+  margin: auto;
+  display: flex;
+  align-items: center;
+}
+
+.drone-id-area,
+.drone-state-area,
+.drone-battery-area,
+.drone-position-area {
+  width: 100%;
+  height: 100%;
+}
+
+.drone-icon,
+.drone-id,
+.drone-state {
+  display: inline-block;
+  height: 2em;
+  margin-top: 0px;
+  margin-bottom: 0px;
+}
+
+.drone-id {
+  margin: auto 0 auto;
+  padding: 0 0 0 10px;
+}
+
+.drone-battery-area > progress {
+  width: 95%;
 }

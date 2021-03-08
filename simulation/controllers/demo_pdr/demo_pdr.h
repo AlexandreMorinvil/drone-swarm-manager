@@ -18,6 +18,8 @@
 #include <argos3/core/control_interface/ci_controller.h>
 /* Definition of the crazyflie distance sensor */
 #include <argos3/plugins/robots/crazyflie/control_interface/ci_crazyflie_distance_scanner_sensor.h>
+/* Definition of the LEDs actuator */
+#include <argos3/plugins/robots/generic/control_interface/ci_leds_actuator.h>
 /* Definition of the crazyflie position actuator */
 #include <argos3/plugins/robots/generic/control_interface/ci_quadrotor_position_actuator.h>
 /* Definition of the crazyflie position sensor */
@@ -36,6 +38,8 @@
  * With this statement, you save typing argos:: every time.
  */
 using namespace argos;
+
+enum SensorSide { kLeft, kBack, kRight, kFront, kDefault};
 
 /*
  * A controller is simply an implementation of the CCI_Controller class.
@@ -87,17 +91,108 @@ public:
     */
    bool Land();
 
+  SensorSide CriticalProximity();
+
+  SensorSide CriticalProximity2();
+
+  float computeAngleToFollow();
+
+  void sendTelemetry();
+
+  void connectToServer();
+
+  void setPosVelocity();
+
+  SensorSide FreeSide();
+
 private:
 
-
+   CCI_CrazyflieDistanceScannerSensor* m_pcDistance;
+   CCI_RangeAndBearingSensor* m_pcRABSens;
+   CCI_RangeAndBearingActuator* m_pcRABAct;
    CCI_QuadRotorPositionActuator* m_pcPropellers;
    CCI_PositioningSensor* m_pcPos;
+   CCI_BatterySensor* m_pcBattery;
 
    /* The random number generator */
    CRandom::CRNG* m_pcRNG;
-
+  CVector3 posInitial;
+  CVector3 posFinal  ;
    /* Current step */
    uint m_uiCurrentStep;
+
+   bool isConnected;
+
+   /* Packet */
+  typedef enum {
+    tx,
+    position,
+    attitude,
+    velocity,
+    distance
+  } PacketType;
+
+  typedef enum {
+    kStandby,
+    kTakeOff,
+    kReturnToBase,
+    kLanding
+  } StateMode;
+
+struct packetRX {
+  bool led_activation;
+} __attribute__((packed));
+
+struct PacketPosition {
+  PacketType packetType;
+  float x;
+  float y;
+  float z;
+} __attribute__((packed));
+
+struct PacketTX {
+  PacketType packetType;
+  bool isLedActivated;
+  float vbat;
+  uint8_t rssiToBase;
+  StateMode stateMode;
+} __attribute__((packed));
+
+struct PacketVelocity {
+  PacketType packetType;
+  float px;
+  float py;
+  float pz;
+} __attribute__((packed));
+
+struct PacketDistance {
+  PacketType packetType;
+  uint16_t front;
+  uint16_t back;
+  uint16_t up;
+  uint16_t left;
+  uint16_t right;
+  uint16_t zrange;
+} __attribute__((packed));
+
+
+  /*Socket variables*/
+  int sock, valRead, n;
+  struct sockaddr_in serv_addr;
+  char buffer[1024];
+  CVector3* newCVector;
+  CRadians currentAngle;
+  int count;
+  StateMode stateMode;
+
+  CVector3 cPos;
+
+  float leftDist, backDist, frontDist, rightDist;
+  struct Packet
+  {
+    float test;
+  };
+
 };
 
 #endif
