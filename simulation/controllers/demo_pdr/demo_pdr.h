@@ -93,6 +93,8 @@ public:
 
   SensorSide CriticalProximity();
 
+  SensorSide CriticalProximity2();
+
   float computeAngleToFollow();
 
   void sendTelemetry();
@@ -105,6 +107,8 @@ public:
 
   int getIntId();
 
+  SensorSide FreeSide();
+
 private:
 
    CCI_CrazyflieDistanceScannerSensor* m_pcDistance;
@@ -116,6 +120,8 @@ private:
 
    /* The random number generator */
    CRandom::CRNG* m_pcRNG;
+
+   CVector3 objective;
 
    /* Current step */
    uint m_uiCurrentStep;
