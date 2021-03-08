@@ -24,11 +24,6 @@ class ArgosServer() :
         self.sent_data = None
         self.point = Vec3(0,0,0)
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-<<<<<<< HEAD
-        print(port)
-        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
-=======
->>>>>>> predev
         self.sock.bind(('localhost', port))
          # listen for incoming connections (server mode) with one connection at a time
         self.sock.listen()

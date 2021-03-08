@@ -3,6 +3,7 @@ import json
 from vec3 import Vec3
 from drone import *
 import threading
+import sys
 
 from flask import Flask, jsonify, render_template
 from flask_socketio import *
@@ -24,8 +25,12 @@ socketio = SocketIO(app ,cors_allowed_origins='*')
 default_port = 5015
 
 # Select mode
-mode = Mode.REAL_TIME
-
+if (sys.argv[1] == 'simulation'):
+    mode = Mode.SIMULATION
+    print('mode simulation')
+else:
+    mode = Mode.REAL_TIME
+    print('mode real time')
 # Initialize the low-level drivers (don't list the debug drivers)
 cflib.crtp.init_drivers(enable_debug_driver=False)
 # Scan for Crazyflies and use the first one found
