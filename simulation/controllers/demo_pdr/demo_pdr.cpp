@@ -19,7 +19,7 @@
 
 
 
-#define DEFAULT_PORT 8000
+#define DEFAULT_PORT 5015
 #define CRITICAL_VALUE 70.0f
 
 typedef enum {
@@ -79,7 +79,6 @@ int CDemoPdr::getIntId()
    return stoi(sm[0]);
 }
 
-
 void CDemoPdr::connectToServer()
 {
    sock = 0;
@@ -104,34 +103,12 @@ void CDemoPdr::connectToServer()
       printf("\nInvalid address/ Address not supported \n"); 
       return; 
    }
-
-   int flags = fcntl(sock, F_GETFL);
-   fcntl(sock, F_SETFL, flags | O_NONBLOCK);
-
    isConnected = true;
 
    
    if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) 
    { 
       printf("\nConnection Failed \n");
-      return; 
-
-      /*int error = 0;
-      socklen_t len = sizeof (error);
-      int retval = getsockopt (sock, SOL_SOCKET, SO_ERROR, &error, &len);
-      fprintf(stderr, "error getting socket error code: %s\n", strerror(retval));
-      fprintf(stderr, "socket error: %s\n", strerror(error));
-      if (retval != 0) {
-         /* there was a problem getting the error code */
-         /*fprintf(stderr, "error getting socket error code: %s\n", strerror(retval));
-         return;
-      }
-
-      if (error != 0) {
-         /* socket has a non zero error status */
-         /*fprintf(stderr, "socket error: %s\n", strerror(error));
-      }
-      return; */
    }
       
 
@@ -237,28 +214,6 @@ SensorSide CDemoPdr::CriticalProximity() {
    return minSensor;
 }
 
-SensorSide CDemoPdr::CriticalProximity2() {
-   float sensor[3]  = {leftDist, backDist, rightDist};
-   float min   = CRITICAL_VALUE;
-   SensorSide minSensor = SensorSide::kDefault;
-
-   for (unsigned i = 0; i < 3; i++) {
-      if (min > sensor[i] && sensor[i] > 0.0) 
-      {
-         min = sensor[i];
-         minSensor = (SensorSide) i;
-      }
-   }
-
-   if (((frontDist < 90.0 && frontDist > 0) && minSensor == SensorSide::kDefault)
-        || (frontDist < min && frontDist > 0)){
-      minSensor = SensorSide::kFront;
-   } 
-
-   return minSensor;
-}
-
-
 
 
 SensorSide CDemoPdr::FreeSide() {
@@ -353,20 +308,6 @@ void CDemoPdr::ControlStep()
    frontDist = (iterDistRead++)->second;
    leftDist = (iterDistRead++)->second;
    backDist = (iterDistRead++)->second;
-
-   /* ---------------------------
-      ---- P2P COMMUNICATION ----
-   /* ---------------------------
-   /*struct Packet packet;
-   packet.test = 1.5;
-   CByteArray cBuf(10);
-   memcpy(&cBuf[0], &packet, sizeof(packet));
-   if (GetId() == "s0")
-   {
-      LOG << "Send Packet (from: " << GetId() << "): " << packet.test << std::endl;
-      m_pcRABAct->SetData(cBuf);
-   }*/
-
 
    if (stateMode == kStandby)
    {
