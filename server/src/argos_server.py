@@ -69,6 +69,7 @@ class ArgosServer() :
                 self.drone_argos._speed.x = px
                 self.drone_argos._speed.y = py
                 self.drone_argos._speed.z = pz
+                print("Data received : ", px, py, pz)
                 
             elif PacketType(self.data_received[0]) == PacketType.DISTANCE:
                 (a, b, packet_type, front, back, up, left, right, zrange) = struct.unpack("<hbbhhhhhh", self.data_received)

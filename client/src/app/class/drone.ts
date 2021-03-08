@@ -52,6 +52,10 @@ export class Drone {
     return this.batteryLevel * 100;
   }
 
+  getScalarSpeed(): number {
+    return Math.sqrt(this.currentSpeed.x ** 2 + this.currentSpeed.y ** 2 /*+ this.currentSpeed.z ** 2*/);
+  }
+
   getDroneStateText(): string {
     switch (this.state) {
       case DroneState.STANDBY:
@@ -71,7 +75,7 @@ export class Drone {
     }
   }
 
-  getSpeed(): number {
+  getSpeed(): Vec3 {
     return this.currentSpeed;
   }
 }

@@ -113,5 +113,5 @@ class Drone :
                 'front': (posAbs + self.sensors.getEdgeFront()).toJson(),
                 'right': (posAbs + self.sensors.getEdgeRight()).toJson(),
                 'currentPos': posAbs.toJson(),
-                'currentSpeed': self._speed,
+                'currentSpeed': self._speed.toJson(),
                 }
