@@ -15,11 +15,7 @@
 /* Logging */
 #include <argos3/core/utility/logging/argos_log.h>
 
-<<<<<<< HEAD
 #define DEFAULT_PORT 5015
-=======
-#define DEFAULT_PORT 8000
->>>>>>> d517392c01e2cea984d1bdec38fd4911d5f07f2c
 #define CRITICAL_VALUE 70.0f
 
 typedef enum {
@@ -79,14 +75,6 @@ int CDemoPdr::getIntId()
    return stoi(sm[0]);
 }
 
-int CDemoPdr::getIntId()
-{
-   std::regex regular_exp("[0-9].*");
-   std::smatch sm;
-   regex_search(GetId(), sm, regular_exp);
-   return stoi(sm[0]);
-}
-
 void CDemoPdr::connectToServer()
 {
    sock = 0;
@@ -110,39 +98,12 @@ void CDemoPdr::connectToServer()
       printf("\nInvalid address/ Address not supported \n"); 
       return; 
    }
-
-<<<<<<< HEAD
-=======
-   // Unblock socket connect
-   //int flags = fcntl(sock, F_GETFL);
-   //fcntl(sock, F_SETFL, flags | O_NONBLOCK);
-
->>>>>>> d517392c01e2cea984d1bdec38fd4911d5f07f2c
    isConnected = true;
 
    
    if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr))) 
    { 
       printf("\nConnection Failed \n");
-<<<<<<< HEAD
-=======
-      /*int error = 0;
-      socklen_t len = sizeof (error);
-      int retval = getsockopt (sock, SOL_SOCKET, SO_ERROR, &error, &len);
-      fprintf(stderr, "error getting socket error code: %s\n", strerror(retval));
-      fprintf(stderr, "socket error: %s\n", strerror(error));
-      if (retval != 0) {
-         /* there was a problem getting the error code */
-         /*fprintf(stderr, "error getting socket error code: %s\n", strerror(retval));
-         return;
-      }
-
-      if (error != 0) {
-         /* socket has a non zero error status */
-         /*fprintf(stderr, "socket error: %s\n", strerror(error));
-      }
-      return; */
->>>>>>> d517392c01e2cea984d1bdec38fd4911d5f07f2c
    }
       
 
@@ -236,28 +197,6 @@ SensorSide CDemoPdr::CriticalProximity() {
    return minSensor;
 }
 
-SensorSide CDemoPdr::CriticalProximity2() {
-   float sensor[3]  = {leftDist, backDist, rightDist};
-   float min   = CRITICAL_VALUE;
-   SensorSide minSensor = SensorSide::kDefault;
-
-   for (unsigned i = 0; i < 3; i++) {
-      if (min > sensor[i] && sensor[i] > 0.0) 
-      {
-         min = sensor[i];
-         minSensor = (SensorSide) i;
-      }
-   }
-
-   if (((frontDist < 90.0 && frontDist > 0) && minSensor == SensorSide::kDefault)
-        || (frontDist < min && frontDist > 0)){
-      minSensor = SensorSide::kFront;
-   } 
-
-   return minSensor;
-}
-
-
 
 
 SensorSide CDemoPdr::FreeSide() {
@@ -318,10 +257,10 @@ void CDemoPdr::ControlStep()
       connectToServer();
    }
 
-   //if (m_pcBattery->GetReading().AvailableCharge < 0.3 && stateMode == kTakeOff)
-   //{
-   //   stateMode = kReturnToBase;
-   //}
+   if (m_pcBattery->GetReading().AvailableCharge < 0.3 && stateMode == kTakeOff)
+   {
+      stateMode = kReturnToBase;
+   }
 
 
    currentAngle = *(new CRadians(0.1f));
@@ -344,15 +283,6 @@ void CDemoPdr::ControlStep()
    leftDist = (iterDistRead++)->second;
    backDist = (iterDistRead++)->second;
 
-<<<<<<< HEAD
-   /*LOG << "ID " << GetId() << std::endl;
-   LOG << "rightDist " << rightDist << std::endl;
-   LOG << "frontDist " << frontDist << std::endl;
-   LOG << "leftDist " << leftDist << std::endl;
-   LOG << "backDist " << backDist << std::endl;*/
-
-=======
->>>>>>> d517392c01e2cea984d1bdec38fd4911d5f07f2c
    if (stateMode == kStandby)
    {
       return;
