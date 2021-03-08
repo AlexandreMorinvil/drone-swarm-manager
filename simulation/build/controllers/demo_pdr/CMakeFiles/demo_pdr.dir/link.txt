@@ -1,0 +1,1 @@
+/usr/bin/c++ -fPIC -g  -shared -Wl,-soname,libdemo_pdr.so -o libdemo_pdr.so CMakeFiles/demo_pdr.dir/demo_pdr.cpp.o CMakeFiles/demo_pdr.dir/demo_pdr_autogen/mocs_compilation.cpp.o  -L/usr/local/lib/argos3 -Wl,-rpath,/usr/local/lib/argos3 -largos3core_simulator -largos3plugin_simulator_crazyflie -largos3plugin_simulator_genericrobot 

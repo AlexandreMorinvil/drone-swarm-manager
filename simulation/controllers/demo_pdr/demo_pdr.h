@@ -112,7 +112,8 @@ private:
 
    /* The random number generator */
    CRandom::CRNG* m_pcRNG;
-
+  CVector3 posInitial;
+  CVector3 posFinal  ;
    /* Current step */
    uint m_uiCurrentStep;
 

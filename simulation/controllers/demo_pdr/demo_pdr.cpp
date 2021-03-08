@@ -70,8 +70,7 @@ struct PacketDistance {
 /****************************************/
 
 CVector3 objective = *(new CVector3(0,0,0));
-CVector3 posInitial = *(new CVector3(0,0,0));
-CVector3 posFinal = *(new CVector3(0,0,0));
+
 
 
 void CDemoPdr::connectToServer()
@@ -244,7 +243,8 @@ void CDemoPdr::Init(TConfigurationNode &t_node)
    Reset();
    
    objective = m_pcPos->GetReading().Position;
-
+   posInitial = *(new CVector3(0,0,0));
+   posFinal   = *(new CVector3(0,0,0));
    stateMode = kStandby;
 }
 
