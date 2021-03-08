@@ -21,10 +21,10 @@ class Mode(Enum):
 app = Flask(__name__)
 socketio = SocketIO(app ,cors_allowed_origins='*')
 
-default_port = 8000
+default_port = 5015
 
 # Select mode
-mode = Mode.SIMULATION
+mode = Mode.REAL_TIME
 
 # Initialize the low-level drivers (don't list the debug drivers)
 cflib.crtp.init_drivers(enable_debug_driver=False)
@@ -44,7 +44,6 @@ for i in range(4):
     t = threading.Thread(target=socks[i].waiting_connection, name='waiting_connection')
     t.start()
 
-    ## NEEDS REFACTOR
     if mode == Mode.SIMULATION:
         drones.append(socks[i].drone_argos)
 
