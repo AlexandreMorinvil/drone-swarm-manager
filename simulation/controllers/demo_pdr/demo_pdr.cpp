@@ -115,7 +115,7 @@ void CDemoPdr::connectToServer()
 }
 
 void CDemoPdr::setPosVelocity() {
-   if (m_uiCurrentStep % 10 == 0) {
+   if (m_uiCurrentStep % 10 == 0 && m_uiCurrentStep != 0) {
       posInitial = cPos;
    }
    if (m_uiCurrentStep % 10 == 9) {
@@ -273,11 +273,11 @@ void CDemoPdr::ControlStep()
    setPosVelocity();
    sendTelemetry();
 
-   LOG << cPos.GetX() << std::endl;
+   // LOG << cPos.GetX() << std::endl;
    
    valRead = recv(sock , buffer, sizeof(buffer), 0);
    if (valRead != -1){
-      LOG << "RECEIVED FROM " << GetId() << std::endl;
+      // LOG << "RECEIVED FROM " << GetId() << std::endl;
       stateMode = *reinterpret_cast<const StateMode*>(buffer);
    }
 
