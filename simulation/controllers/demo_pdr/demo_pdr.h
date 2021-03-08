@@ -120,8 +120,6 @@ private:
    /* Current step */
    uint m_uiCurrentStep;
 
-   bool isConnected;
-
    /* Packet */
   typedef enum {
     tx,
@@ -182,18 +180,17 @@ struct PacketDistance {
   CVector3* newCVector;
   CRadians currentAngle;
   int count;
+  bool isConnected;
   StateMode stateMode;
 
   CVector3 cPos;
 
   float leftDist, backDist, frontDist, rightDist;
-  bool iAmLocked;
   
   struct PacketP2P
   {
     uint8_t id;
     float currentAltitude;
-    bool iAmLocked;
   };
 
 };
