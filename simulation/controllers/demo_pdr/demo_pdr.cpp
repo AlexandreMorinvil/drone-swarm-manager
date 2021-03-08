@@ -273,11 +273,11 @@ void CDemoPdr::ControlStep()
    setPosVelocity();
    sendTelemetry();
 
-   // LOG << cPos.GetX() << std::endl;
+   LOG << cPos.GetX() << std::endl;
    
    valRead = recv(sock , buffer, sizeof(buffer), 0);
    if (valRead != -1){
-      // LOG << "RECEIVED FROM " << GetId() << std::endl;
+      LOG << "RECEIVED FROM " << GetId() << std::endl;
       stateMode = *reinterpret_cast<const StateMode*>(buffer);
    }
 
@@ -316,7 +316,6 @@ void CDemoPdr::ControlStep()
    {
       switch (CriticalProximity()) {
         case SensorSide::kDefault:
-            LOG << "kDefault" << std::endl;
             newCVector = new CVector3(
                (cos(currentAngle.GetValue()) * 0.4 + cPos.GetX()) * 1,
                (sin(currentAngle.GetValue()) * 0.4 + cPos.GetY()) * 1,
