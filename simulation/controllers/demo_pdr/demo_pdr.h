@@ -99,6 +99,12 @@ public:
 
   void connectToServer();
 
+  void checkIfPacketIsComing();
+
+  void sendPacketToOtherRobots();
+
+  int getIntId();
+
 private:
 
    CCI_CrazyflieDistanceScannerSensor* m_pcDistance;
@@ -113,8 +119,6 @@ private:
 
    /* Current step */
    uint m_uiCurrentStep;
-
-   bool isConnected;
 
    /* Packet */
   typedef enum {
@@ -176,14 +180,17 @@ struct PacketDistance {
   CVector3* newCVector;
   CRadians currentAngle;
   int count;
+  bool isConnected;
   StateMode stateMode;
 
   CVector3 cPos;
 
   float leftDist, backDist, frontDist, rightDist;
-  struct Packet
+  
+  struct PacketP2P
   {
-    float test;
+    uint8_t id;
+    float currentAltitude;
   };
 
 };

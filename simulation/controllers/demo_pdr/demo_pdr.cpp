@@ -16,7 +16,7 @@
 #include <argos3/core/utility/logging/argos_log.h>
 
 #define DEFAULT_PORT 8000
-#define CRITICAL_VALUE 40.0f
+#define CRITICAL_VALUE 70.0f
 
 typedef enum {
    tx,
@@ -69,10 +69,17 @@ struct PacketDistance {
 CVector3 objective = *(new CVector3(0,0,0));
 
 
+int CDemoPdr::getIntId()
+{
+   std::regex regular_exp("[0-9].*");
+   std::smatch sm;
+   regex_search(GetId(), sm, regular_exp);
+   return stoi(sm[0]);
+}
+
 void CDemoPdr::connectToServer()
 {
    sock = 0;
-   isConnected = true;
 
    if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) 
    { 
@@ -84,7 +91,7 @@ void CDemoPdr::connectToServer()
    std::regex regular_exp("[0-9].*");
    std::smatch sm;
    regex_search(GetId(), sm, regular_exp);
-   serv_addr.sin_port = htons(DEFAULT_PORT + stoi(sm[0]));
+   serv_addr.sin_port = htons(DEFAULT_PORT + getIntId());
    
 
    // Convert IPv4 and IPv6 addresses from text to binary form 
@@ -95,15 +102,31 @@ void CDemoPdr::connectToServer()
    }
 
    // Unblock socket connect
-   int flags = fcntl(sock, F_GETFL);
-   fcntl(sock, F_SETFL, flags | O_NONBLOCK);
+   //int flags = fcntl(sock, F_GETFL);
+   //fcntl(sock, F_SETFL, flags | O_NONBLOCK);
+
+   isConnected = true;
+
    
-   int test =  connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
-   if (test < 0) 
+   if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr))) 
    { 
-      LOG << "test " << test << std::endl;
       printf("\nConnection Failed \n");
-      return; 
+      /*int error = 0;
+      socklen_t len = sizeof (error);
+      int retval = getsockopt (sock, SOL_SOCKET, SO_ERROR, &error, &len);
+      fprintf(stderr, "error getting socket error code: %s\n", strerror(retval));
+      fprintf(stderr, "socket error: %s\n", strerror(error));
+      if (retval != 0) {
+         /* there was a problem getting the error code */
+         /*fprintf(stderr, "error getting socket error code: %s\n", strerror(retval));
+         return;
+      }
+
+      if (error != 0) {
+         /* socket has a non zero error status */
+         /*fprintf(stderr, "socket error: %s\n", strerror(error));
+      }
+      return; */
    }
       
 
@@ -220,6 +243,7 @@ void CDemoPdr::Init(TConfigurationNode &t_node)
    count = 0;
 
    m_uiCurrentStep = 0;
+   isConnected = false;
    Reset();
    
    objective = m_pcPos->GetReading().Position;
@@ -237,10 +261,10 @@ void CDemoPdr::ControlStep()
       connectToServer();
    }
 
-   if (m_pcBattery->GetReading().AvailableCharge < 0.3 && stateMode == kTakeOff)
-   {
-      stateMode = kReturnToBase;
-   }
+   //if (m_pcBattery->GetReading().AvailableCharge < 0.3 && stateMode == kTakeOff)
+   //{
+   //   stateMode = kReturnToBase;
+   //}
 
 
    currentAngle = *(new CRadians(0.1f));
@@ -250,12 +274,9 @@ void CDemoPdr::ControlStep()
    cPos = m_pcPos->GetReading().Position;
 
    sendTelemetry();
-
-   LOG << cPos.GetX() << std::endl;
    
    valRead = recv(sock , buffer, sizeof(buffer), 0);
    if (valRead != -1){
-      LOG << "RECEIVED FROM " << GetId() << std::endl;
       stateMode = *reinterpret_cast<const StateMode*>(buffer);
    }
 
@@ -266,35 +287,25 @@ void CDemoPdr::ControlStep()
    leftDist = (iterDistRead++)->second;
    backDist = (iterDistRead++)->second;
 
-   /* ---------------------------
-      ---- P2P COMMUNICATION ----
-   /* ---------------------------
-   /*struct Packet packet;
-   packet.test = 1.5;
-   CByteArray cBuf(10);
-   memcpy(&cBuf[0], &packet, sizeof(packet));
-   if (GetId() == "s0")
-   {
-      LOG << "Send Packet (from: " << GetId() << "): " << packet.test << std::endl;
-      m_pcRABAct->SetData(cBuf);
-   }*/
-
    if (stateMode == kStandby)
    {
       return;
    }
 
+   sendPacketToOtherRobots();
+   checkIfPacketIsComing();
+
+   
    count--;
    if (m_uiCurrentStep < 20) // decolage
    {
       cPos.SetZ(cPos.GetZ() + 0.25f);
       m_pcPropellers->SetAbsolutePosition(cPos);
    }
-   else if (stateMode == kTakeOff || stateMode == kReturnToBase)
+   else if ((stateMode == kTakeOff || stateMode == kReturnToBase) && count <= 0)
    {
       switch (CriticalProximity()) {
         case SensorSide::kDefault:
-            LOG << "kDefault" << std::endl;
             newCVector = new CVector3(
                (cos(currentAngle.GetValue()) * 0.4 + cPos.GetX()) * 1,
                (sin(currentAngle.GetValue()) * 0.4 + cPos.GetY()) * 1,
@@ -306,31 +317,28 @@ void CDemoPdr::ControlStep()
          break;
             
         case SensorSide::kRight:
-            LOG << "kRight" << std::endl;
             newCVector = new CVector3(
-               (cos(currentAngle.GetValue() - 1.56) * -0.5 + cPos.GetX()) * 1,
-               (sin(currentAngle.GetValue() - 1.56) * -0.5 + cPos.GetY()) * 1,
+               (cos(currentAngle.GetValue() - 1.56) * -0.1 + cPos.GetX()) * 1,
+               (sin(currentAngle.GetValue() - 1.56) * -0.1 + cPos.GetY()) * 1,
                cPos.GetZ());
             m_pcPropellers->SetAbsolutePosition(*newCVector);
             break;
         case SensorSide::kLeft:
-            LOG << "kLeft" << std::endl;
             newCVector = new CVector3(
-               (cos(currentAngle.GetValue() - 1.56) * 0.5 + cPos.GetX()) * 1,
-               (sin(currentAngle.GetValue() - 1.56) * 0.5 + cPos.GetY()) * 1,
+               (cos(currentAngle.GetValue() - 1.56) * 0.1 + cPos.GetX()) * 1,
+               (sin(currentAngle.GetValue() - 1.56) * 0.1 + cPos.GetY()) * 1,
                cPos.GetZ());
             m_pcPropellers->SetAbsolutePosition(*newCVector);
             break;
         case SensorSide::kBack:
-            LOG << "kBack" << std::endl;
             newCVector = new CVector3(
-               (cos(currentAngle.GetValue() + 0.8) * 0.5 + cPos.GetX()) * 1,
-               (sin(currentAngle.GetValue() + 0.8) * 0.5 + cPos.GetY()) * 1,
+               (cos(currentAngle.GetValue() + 0.8) * 0.1 + cPos.GetX()) * 1,
+               (sin(currentAngle.GetValue() + 0.8) * 0.1 + cPos.GetY()) * 1,
                cPos.GetZ());
             m_pcPropellers->SetAbsolutePosition(*newCVector);
             break;
         case SensorSide::kFront:
-            m_pcPropellers->SetRelativeYaw(CRadians::PI_OVER_FOUR/3);
+            m_pcPropellers->SetRelativeYaw(CRadians::PI_OVER_FOUR/2);
             break;
       }
    }
@@ -344,6 +352,62 @@ void CDemoPdr::ControlStep()
      
    }
    m_uiCurrentStep++;
+}
+
+// 1 2 3 (4)
+
+void CDemoPdr::checkIfPacketIsComing()
+{
+   const CCI_RangeAndBearingSensor::TReadings& tMsgs = m_pcRABSens->GetReadings();
+   if (!tMsgs.empty() && count <= 0) {
+      int idMax = -1;
+      float targetAltitude = 0.0;
+      for (int i = 0; i < tMsgs.size(); i++) {
+         if (tMsgs[i].Range < 100.0)
+         {
+            PacketP2P packetReceived = *reinterpret_cast<const PacketP2P*>(tMsgs[i].Data.ToCArray());
+            if (packetReceived.id > idMax
+                  && packetReceived.id < getIntId()
+                  && (packetReceived.currentAltitude - 0.1) < cPos.GetZ() && (packetReceived.currentAltitude + 0.1) > cPos.GetZ())
+            {
+               idMax = packetReceived.id;
+               targetAltitude = std::max(0.5, packetReceived.currentAltitude - 0.25);
+            }
+         }
+      }
+      if (idMax != -1 && cPos.GetZ() > 0.5)
+      {
+         CVector3* newAltitude = new CVector3(cPos.GetX(), cPos.GetY(), targetAltitude);
+         m_pcPropellers->SetAbsolutePosition(*newAltitude);
+         count = 50;
+      }
+      
+      
+      /*if (idMax == -1)
+      {
+         CVector3* test = new CVector3(cPos.GetX(), cPos.GetY(), 1.0);
+         m_pcPropellers->SetAbsolutePosition(*test);
+      }*/
+   }
+   else if (count <= 0)
+   {
+      CVector3* newAltitude = new CVector3(cPos.GetX(), cPos.GetY(), 1.0);
+      m_pcPropellers->SetAbsolutePosition(*newAltitude);
+   }
+}
+
+void CDemoPdr::sendPacketToOtherRobots()
+{
+   /* ---------------------------
+      ---- P2P COMMUNICATION ----
+      --------------------------- */
+   struct PacketP2P packet;
+   packet.id = getIntId();
+   packet.currentAltitude = cPos.GetZ();
+   CByteArray cBuf(10);
+   memcpy(&cBuf[0], &packet, sizeof(packet));
+   //LOG << "Send Packet (from: " << GetId() << "): " << packet.test << std::endl;
+   m_pcRABAct->SetData(cBuf);
 }
 
 

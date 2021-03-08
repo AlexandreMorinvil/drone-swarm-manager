@@ -80,7 +80,6 @@ def sendPosition():
     socketio.emit('POSITION', position_json)
 
 def send_data():
-    print("data send")
     data_to_send = json.dumps([drone.dump() for drone in drones])
     socketio.emit('drone_data', data_to_send, broadcast=True)
 
@@ -102,14 +101,13 @@ def set_interval(func, sec):
     return t
 
 if __name__ == '__main__':
-
-    for i in range(4):
-        t = threading.Thread(target=socks[i].receive_data, name='receive_data')
-        if (socks[i].data_received != None):
-            t.start()
-    
     #t2 = threading.Thread(target=socks[1].receive_data, name='receive_data')
     #t2.start()
     set_interval(sendPosition, 1)
     set_interval(send_data, 1)
     app.run()
+
+    while True:
+        for i in range(4):
+            if (socks[i].data_received != None):
+                socks[i].start_receive_data()
