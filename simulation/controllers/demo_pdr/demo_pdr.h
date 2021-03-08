@@ -105,6 +105,8 @@ public:
 
   int getIntId();
 
+  SensorSide FreeSide();
+
 private:
 
    CCI_CrazyflieDistanceScannerSensor* m_pcDistance;

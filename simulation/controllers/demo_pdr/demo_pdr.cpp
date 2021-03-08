@@ -15,8 +15,8 @@
 /* Logging */
 #include <argos3/core/utility/logging/argos_log.h>
 
-#define DEFAULT_PORT 8000
-#define CRITICAL_VALUE 70.0f
+#define DEFAULT_PORT 5010
+#define CRITICAL_VALUE 60.0f
 
 typedef enum {
    tx,
@@ -187,6 +187,7 @@ float CDemoPdr::computeAngleToFollow()
       return asin(ydiff/length);
    }
    return acos(ydiff/length);
+
 }
 
 
@@ -211,13 +212,32 @@ SensorSide CDemoPdr::CriticalProximity() {
       }
    }
 
-   if (((frontDist < 90.0 && frontDist > 0) && minSensor == SensorSide::kDefault)
+   if (((frontDist < 130.0 && frontDist > 0) && minSensor == SensorSide::kDefault)
         || (frontDist < min && frontDist > 0)){
       minSensor = SensorSide::kFront;
    }
 
    return minSensor;
 }
+SensorSide CDemoPdr::FreeSide() {
+   float sensor[4]  = {leftDist, backDist, rightDist, frontDist};
+   SensorSide closeSens = CriticalProximity();
+   if (closeSens == SensorSide::kDefault) return closeSens;
+   SensorSide oppSens = (SensorSide) ((closeSens +2) % 4);
+   if (sensor[oppSens] == -2 || sensor[oppSens] > 2 * CRITICAL_VALUE ) return oppSens;
+   float max   = sensor[closeSens];
+   SensorSide maxSensor = SensorSide::kDefault;
+   for (unsigned i = 0; i < 4; i++) {
+      if (sensor[i] == -2 ) return (SensorSide) i;
+      if (max < sensor[i]) {
+         max = sensor[i];
+         maxSensor = (SensorSide) i;
+      }
+   }
+   return maxSensor;
+}
+
+
 
 void CDemoPdr::Init(TConfigurationNode &t_node)
 {
@@ -287,6 +307,12 @@ void CDemoPdr::ControlStep()
    leftDist = (iterDistRead++)->second;
    backDist = (iterDistRead++)->second;
 
+   LOG << "ID " << GetId() << std::endl;
+   LOG << "rightDist " << rightDist << std::endl;
+   LOG << "frontDist " << frontDist << std::endl;
+   LOG << "leftDist " << leftDist << std::endl;
+   LOG << "backDist " << backDist << std::endl;
+
    if (stateMode == kStandby)
    {
       return;
@@ -304,8 +330,13 @@ void CDemoPdr::ControlStep()
    }
    else if ((stateMode == kTakeOff || stateMode == kReturnToBase) && count <= 0)
    {
-      switch (CriticalProximity()) {
+      LOG << "angle : " << currentAngle << std::endl;
+
+     switch (FreeSide()) {
         case SensorSide::kDefault:
+        case SensorSide::kFront:
+            LOG << "kDefault" << std::endl;
+            // avance
             newCVector = new CVector3(
                (cos(currentAngle.GetValue()) * 0.4 + cPos.GetX()) * 1,
                (sin(currentAngle.GetValue()) * 0.4 + cPos.GetY()) * 1,
@@ -316,30 +347,42 @@ void CDemoPdr::ControlStep()
             }
          break;
             
-        case SensorSide::kRight:
-            newCVector = new CVector3(
-               (cos(currentAngle.GetValue() - 1.56) * -0.1 + cPos.GetX()) * 1,
-               (sin(currentAngle.GetValue() - 1.56) * -0.1 + cPos.GetY()) * 1,
-               cPos.GetZ());
-            m_pcPropellers->SetAbsolutePosition(*newCVector);
-            break;
         case SensorSide::kLeft:
+            LOG << "kLeft" << std::endl;
+            // go left
             newCVector = new CVector3(
-               (cos(currentAngle.GetValue() - 1.56) * 0.1 + cPos.GetX()) * 1,
-               (sin(currentAngle.GetValue() - 1.56) * 0.1 + cPos.GetY()) * 1,
+               (cos(0.8 - currentAngle.GetValue()) * -0.3 + cPos.GetX()) * 1,
+               (sin(0.8 - currentAngle.GetValue()) * 0.3 + cPos.GetY()) * 1,
                cPos.GetZ());
             m_pcPropellers->SetAbsolutePosition(*newCVector);
+            if (stateMode == kReturnToBase) 
+               m_pcPropellers->SetAbsoluteYaw(*(new CRadians(computeAngleToFollow())));
+            else 
+               m_pcPropellers->SetRelativeYaw(CRadians::PI_OVER_FOUR/3);
+            break;
+        case SensorSide::kRight:
+            LOG << "kRight" << std::endl;
+            //go right
+            newCVector = new CVector3(
+               (cos(0.8 - currentAngle.GetValue()) * 0.3 + cPos.GetX()) * 1,
+               (sin(0.8 - currentAngle.GetValue()) * -0.3 + cPos.GetY()) * 1,
+               cPos.GetZ());
+            m_pcPropellers->SetAbsolutePosition(*newCVector);
+            if (stateMode == kReturnToBase) 
+               m_pcPropellers->SetAbsoluteYaw(*(new CRadians(computeAngleToFollow())));
+            else 
+               m_pcPropellers->SetRelativeYaw(-CRadians::PI_OVER_FOUR/3);
             break;
         case SensorSide::kBack:
-            newCVector = new CVector3(
-               (cos(currentAngle.GetValue() + 0.8) * 0.1 + cPos.GetX()) * 1,
-               (sin(currentAngle.GetValue() + 0.8) * 0.1 + cPos.GetY()) * 1,
-               cPos.GetZ());
-            m_pcPropellers->SetAbsolutePosition(*newCVector);
+            LOG << "kBack" << std::endl;
+            // turn around
+            m_pcPropellers->SetRelativeYaw(CRadians::PI_OVER_FOUR);
             break;
-        case SensorSide::kFront:
-            m_pcPropellers->SetRelativeYaw(CRadians::PI_OVER_FOUR/2);
-            break;
+        // case SensorSide::kFront:
+        //     // turn 45 deg
+        //     LOG << "kFront" << std::endl;
+        //     m_pcPropellers->SetRelativeYaw(CRadians::PI_OVER_FOUR);
+        //     break;
       }
    }
    else if (stateMode == kLanding && count <= 0)
