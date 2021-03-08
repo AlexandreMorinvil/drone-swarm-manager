@@ -14,6 +14,10 @@
 #include <argos3/core/utility/math/vector2.h>
 /* Logging */
 #include <argos3/core/utility/logging/argos_log.h>
+#include <argos3/core/simulator/entity/embodied_entity.h>
+#include<argos3/plugins/simulator/entities/box_entity.h>
+
+
 
 #define DEFAULT_PORT 5015
 #define CRITICAL_VALUE 70.0f
@@ -78,6 +82,7 @@ int CDemoPdr::getIntId()
 void CDemoPdr::connectToServer()
 {
    sock = 0;
+   isConnected = true;
 
    if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) 
    { 
@@ -89,7 +94,7 @@ void CDemoPdr::connectToServer()
    std::regex regular_exp("[0-9].*");
    std::smatch sm;
    regex_search(GetId(), sm, regular_exp);
-   serv_addr.sin_port = htons(DEFAULT_PORT + getIntId());
+   serv_addr.sin_port = htons(DEFAULT_PORT + stoi(sm[0]));
    
 
    // Convert IPv4 and IPv6 addresses from text to binary form 
@@ -101,7 +106,7 @@ void CDemoPdr::connectToServer()
    isConnected = true;
 
    
-   if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr))) 
+   if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) 
    { 
       printf("\nConnection Failed \n");
    }
@@ -109,12 +114,24 @@ void CDemoPdr::connectToServer()
 
 }
 
+void CDemoPdr::setPosVelocity() {
+   if (m_uiCurrentStep % 10 == 0 && m_uiCurrentStep != 0) {
+      posInitial = cPos;
+   }
+   if (m_uiCurrentStep % 10 == 9) {
+      posFinal = cPos;
+   }
+   
+}
+
+
 void CDemoPdr::sendTelemetry()
 {
    // Unblock socket
    int flags = fcntl(sock, F_GETFL);
    fcntl(sock, F_SETFL, flags | O_NONBLOCK);
 
+   
    struct PacketPosition packetPosition;
    packetPosition.x = cPos.GetX();
    packetPosition.y = cPos.GetY();
@@ -124,9 +141,9 @@ void CDemoPdr::sendTelemetry()
 
    struct PacketVelocity packetVelocity;
    packetVelocity.packetType = velocity;
-   packetVelocity.px = 0;
-   packetVelocity.py = 0;
-   packetVelocity.pz = 0;
+   packetVelocity.px = (posFinal.GetX() - posInitial.GetX());
+   packetVelocity.py = (posFinal.GetY() - posInitial.GetY());
+   packetVelocity.pz = (posFinal.GetZ() - posInitial.GetZ());
    send(sock, &packetVelocity, sizeof(packetVelocity), 0 );
 
    struct PacketDistance packetDistance;
@@ -225,6 +242,8 @@ void CDemoPdr::Init(TConfigurationNode &t_node)
    m_pcRABAct      = GetActuator <CCI_RangeAndBearingActuator>("range_and_bearing");
    m_pcDistance = GetSensor<CCI_CrazyflieDistanceScannerSensor>("crazyflie_distance_scanner");
    m_pcPropellers = GetActuator<CCI_QuadRotorPositionActuator>("quadrotor_position");
+
+
    try
    {
       m_pcBattery = GetSensor<CCI_BatterySensor>("battery");
@@ -234,16 +253,21 @@ void CDemoPdr::Init(TConfigurationNode &t_node)
    {
    }
 
+   /*
+    * Initialize other stuff
+    */
+   /* Create a random number generator. We use the 'argos' category so
+      that creation, reset, seeding and cleanup are managed by ARGoS. */
    m_pcRNG = CRandom::CreateRNG("argos");
 
    count = 0;
 
    m_uiCurrentStep = 0;
-   isConnected = false;
    Reset();
    
    objective = m_pcPos->GetReading().Position;
-
+   posInitial = *(new CVector3(0,0,0));
+   posFinal   = *(new CVector3(0,0,0));
    stateMode = kStandby;
 }
 
@@ -269,7 +293,9 @@ void CDemoPdr::ControlStep()
 
    cPos = m_pcPos->GetReading().Position;
 
+   setPosVelocity();
    sendTelemetry();
+
    
    valRead = recv(sock , buffer, sizeof(buffer), 0);
    if (valRead != -1){
@@ -288,10 +314,6 @@ void CDemoPdr::ControlStep()
       return;
    }
 
-   sendPacketToOtherRobots();
-   checkIfPacketIsComing();
-
-   
    count--;
    if (m_uiCurrentStep < 20) // decolage
    {
@@ -413,7 +435,6 @@ void CDemoPdr::sendPacketToOtherRobots()
    memcpy(&cBuf[0], &packet, sizeof(packet));
    m_pcRABAct->SetData(cBuf);
 }
-
 
 
 /****************************************/

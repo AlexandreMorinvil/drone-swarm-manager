@@ -101,11 +101,7 @@ public:
 
   void connectToServer();
 
-  void checkIfPacketIsComing();
-
-  void sendPacketToOtherRobots();
-
-  int getIntId();
+  void setPosVelocity();
 
   SensorSide FreeSide();
 
@@ -120,11 +116,12 @@ private:
 
    /* The random number generator */
    CRandom::CRNG* m_pcRNG;
-
-   CVector3 objective;
-
+  CVector3 posInitial;
+  CVector3 posFinal  ;
    /* Current step */
    uint m_uiCurrentStep;
+
+   bool isConnected;
 
    /* Packet */
   typedef enum {
@@ -186,17 +183,14 @@ struct PacketDistance {
   CVector3* newCVector;
   CRadians currentAngle;
   int count;
-  bool isConnected;
   StateMode stateMode;
 
   CVector3 cPos;
 
   float leftDist, backDist, frontDist, rightDist;
-  
-  struct PacketP2P
+  struct Packet
   {
-    uint8_t id;
-    float currentAltitude;
+    float test;
   };
 
 };
