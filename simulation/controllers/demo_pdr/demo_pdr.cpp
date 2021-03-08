@@ -16,7 +16,7 @@
 #include <argos3/core/utility/logging/argos_log.h>
 
 #define DEFAULT_PORT 8000
-#define CRITICAL_VALUE 90.0f
+#define CRITICAL_VALUE 70.0f
 
 typedef enum {
    tx,
@@ -80,7 +80,6 @@ int CDemoPdr::getIntId()
 void CDemoPdr::connectToServer()
 {
    sock = 0;
-   retry--;
 
    if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) 
    { 
@@ -103,28 +102,31 @@ void CDemoPdr::connectToServer()
    }
 
    // Unblock socket connect
-   int flags = fcntl(sock, F_GETFL);
-   fcntl(sock, F_SETFL, flags | O_NONBLOCK);
+   //int flags = fcntl(sock, F_GETFL);
+   //fcntl(sock, F_SETFL, flags | O_NONBLOCK);
 
+   isConnected = true;
 
    
    if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr))) 
    { 
-      int error = 0;
+      printf("\nConnection Failed \n");
+      /*int error = 0;
       socklen_t len = sizeof (error);
       int retval = getsockopt (sock, SOL_SOCKET, SO_ERROR, &error, &len);
-      printf("\nConnection Failed \n");
+      fprintf(stderr, "error getting socket error code: %s\n", strerror(retval));
+      fprintf(stderr, "socket error: %s\n", strerror(error));
       if (retval != 0) {
          /* there was a problem getting the error code */
-         fprintf(stderr, "error getting socket error code: %s\n", strerror(retval));
+         /*fprintf(stderr, "error getting socket error code: %s\n", strerror(retval));
          return;
       }
 
       if (error != 0) {
          /* socket has a non zero error status */
-         fprintf(stderr, "socket error: %s\n", strerror(error));
+         /*fprintf(stderr, "socket error: %s\n", strerror(error));
       }
-      return; 
+      return; */
    }
       
 
@@ -241,7 +243,7 @@ void CDemoPdr::Init(TConfigurationNode &t_node)
    count = 0;
 
    m_uiCurrentStep = 0;
-   retry = 3;
+   isConnected = false;
    Reset();
    
    objective = m_pcPos->GetReading().Position;
@@ -254,7 +256,7 @@ void CDemoPdr::Init(TConfigurationNode &t_node)
 
 void CDemoPdr::ControlStep()
 {
-   if (retry > 0)
+   if (!isConnected)
    {
       connectToServer();
    }
@@ -316,22 +318,22 @@ void CDemoPdr::ControlStep()
             
         case SensorSide::kRight:
             newCVector = new CVector3(
-               (cos(currentAngle.GetValue() - 1.56) * -0.3 + cPos.GetX()) * 1,
-               (sin(currentAngle.GetValue() - 1.56) * -0.3 + cPos.GetY()) * 1,
+               (cos(currentAngle.GetValue() - 1.56) * -0.1 + cPos.GetX()) * 1,
+               (sin(currentAngle.GetValue() - 1.56) * -0.1 + cPos.GetY()) * 1,
                cPos.GetZ());
             m_pcPropellers->SetAbsolutePosition(*newCVector);
             break;
         case SensorSide::kLeft:
             newCVector = new CVector3(
-               (cos(currentAngle.GetValue() - 1.56) * 0.3 + cPos.GetX()) * 1,
-               (sin(currentAngle.GetValue() - 1.56) * 0.3 + cPos.GetY()) * 1,
+               (cos(currentAngle.GetValue() - 1.56) * 0.1 + cPos.GetX()) * 1,
+               (sin(currentAngle.GetValue() - 1.56) * 0.1 + cPos.GetY()) * 1,
                cPos.GetZ());
             m_pcPropellers->SetAbsolutePosition(*newCVector);
             break;
         case SensorSide::kBack:
             newCVector = new CVector3(
-               (cos(currentAngle.GetValue() + 0.8) * 0.3 + cPos.GetX()) * 1,
-               (sin(currentAngle.GetValue() + 0.8) * 0.3 + cPos.GetY()) * 1,
+               (cos(currentAngle.GetValue() + 0.8) * 0.1 + cPos.GetX()) * 1,
+               (sin(currentAngle.GetValue() + 0.8) * 0.1 + cPos.GetY()) * 1,
                cPos.GetZ());
             m_pcPropellers->SetAbsolutePosition(*newCVector);
             break;
@@ -375,7 +377,6 @@ void CDemoPdr::checkIfPacketIsComing()
       }
       if (idMax != -1 && cPos.GetZ() > 0.5)
       {
-         LOG << "LOWER" << std::endl;
          CVector3* newAltitude = new CVector3(cPos.GetX(), cPos.GetY(), targetAltitude);
          m_pcPropellers->SetAbsolutePosition(*newAltitude);
          count = 50;
@@ -390,7 +391,6 @@ void CDemoPdr::checkIfPacketIsComing()
    }
    else if (count <= 0)
    {
-      LOG << "UP" << std::endl;
       CVector3* newAltitude = new CVector3(cPos.GetX(), cPos.GetY(), 1.0);
       m_pcPropellers->SetAbsolutePosition(*newAltitude);
    }

@@ -180,7 +180,7 @@ struct PacketDistance {
   CVector3* newCVector;
   CRadians currentAngle;
   int count;
-  int retry;
+  bool isConnected;
   StateMode stateMode;
 
   CVector3 cPos;
