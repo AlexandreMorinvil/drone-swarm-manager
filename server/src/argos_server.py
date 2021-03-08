@@ -24,7 +24,6 @@ class ArgosServer() :
         self.sent_data = None
         self.point = Vec3(0,0,0)
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
         self.sock.bind(('localhost', port))
          # listen for incoming connections (server mode) with one connection at a time
         self.sock.listen()
@@ -42,21 +41,20 @@ class ArgosServer() :
         data = struct.pack(format_packer, packet)
         self.connection.send(data)
 
+
         
     def receive_data(self):
         while True:
-            self.connection.settimeout(5.0)
-            print("ALLO1")
             self.data_received = self.connection.recv(16)   
-            print("ALLO2")
             self.data_received += bytearray(16 - len(self.data_received)) 
 
             if PacketType(self.data_received[0]) == PacketType.TX:
-                (a, b, packet_type, is_led_activated, vbattery, rssi) = struct.unpack("<hffbfb", self.data_received)
+                (packet_type, is_led_activated, vbattery, rssi, stateMode, a) = struct.unpack("<ibfbih", self.data_received)
                 self.drone_argos._vbat = vbattery
+                self.drone_argos._state = stateMode
 
             elif PacketType(self.data_received[0]) == PacketType.POSITION:
-                (a, b, c, packet_type, x, y, z) = struct.unpack("<bbbbfff", self.data_received)
+                (packet_type, x, y, z) = struct.unpack("<ifff", self.data_received)
                 self.drone_argos.currentPos.x = x
                 self.drone_argos.currentPos.y = y
                 self.drone_argos.currentPos.z = z
@@ -67,7 +65,7 @@ class ArgosServer() :
                 
                 
             elif PacketType(self.data_received[0]) == PacketType.DISTANCE:
-                (a, b, packet_type, front, back, up, left, right, zrange) = struct.unpack("<hbbhhhhhh", self.data_received)
+                (packet_type, front, back, up, left, right, zrange, a, b) = struct.unpack("<hbhhhhhhb", self.data_received)
                 self.drone_argos.sensors.front = front
                 self.drone_argos.sensors.back = back
                 self.drone_argos.sensors.up = up
