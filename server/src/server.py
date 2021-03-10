@@ -24,7 +24,7 @@ socketio = SocketIO(app ,cors_allowed_origins='*')
 default_port = 5015
 
 # Select mode
-mode = Mode.REAL_TIME
+mode = Mode.SIMULATION
 
 # Initialize the low-level drivers (don't list the debug drivers)
 cflib.crtp.init_drivers(enable_debug_driver=False)
@@ -34,7 +34,7 @@ available = cflib.crtp.scan_interfaces()
 print('Crazyflies found:')
 
 if (mode == Mode.REAL_TIME):
-    drones = [Drone("radio://0/80/250K",Vec3(0,0,0),0), Drone("radio://0/72/250K",Vec3(0,0,0),1)]
+    drones = [Drone("radio://0/80/250K",Vec3(0,0,0),0), Drone("radio://0/72/250K",Vec3(0,0,0),1), Drone("radio://0/72/250K",Vec3(0,0,0),2), Drone("radio://0/72/250K",Vec3(0,0,0),4)]
 else:
     drones = []
 

@@ -1,6 +1,16 @@
 <div class="drone-board">
-  <h1>Info :</h1>
+  <h1>Drone : {{ drone.getDroneId() }}</h1>
+  <mat-divider></mat-divider>
+  <h1>Details</h1>
+  <p>Connection : {{ drone.getBatteryLevel() }}</p>
+  <p>State : {{ drone.getDroneStateText() }}</p>
   <p>Battery Level : {{ drone.getBatteryLevel() }}</p>
+  <p>Position X : {{ drone.getPositionnX() }}</p>
+  <p>Position Y : {{ drone.getPositionnY() }}</p>
+  <p>Position Z : {{ drone.getPositionnZ() }}</p>
+  <p>Position X : {{ drone.getSpeedX() }}</p>
+  <p>Position Y : {{ drone.getSpeedY() }}</p>
+  <p>Position Z : {{ drone.getSpeedZ() }}</p>
 
   <mat-divider></mat-divider>
 
@@ -17,7 +27,7 @@
       Take Off
     </button>
   </div>
-  
+
   <div class="return-to-base">
     <button mat-button (click)="sendReturnToBaseRequest()">
       <mat-icon>flight_land</mat-icon>

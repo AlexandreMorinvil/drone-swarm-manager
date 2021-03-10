@@ -24,11 +24,6 @@ class ArgosServer() :
         self.sent_data = None
         self.point = Vec3(0,0,0)
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-<<<<<<< HEAD
-        print(port)
-        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
-=======
->>>>>>> predev
         self.sock.bind(('localhost', port))
          # listen for incoming connections (server mode) with one connection at a time
         self.sock.listen()
@@ -53,9 +48,7 @@ class ArgosServer() :
         print('entree receive_data')
         while True:
             self.connection.settimeout(5.0)
-            print("ALLO1")
             self.data_received = self.connection.recv(16)   
-            print("ALLO2")
             self.data_received += bytearray(16 - len(self.data_received)) 
 
             if PacketType(self.data_received[0]) == PacketType.TX:
