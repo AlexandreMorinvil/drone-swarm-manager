@@ -1,12 +1,10 @@
 #!/bin/bash
 
-# To enter the container
-docker exec -it $(docker ps -qf "name=simulation-argos") /bin/bash
-
 # To launch the simulation
-cd experiments
+cd /root/simulation
+cd ./experiments
 ./wallGen.out
-cd ../cmake
+cd /root/simulation/cmake
 cmake ..
 make
-cd ~/alfred/simulation && argos3 -c experiments/demo_pdr.argos
+cd /root/simulation && argos3 -c experiments/demo_pdr.argos
