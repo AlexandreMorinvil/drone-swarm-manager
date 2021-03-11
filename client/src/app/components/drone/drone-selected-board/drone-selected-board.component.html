@@ -1,37 +1,58 @@
-<div class="drone-board">
+<div class="selected-drone-board">
   <h1>Drone : {{ drone.getDroneId() }}</h1>
-  <mat-divider></mat-divider>
-  <h1>Details</h1>
-  <p>Connection : {{ drone.getBatteryLevel() }}</p>
-  <p>State : {{ drone.getDroneStateText() }}</p>
-  <p>Battery Level : {{ drone.getBatteryLevel() }}</p>
-  <p>Position X : {{ drone.getPositionnX() }}</p>
-  <p>Position Y : {{ drone.getPositionnY() }}</p>
-  <p>Position Z : {{ drone.getPositionnZ() }}</p>
-  <p>Position X : {{ drone.getSpeedX() }}</p>
-  <p>Position Y : {{ drone.getSpeedY() }}</p>
-  <p>Position Z : {{ drone.getSpeedZ() }}</p>
 
   <mat-divider></mat-divider>
 
-  <h1>Action :</h1>
-  <div class="led_button">
-    <button mat-button (click)="sendToggleLedRequest()">Led</button>
-  </div>
-
-  <mat-divider></mat-divider>
-  <h1>Control :</h1>
-  <div class="take-off">
-    <button mat-button (click)="sendTakeOffRequest()">
+  <h1>Controls</h1>
+  <div>
+    <button mat-button class="selected-drone-control-button" (click)="sendTakeOffRequest()">
       <mat-icon>flight_takeoff</mat-icon>
-      Take Off
+      Run Mission
     </button>
-  </div>
 
-  <div class="return-to-base">
-    <button mat-button (click)="sendReturnToBaseRequest()">
-      <mat-icon>flight_land</mat-icon>
+    <button mat-button class="selected-drone-control-button" (click)="sendReturnToBaseRequest()">
+      <mat-icon>home</mat-icon>
       Return to base
     </button>
+
+    <button mat-button class="selected-drone-control-button" (click)="sendReturnToBaseRequest()">
+      <mat-icon>flight_land</mat-icon>
+      Land
+    </button>
+
+    <button mat-button class="selected-drone-control-button" (click)="sendToggleLedRequest()">
+      <mat-icon>lightbulb</mat-icon>
+      Toggle LED
+    </button>
   </div>
+
+  <mat-divider></mat-divider>
+  <h1>Details</h1>
+  <p class="selected-drone-attribute">
+    <span>Connection :</span> <span> {{ drone.getConnectionStatus() }}</span>
+  </p>
+  <p class="selected-drone-attribute">
+    <span>State :</span><span> {{ drone.getDroneStateText() }}</span>
+  </p>
+  <p class="selected-drone-attribute">
+    <span>Battery Level :</span><span> {{ drone.getBatteryLevel() }} % </span>
+  </p>
+  <p class="selected-drone-attribute">
+    <span>Position X :</span><span> {{ drone.getPositionnX() }} m</span>
+  </p>
+  <p class="selected-drone-attribute">
+    <span>Position Y :</span><span> {{ drone.getPositionnY() }} m</span>
+  </p>
+  <p class="selected-drone-attribute">
+    <span>Position Z :</span><span> {{ drone.getPositionnZ() }} m</span>
+  </p>
+  <p class="selected-drone-attribute">
+    <span>Speed X :</span><span> {{ drone.getSpeedX() }} m/s</span>
+  </p>
+  <p class="selected-drone-attribute">
+    <span>Speed Y :</span><span> {{ drone.getSpeedY() }} m/s</span>
+  </p>
+  <p class="selected-drone-attribute">
+    <span>Speed Z :</span><span> {{ drone.getSpeedZ() }} m/s</span>
+  </p>
 </div>

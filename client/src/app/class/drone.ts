@@ -64,8 +64,8 @@ export class Drone {
     return Math.ceil(batteryLevel);
   }
 
-  getScalarSpeed(): number {
-    return Math.sqrt(this.currentSpeed.x ** 2 + this.currentSpeed.y ** 2 /*+ this.currentSpeed.z ** 2*/);
+  getScalarSpeed(): string {
+    return Math.sqrt(this.currentSpeed.x ** 2 + this.currentSpeed.y ** 2 + this.currentSpeed.z ** 2).toFixed(DECIMALS_TO_DISPLAY);
   }
 
   getPositionnX(): string {
@@ -101,7 +101,7 @@ export class Drone {
       case DroneState.TAKE_OFF:
         return "IN MISSION";
       case DroneState.RETURN_TO_BASE:
-        return "RETURN TO BASE";
+        return "RETURN";
       case DroneState.LANDING:
         return "LANDING";
       case DroneState.FAIL:
