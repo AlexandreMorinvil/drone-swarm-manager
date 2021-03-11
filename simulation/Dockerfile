@@ -71,6 +71,7 @@ COPY . .
 
 # Build code
 RUN cd /root/simulation &&\
-    mkdir build && cd build &&\
+    mkdir build &&\
+    cd build &&\
     cmake -DCMAKE_BUILD_TYPE=Debug .. &&\
     make -j $(nproc)
