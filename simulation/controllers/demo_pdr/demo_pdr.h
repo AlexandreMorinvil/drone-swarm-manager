@@ -33,13 +33,13 @@
 /* Definitions for random number generation */
 #include <argos3/core/utility/math/rng.h>
 
+#include "moving.h"
+
 /*
  * All the ARGoS stuff in the 'argos' namespace.
  * With this statement, you save typing argos:: every time.
  */
 using namespace argos;
-
-enum SensorSide { kLeft, kBack, kRight, kFront, kDefault};
 
 /*
  * A controller is simply an implementation of the CCI_Controller class.
@@ -113,12 +113,14 @@ public:
 
 private:
 
-   CCI_CrazyflieDistanceScannerSensor* m_pcDistance;
-   CCI_RangeAndBearingSensor* m_pcRABSens;
-   CCI_RangeAndBearingActuator* m_pcRABAct;
-   CCI_QuadRotorPositionActuator* m_pcPropellers;
-   CCI_PositioningSensor* m_pcPos;
-   CCI_BatterySensor* m_pcBattery;
+  CCI_CrazyflieDistanceScannerSensor* m_pcDistance;
+  CCI_RangeAndBearingSensor* m_pcRABSens;
+  CCI_RangeAndBearingActuator* m_pcRABAct;
+  CCI_QuadRotorPositionActuator* m_pcPropellers;
+  CCI_PositioningSensor* m_pcPos;
+  CCI_BatterySensor* m_pcBattery;
+
+  CMoving* cMoving;
 
    /* The random number generator */
    CRandom::CRNG* m_pcRNG;
