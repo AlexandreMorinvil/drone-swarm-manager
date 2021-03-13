@@ -10,21 +10,39 @@
 
 #ifndef SENSORS_H
 #define SENSORS_H
+#define CRITICAL_VALUE 70.0f
+
+#include <argos3/plugins/robots/crazyflie/control_interface/ci_crazyflie_distance_scanner_sensor.h>
+#include <argos3/core/control_interface/ci_controller.h>
+#include <string>
+#include <fcntl.h>
+#include <regex>
+
 
 enum SensorSide { kLeft, kBack, kRight, kFront, kDefault};
+
+using argos::CCI_CrazyflieDistanceScannerSensor;
+using std::string;
 
 /*
  * A controller is simply an implementation of the CCI_Controller class.
  */
 class CSensors {
-   public:
-      CSensors();
-      
+ public:
+      CSensors(
+          CCI_CrazyflieDistanceScannerSensor* pcDistance);
+
       virtual ~CSensors() {}
 
-   private:
+      void UpdateValues();
 
+      SensorSide FreeSide();
+
+      SensorSide CriticalProximity();
+
+ private:
+      CCI_CrazyflieDistanceScannerSensor* m_pcDistance;
+      float leftDist, backDist, frontDist, rightDist;
 };
-
 
 #endif

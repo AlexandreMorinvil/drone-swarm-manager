@@ -33,7 +33,11 @@
 /* Definitions for random number generation */
 #include <argos3/core/utility/math/rng.h>
 
-#include "moving.h"
+#include "controllers/demo_pdr/moving.h"
+#include "controllers/demo_pdr/sensors.h"
+#include "controllers/demo_pdr/p2p.h"
+#include "controllers/demo_pdr/radio.h"
+#include "controllers/demo_pdr/timer.h"
 
 /*
  * All the ARGoS stuff in the 'argos' namespace.
@@ -121,6 +125,10 @@ private:
   CCI_BatterySensor* m_pcBattery;
 
   CMoving* cMoving;
+  CSensors* cSensors;
+  CP2P* cP2P;
+  CRadio* cRadio;
+  CTimer* cTimer;
 
    /* The random number generator */
    CRandom::CRNG* m_pcRNG;
@@ -140,68 +148,24 @@ private:
     distance
   } PacketType;
 
-  typedef enum {
-    kStandby,
-    kTakeOff,
-    kReturnToBase,
-    kLanding
-  } StateMode;
+  
 
 struct packetRX {
   bool led_activation;
 } __attribute__((packed));
 
-struct PacketPosition {
-  PacketType packetType;
-  float x;
-  float y;
-  float z;
-} __attribute__((packed));
-
-struct PacketTX {
-  PacketType packetType;
-  bool isLedActivated;
-  float vbat;
-  uint8_t rssiToBase;
-  StateMode stateMode;
-} __attribute__((packed));
-
-struct PacketVelocity {
-  PacketType packetType;
-  float px;
-  float py;
-  float pz;
-} __attribute__((packed));
-
-struct PacketDistance {
-  PacketType packetType;
-  uint16_t front;
-  uint16_t back;
-  uint16_t up;
-  uint16_t left;
-  uint16_t right;
-  uint16_t zrange;
-} __attribute__((packed));
 
 
-  /*Socket variables*/
-  int sock, valRead, n;
-  struct sockaddr_in serv_addr;
-  char buffer[1024];
   CVector3* newCVector;
   CRadians currentAngle;
-  int count;
   StateMode stateMode;
   CVector3 objective;
 
   CVector3 cPos;
 
-  float leftDist, backDist, frontDist, rightDist;
-  struct PacketP2P
-  {
-    uint8_t id;
-    float currentAltitude;
-  };
+  int idRobot;
+
+  
 
 };
 

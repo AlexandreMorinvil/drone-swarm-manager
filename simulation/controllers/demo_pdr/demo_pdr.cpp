@@ -19,98 +19,13 @@
 
 
 
-#define DEFAULT_PORT 5015
-#define CRITICAL_VALUE 70.0f
-
-typedef enum {
-   tx,
-   position,
-   attitude,
-   velocity,
-   distance
-} PacketType;
-
-struct packetRX {
-  bool led_activation;
-} __attribute__((packed));
-
-struct PacketPosition {
-  PacketType packetType;
-  float x;
-  float y;
-  float z;
-} __attribute__((packed));
-
-struct PacketTX {
-  PacketType packetType;
-  bool isLedActivated;
-  float vbat;
-  uint8_t rssiToBase;
-} __attribute__((packed));
-
-struct PacketVelocity {
-  PacketType packetType;
-  float px;
-  float py;
-  float pz;
-} __attribute__((packed));
-
-struct PacketDistance {
-  PacketType packetType;
-  uint16_t front;
-  uint16_t back;
-  uint16_t up;
-  uint16_t left;
-  uint16_t right;
-  uint16_t zrange;
-} __attribute__((packed));
-
-
 
 /****************************************/
 /****************************************/
 
 
-int CDemoPdr::getIntId()
-{
-   std::regex regular_exp("[0-9].*");
-   std::smatch sm;
-   regex_search(GetId(), sm, regular_exp);
-   return stoi(sm[0]);
-}
 
-void CDemoPdr::connectToServer()
-{
-   sock = 0;
-   isConnected = true;
 
-   if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) 
-   { 
-      printf("\n Socket creation error \n"); 
-      return; 
-   }
-   serv_addr.sin_family = AF_INET;
-
-   std::regex regular_exp("[0-9].*");
-   std::smatch sm;
-   regex_search(GetId(), sm, regular_exp);
-   serv_addr.sin_port = htons(DEFAULT_PORT + stoi(sm[0]));
-   
-
-   // Convert IPv4 and IPv6 addresses from text to binary form 
-   if(inet_pton(AF_INET, "127.0.0.1", &serv_addr.sin_addr)<=0)  
-   { 
-      printf("\nInvalid address/ Address not supported \n"); 
-      return; 
-   }
-   isConnected = true;
-
-   
-   if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) 
-   { 
-      printf("\nConnection Failed \n");
-   }
-}
 
 void CDemoPdr::setPosVelocity() {
    if (m_uiCurrentStep % 10 == 0 && m_uiCurrentStep != 0) {
@@ -123,48 +38,7 @@ void CDemoPdr::setPosVelocity() {
 }
 
 
-void CDemoPdr::sendTelemetry()
-{
-   // Unblock socket
-   int flags = fcntl(sock, F_GETFL);
-   fcntl(sock, F_SETFL, flags | O_NONBLOCK);
-
-   
-   struct PacketPosition packetPosition;
-   packetPosition.x = cPos.GetX();
-   packetPosition.y = cPos.GetY();
-   packetPosition.z = cPos.GetZ();
-   packetPosition.packetType = position;
-   send(sock, &packetPosition, sizeof(packetPosition), 0 );
-
-   struct PacketVelocity packetVelocity;
-   packetVelocity.packetType = velocity;
-   packetVelocity.px = (posFinal.GetX() - posInitial.GetX());
-   packetVelocity.py = (posFinal.GetY() - posInitial.GetY());
-   packetVelocity.pz = (posFinal.GetZ() - posInitial.GetZ());
-   send(sock, &packetVelocity, sizeof(packetVelocity), 0 );
-
-   struct PacketDistance packetDistance;
-   packetDistance.packetType = distance;
-   packetDistance.front = 0;
-   packetDistance.left = 0;
-   packetDistance.right = 0;
-   packetDistance.up = 0;
-   packetDistance.back = 0;
-   packetDistance.zrange = 0;
-   send(sock, &packetDistance, sizeof(packetDistance), 0 );
-
-   const CCI_BatterySensor::SReading& sBatRead = m_pcBattery->GetReading();
-   struct PacketTX packetTx;
-   packetTx.packetType = tx;
-   packetTx.isLedActivated = true;
-   packetTx.vbat = sBatRead.AvailableCharge;
-   packetTx.stateMode = stateMode;
-   packetTx.rssiToBase = 0;
-   send(sock, &packetTx, sizeof(packetTx), 0 );
-}
-
-float CDemoPdr::computeAngleToFollow()
+/*float CDemoPdr::computeAngleToFollow()
 {
    float xdiff = objective.GetX() - cPos.GetX();
    float ydiff = objective.GetY() - cPos.GetY();
@@ -180,7 +54,7 @@ float CDemoPdr::computeAngleToFollow()
    }
    return acos(ydiff/length);
 
-}
+}*/
 
 
 CDemoPdr::CDemoPdr() : m_pcDistance(NULL),
@@ -191,219 +65,124 @@ CDemoPdr::CDemoPdr() : m_pcDistance(NULL),
 
 /****************************************/
 /****************************************/
-SensorSide CDemoPdr::CriticalProximity() {
-   float sensor[4]  = {leftDist, backDist, rightDist, frontDist};
-   float min   = CRITICAL_VALUE;
-   SensorSide minSensor = SensorSide::kDefault;
 
-   for (unsigned i = 0; i < 4; i++) {
-      if (min > sensor[i] && sensor[i] > 0.0) 
-      {
-         min = sensor[i];
-         minSensor = (SensorSide) i;
+
+
+
+
+void CDemoPdr::Init(TConfigurationNode &t_node) {
+      m_pcRABSens =
+         GetSensor<CCI_RangeAndBearingSensor>("range_and_bearing");
+      m_pcRABAct =
+         GetActuator<CCI_RangeAndBearingActuator>("range_and_bearing");
+      m_pcDistance =
+         GetSensor<CCI_CrazyflieDistanceScannerSensor>
+         ("crazyflie_distance_scanner");
+      m_pcPropellers =
+         GetActuator<CCI_QuadRotorPositionActuator>("quadrotor_position");
+
+
+      try {
+         m_pcBattery = GetSensor<CCI_BatterySensor>("battery");
+         m_pcPos = GetSensor<CCI_PositioningSensor>("positioning");
+      } catch (CARGoSException &ex) {
       }
-   }
 
-   if (((frontDist < 130.0 && frontDist > 0) && minSensor == SensorSide::kDefault)
-        || (frontDist < min && frontDist > 0)){
-      minSensor = SensorSide::kFront;
-   } 
+      cMoving = new CMoving(m_pcPropellers, m_pcPos);
+      cSensors = new CSensors(m_pcDistance);
+      cTimer = new CTimer();
+      cP2P = new CP2P(m_pcRABSens, m_pcRABAct, cTimer);
+      cRadio = new CRadio();
 
-   return minSensor;
-}
+      m_pcRNG = CRandom::CreateRNG("argos");
 
+      m_uiCurrentStep = 0;
+      Reset();
 
-
-SensorSide CDemoPdr::FreeSide() {
-   float sensor[4]  = {leftDist, backDist, rightDist, frontDist};
-   SensorSide closeSens = CriticalProximity();
-   if (closeSens == SensorSide::kDefault) return closeSens;
-   SensorSide oppSens = (SensorSide) ((closeSens +2) % 4);
-   if (sensor[oppSens] == -2 || sensor[oppSens] > 2 * CRITICAL_VALUE ) return oppSens;
-   float max   = sensor[closeSens];
-   SensorSide maxSensor = SensorSide::kDefault;
-   for (unsigned i = 0; i < 4; i++) {
-      if (sensor[i] == -2 ) return (SensorSide) i;
-      if (max < sensor[i]) {
-         max = sensor[i];
-         maxSensor = (SensorSide) i;
-      }
-   }
-   return maxSensor;
-}
-
-
-
-void CDemoPdr::Init(TConfigurationNode &t_node)
-{
-   m_pcRABSens     = GetSensor <CCI_RangeAndBearingSensor>("range_and_bearing" );
-   m_pcRABAct      = GetActuator <CCI_RangeAndBearingActuator>("range_and_bearing");
-   m_pcDistance = GetSensor<CCI_CrazyflieDistanceScannerSensor>("crazyflie_distance_scanner");
-   m_pcPropellers = GetActuator<CCI_QuadRotorPositionActuator>("quadrotor_position");
-
-
-   try
-   {
-      m_pcBattery = GetSensor<CCI_BatterySensor>("battery");
-      m_pcPos = GetSensor<CCI_PositioningSensor>("positioning");
-   }
-   catch (CARGoSException &ex)
-   {
-   }
-
-   cMoving = new CMoving(m_pcPropellers, m_pcPos);
-
-   /*
-    * Initialize other stuff
-    */
-   /* Create a random number generator. We use the 'argos' category so
-      that creation, reset, seeding and cleanup are managed by ARGoS. */
-   m_pcRNG = CRandom::CreateRNG("argos");
-
-   count = 0;
-
-   m_uiCurrentStep = 0;
-   Reset();
-   
-   objective = m_pcPos->GetReading().Position;
-   posInitial = *(new CVector3(0,0,0));
-   posFinal   = *(new CVector3(0,0,0));
-   stateMode = kStandby;
+      objective = m_pcPos->GetReading().Position;
+      posInitial = *(new CVector3(0, 0, 0));
+      posFinal   = *(new CVector3(0, 0, 0));
+      stateMode = kStandby;
+      std::regex regular_exp("[0-9].*");
+      std::smatch sm;
+      regex_search(GetId(), sm, regular_exp);
+      idRobot = stoi(sm[0]);
 }
 
 /****************************************/
 /****************************************/
 
-void CDemoPdr::ControlStep()
-{
-   if (!isConnected)
-   {
-      connectToServer();
-   }
+void CDemoPdr::ControlStep() {
+      const CCI_BatterySensor::SReading& sBatRead = m_pcBattery->GetReading();
+      if (!isConnected) {
+         cRadio->connectToServer(idRobot);
+      }
 
-   if (m_pcBattery->GetReading().AvailableCharge < 0.3 && stateMode == kTakeOff)
-   {
-      stateMode = kReturnToBase;
-   }
+      if (sBatRead.AvailableCharge < 0.3 && stateMode == kTakeOff) {
+         stateMode = kReturnToBase;
+      }
 
-   cPos = m_pcPos->GetReading().Position;
+      cPos = m_pcPos->GetReading().Position;
+
+      if (stateMode == kTakeOff
+         && cTimer->GetTimer(TimerType::kAvoidTimer) < 0) {
+         m_pcPropellers->SetAbsolutePosition(
+            *cP2P->GetNewVectorToAvoidCollision(cPos, idRobot));
+      }
+
+      cP2P->sendPacketToOtherRobots(cPos.GetZ(), idRobot);
 
 
-   checkIfPacketIsComing();
-   sendPacketToOtherRobots();
+      setPosVelocity();
+      cRadio->sendTelemetry(cPos, stateMode, sBatRead.AvailableCharge);
 
 
-   setPosVelocity();
-   sendTelemetry();
+      StateMode* stateModeReceived = cRadio->ReceiveData();
+      if (stateModeReceived) {
+         stateMode = *stateModeReceived;
+      }
 
-   
-   valRead = recv(sock , buffer, sizeof(buffer), 0);
-   if (valRead != -1){
-      stateMode = *reinterpret_cast<const StateMode*>(buffer);
-   }
+      cSensors->UpdateValues();
 
-   CCI_CrazyflieDistanceScannerSensor::TReadingsMap sDistRead = m_pcDistance->GetReadingsMap();
-   auto iterDistRead = sDistRead.begin();
-   rightDist = (iterDistRead++)->second;
-   frontDist = (iterDistRead++)->second;
-   leftDist = (iterDistRead++)->second;
-   backDist = (iterDistRead++)->second;
+      if (stateMode == kStandby) {
+         return;
+      }
 
-   if (stateMode == kStandby)
-   {
-      return;
-   }
+      LOG << "stateMode : " << stateMode << std::endl;
 
-   count--;
-   if (m_uiCurrentStep < 20) // decolage
-   {
-      cPos.SetZ(cPos.GetZ() + 0.25f);
-      m_pcPropellers->SetAbsolutePosition(cPos);
-   }
+      cTimer->CountOneCycle();
+      if (m_uiCurrentStep < 20) {  // decolage
+         cPos.SetZ(cPos.GetZ() + 0.25f);
+         m_pcPropellers->SetAbsolutePosition(cPos);
+      } else if ((stateMode == kTakeOff || stateMode == kReturnToBase)) {
+         cMoving->GoInSpecifiedDirection(cSensors->FreeSide());
+      }
 
-   else if ((stateMode == kTakeOff || stateMode == kReturnToBase) && count <= 0)
-   {
-      cMoving->GoInSpecifiedDirection(FreeSide());
-   }
-
-   if (stateMode != kLanding && cPos.GetZ() < 0.2)
-   {
-      CVector3* test = new CVector3(cPos.GetX(), cPos.GetY(), 0.2);
-      m_pcPropellers->SetRelativePosition(*test);
-   }
-
-   if (stateMode == kLanding && count <= 0)
-   {
-      if (cPos.GetZ() > 0.2)
-      {
-         CVector3* test = new CVector3(0,0,-0.1);
+      if (stateMode != StateMode::kLanding && cPos.GetZ() < 0.2) {
+         CVector3* test = new CVector3(cPos.GetX(), cPos.GetY(), 0.2);
          m_pcPropellers->SetRelativePosition(*test);
       }
-     
-   }
 
-
-   m_uiCurrentStep++;
-}
-
-void CDemoPdr::checkIfPacketIsComing()
-{
-   const CCI_RangeAndBearingSensor::TReadings& tMsgs = m_pcRABSens->GetReadings();
-   if (count <= 0 && stateMode == kTakeOff)
-   {
-      if (!tMsgs.empty())
-      {
-         int idMax = -1;
-         float targetAltitude = 0.0;
-         for (int i = 0; i < tMsgs.size(); i++) {
-            if (tMsgs[i].Range < 300.0)
-            {
-               PacketP2P packetReceived = *reinterpret_cast<const PacketP2P*>(tMsgs[i].Data.ToCArray());
-               if (packetReceived.id > idMax
-                     && packetReceived.id < getIntId()
-                     && (packetReceived.currentAltitude - 0.1) < cPos.GetZ() && (packetReceived.currentAltitude + 0.1) > cPos.GetZ())
-               {
-                  idMax = packetReceived.id;
-                  targetAltitude = std::max(0.5, packetReceived.currentAltitude - 0.25);
-               }
-            }
-         }
-         if (idMax != -1 && cPos.GetZ() > 0.5)
-         {
-            CVector3* newAltitude = new CVector3(cPos.GetX(), cPos.GetY(), targetAltitude);
-            m_pcPropellers->SetAbsolutePosition(*newAltitude);
-            count = 50;
+      if (stateMode == StateMode::kLanding) {
+         if (cPos.GetZ() > 0.2) {
+            CVector3* test = new CVector3(0, 0, -0.1);
+            m_pcPropellers->SetRelativePosition(*test);
          }
       }
-      else if (count <= 0)
-      {
-         CVector3* newAltitude = new CVector3(cPos.GetX(), cPos.GetY(), 1.0);
-         m_pcPropellers->SetAbsolutePosition(*newAltitude);
-      }
-   }
-   
+
+
+      m_uiCurrentStep++;
 }
 
-void CDemoPdr::sendPacketToOtherRobots()
-{
-   /* ---------------------------
-      ---- P2P COMMUNICATION ----
-      --------------------------- */
-   struct PacketP2P packet;
-   packet.id = getIntId();
-   packet.currentAltitude = cPos.GetZ();
-   CByteArray cBuf(10);
-   memcpy(&cBuf[0], &packet, sizeof(packet));
-   m_pcRABAct->SetData(cBuf);
-}
+
 
 
 /****************************************/
 /****************************************/
 
 void CDemoPdr::Reset() {
-   m_uiCurrentStep = 0;
- }
+      m_uiCurrentStep = 0;
+}
 
 /****************************************/
 /****************************************/
