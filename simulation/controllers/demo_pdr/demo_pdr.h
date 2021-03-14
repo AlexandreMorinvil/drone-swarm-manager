@@ -49,124 +49,81 @@ using namespace argos;
  * A controller is simply an implementation of the CCI_Controller class.
  */
 class CDemoPdr : public CCI_Controller {
+ public:
+    /* Class constructor. */
+    CDemoPdr();
+    /* Class destructor. */
+    virtual ~CDemoPdr() {}
 
-public:
-
-   /* Class constructor. */
-   CDemoPdr();
-   /* Class destructor. */
-   virtual ~CDemoPdr() {}
-
-   /*
+    /*
     * This function initializes the controller.
     * The 't_node' variable points to the <parameters> section in the XML
     * file in the <controllers><footbot_foraging_controller> section.
     */
-   virtual void Init(TConfigurationNode& t_node);
+    virtual void Init(TConfigurationNode& t_node);
 
-   /*
+    /*
     * This function is called once every time step.
     * The length of the time step is set in the XML file.
     */
-   virtual void ControlStep();
+    virtual void ControlStep();
 
-   /*
+    /*
     * This function resets the controller to its state right after the
     * Init().
     * It is called when you press the reset button in the GUI.
     */
-   virtual void Reset();
+    virtual void Reset();
 
-   /*
+    /*
     * Called to cleanup what done by Init() when the experiment finishes.
     * In this example controller there is no need for clean anything up,
     * so the function could have been omitted. It's here just for
     * completeness.
     */
-   virtual void Destroy() {}
+    virtual void Destroy() {}
 
-   /*
+    /*
     * This function lifts the drone from the ground
     */
-   bool TakeOff();
+    bool TakeOff();
 
-   /*
+    /*
     * This function returns the drone to the ground
     */
-   bool Land();
+    bool Land();
 
-  SensorSide CriticalProximity();
+    void setPosVelocity();
 
-  SensorSide CriticalProximity2();
+ private:
+    CCI_CrazyflieDistanceScannerSensor* m_pcDistance;
+    CCI_RangeAndBearingSensor* m_pcRABSens;
+    CCI_RangeAndBearingActuator* m_pcRABAct;
+    CCI_QuadRotorPositionActuator* m_pcPropellers;
+    CCI_PositioningSensor* m_pcPos;
+    CCI_BatterySensor* m_pcBattery;
 
-  float computeAngleToFollow();
+    CMoving* cMoving;
+    CSensors* cSensors;
+    CP2P* cP2P;
+    CRadio* cRadio;
+    CTimer* cTimer;
 
-  void sendTelemetry();
+    /* The random number generator */
+    CRandom::CRNG* m_pcRNG;
 
-  void connectToServer();
+    CVector3 posInitial;
+    CVector3 posFinal;
 
-  void setPosVelocity();
+    /* Current step */
+    uint m_uiCurrentStep;
 
-  SensorSide FreeSide();
+    StateMode stateMode;
+    CVector3 objective;
 
-  int getIntId();
+    CVector3 cPos;
 
-  void checkIfPacketIsComing();
-
-  void sendPacketToOtherRobots();
-
-private:
-
-  CCI_CrazyflieDistanceScannerSensor* m_pcDistance;
-  CCI_RangeAndBearingSensor* m_pcRABSens;
-  CCI_RangeAndBearingActuator* m_pcRABAct;
-  CCI_QuadRotorPositionActuator* m_pcPropellers;
-  CCI_PositioningSensor* m_pcPos;
-  CCI_BatterySensor* m_pcBattery;
-
-  CMoving* cMoving;
-  CSensors* cSensors;
-  CP2P* cP2P;
-  CRadio* cRadio;
-  CTimer* cTimer;
-
-   /* The random number generator */
-   CRandom::CRNG* m_pcRNG;
-  CVector3 posInitial;
-  CVector3 posFinal  ;
-   /* Current step */
-   uint m_uiCurrentStep;
-
-   bool isConnected;
-
-   /* Packet */
-  typedef enum {
-    tx,
-    position,
-    attitude,
-    velocity,
-    distance
-  } PacketType;
-
-  
-
-struct packetRX {
-  bool led_activation;
-} __attribute__((packed));
-
-
-
-  CVector3* newCVector;
-  CRadians currentAngle;
-  StateMode stateMode;
-  CVector3 objective;
-
-  CVector3 cPos;
-
-  int idRobot;
-
-  
-
+    int idRobot;
 };
 
 #endif

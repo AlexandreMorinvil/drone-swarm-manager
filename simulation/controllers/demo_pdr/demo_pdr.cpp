@@ -110,9 +110,7 @@ void CDemoPdr::Init(TConfigurationNode &t_node) {
 /****************************************/
 
 void CDemoPdr::ControlStep() {
-      if (!isConnected) {
-         cRadio->connectToServer(idRobot);
-      }
+      cRadio->connectToServer(idRobot);
 
       // Update metrics
       const CCI_BatterySensor::SReading& sBatRead = m_pcBattery->GetReading();
