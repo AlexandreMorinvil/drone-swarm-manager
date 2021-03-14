@@ -67,9 +67,6 @@ CDemoPdr::CDemoPdr() : m_pcDistance(NULL),
 /****************************************/
 
 
-
-
-
 void CDemoPdr::Init(TConfigurationNode &t_node) {
       m_pcRABSens =
          GetSensor<CCI_RangeAndBearingSensor>("range_and_bearing");
@@ -113,64 +110,59 @@ void CDemoPdr::Init(TConfigurationNode &t_node) {
 /****************************************/
 
 void CDemoPdr::ControlStep() {
-      const CCI_BatterySensor::SReading& sBatRead = m_pcBattery->GetReading();
       if (!isConnected) {
          cRadio->connectToServer(idRobot);
       }
 
-      if (sBatRead.AvailableCharge < 0.3 && stateMode == kTakeOff) {
-         stateMode = kReturnToBase;
-      }
-
+      // Update metrics
+      const CCI_BatterySensor::SReading& sBatRead = m_pcBattery->GetReading();
       cPos = m_pcPos->GetReading().Position;
-
-      if (stateMode == kTakeOff
-         && cTimer->GetTimer(TimerType::kAvoidTimer) < 0) {
-         m_pcPropellers->SetAbsolutePosition(
-            *cP2P->GetNewVectorToAvoidCollision(cPos, idRobot));
-      }
-
       cP2P->sendPacketToOtherRobots(cPos.GetZ(), idRobot);
-
-
       setPosVelocity();
       cRadio->sendTelemetry(cPos, stateMode, sBatRead.AvailableCharge);
+      cSensors->UpdateValues();
 
-
+      // Update StateMode received from ground station
       StateMode* stateModeReceived = cRadio->ReceiveData();
       if (stateModeReceived) {
          stateMode = *stateModeReceived;
       }
 
-      cSensors->UpdateValues();
-
-      if (stateMode == kStandby) {
-         return;
+      switch (stateMode) {
+         case kStandby:
+            return;
+            break;
+         case kTakeOff:
+            if (sBatRead.AvailableCharge < 0.3) {
+               stateMode = kReturnToBase;
+            }
+            // Check for collision avoidance
+            if (cTimer->GetTimer(TimerType::kAvoidTimer) < 0) {
+               m_pcPropellers->SetAbsolutePosition(
+                  *cP2P->GetNewVectorToAvoidCollision(cPos, idRobot));
+            }
+            cTimer->CountOneCycle();
+            if (m_uiCurrentStep < 20) {  // decolage
+               cPos.SetZ(cPos.GetZ() + 0.25f);
+               m_pcPropellers->SetAbsolutePosition(cPos);
+            } else {
+               cMoving->GoInSpecifiedDirection(cSensors->FreeSide());
+            }
+            // Prevent robot from touching ground
+            if (cPos.GetZ() < 0.2) {
+               CVector3* test = new CVector3(cPos.GetX(), cPos.GetY(), 0.2);
+               m_pcPropellers->SetRelativePosition(*test);
+            }
+            break;
+         case kReturnToBase:
+            break;
+         case kLanding:
+            if (cPos.GetZ() > 0.2) {
+               CVector3* test = new CVector3(0, 0, -0.1);
+               m_pcPropellers->SetRelativePosition(*test);
+            }
+            break;
       }
-
-      LOG << "stateMode : " << stateMode << std::endl;
-
-      cTimer->CountOneCycle();
-      if (m_uiCurrentStep < 20) {  // decolage
-         cPos.SetZ(cPos.GetZ() + 0.25f);
-         m_pcPropellers->SetAbsolutePosition(cPos);
-      } else if ((stateMode == kTakeOff || stateMode == kReturnToBase)) {
-         cMoving->GoInSpecifiedDirection(cSensors->FreeSide());
-      }
-
-      if (stateMode != StateMode::kLanding && cPos.GetZ() < 0.2) {
-         CVector3* test = new CVector3(cPos.GetX(), cPos.GetY(), 0.2);
-         m_pcPropellers->SetRelativePosition(*test);
-      }
-
-      if (stateMode == StateMode::kLanding) {
-         if (cPos.GetZ() > 0.2) {
-            CVector3* test = new CVector3(0, 0, -0.1);
-            m_pcPropellers->SetRelativePosition(*test);
-         }
-      }
-
-
       m_uiCurrentStep++;
 }
 

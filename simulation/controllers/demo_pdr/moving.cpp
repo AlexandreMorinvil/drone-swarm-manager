@@ -16,11 +16,11 @@ CMoving::CMoving(
     m_pcPos = pcPos;
 }
 
-void CMoving::GoInSpecifiedDirection(SensorSide sensorSide) {
+void CMoving::GoInSpecifiedDirection(SensorSide freeSide) {
     updateAngle();
     Real xVector = 0.0;
     Real yVector = 0.0;
-    switch (sensorSide) {
+    switch (freeSide) {
         case SensorSide::kDefault:
         case SensorSide::kFront:
             xVector = cos(currentAngle->GetValue()) * SPEED_SRAIGHT;
@@ -47,8 +47,8 @@ void CMoving::GoInSpecifiedDirection(SensorSide sensorSide) {
         default:
             break;
     }
-    if (sensorSide != SensorSide::kDefault
-        && sensorSide != SensorSide::kFront) {
+    if (freeSide != SensorSide::kDefault
+        && freeSide != SensorSide::kFront) {
         m_pcPropellers->SetRelativeYaw(CRadians::PI_OVER_FOUR/3);
     }
     CVector3* newCVector = new CVector3(xVector, yVector, 0);
