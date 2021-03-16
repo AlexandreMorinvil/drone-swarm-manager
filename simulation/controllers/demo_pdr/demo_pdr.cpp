@@ -131,9 +131,9 @@ void CDemoPdr::ControlStep() {
             return;
             break;
          case kTakeOff:
-            if (sBatRead.AvailableCharge < 0.3) {
-               stateMode = kReturnToBase;
-            }
+            //if (sBatRead.AvailableCharge < 0.3) {
+            //   stateMode = kReturnToBase;
+            //}
             // Check for collision avoidance
             if (cTimer->GetTimer(TimerType::kAvoidTimer) < 0) {
                m_pcPropellers->SetAbsolutePosition(
@@ -144,6 +144,7 @@ void CDemoPdr::ControlStep() {
                cPos.SetZ(cPos.GetZ() + 0.25f);
                m_pcPropellers->SetAbsolutePosition(cPos);
             } else {
+               LOG << "freeSide() : " << cSensors->FreeSide() << std::endl;
                cMoving->GoInSpecifiedDirection(cSensors->FreeSide());
             }
             // Prevent robot from touching ground

@@ -47,8 +47,7 @@ void CMoving::GoInSpecifiedDirection(SensorSide freeSide) {
         default:
             break;
     }
-    if (freeSide != SensorSide::kDefault
-        && freeSide != SensorSide::kFront) {
+    if (freeSide != SensorSide::kDefault) {
         m_pcPropellers->SetRelativeYaw(CRadians::PI_OVER_FOUR/3);
     }
     CVector3* newCVector = new CVector3(xVector, yVector, 0);
