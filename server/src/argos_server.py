@@ -5,6 +5,12 @@ from vec3 import Vec3
 from enum import Enum
 from drone import Drone
 
+import sys
+import os
+
+# Add paths toward dependecies in different subdirectories
+sys.path.insert(1, os.path.abspath('./map/'))
+from map_handler import MapHandler
 
 class PacketType(Enum):
     TX = 0
@@ -27,6 +33,9 @@ class ArgosServer() :
         self.sock.bind(('localhost', port))
          # listen for incoming connections (server mode) with one connection at a time
         self.sock.listen()
+
+        # Initialize the live map handler
+        self.live_map_handler = MapHandler()
 
     def waiting_connection(self):
         # wait for a connection
@@ -67,7 +76,6 @@ class ArgosServer() :
                 self.drone_argos._speed.x = px
                 self.drone_argos._speed.y = py
                 self.drone_argos._speed.z = pz
-                print("Data received : ", px, py, pz)
                 
             elif PacketType(self.data_received[0]) == PacketType.DISTANCE:
                 (packet_type, front, back, up, left, right, zrange, a, b) = struct.unpack("<hbhhhhhhb", self.data_received)
