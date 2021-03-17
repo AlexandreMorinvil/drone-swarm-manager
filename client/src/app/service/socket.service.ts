@@ -30,4 +30,18 @@ import {io, Socket} from 'socket.io-client/build/index';
     public refresh() {
       this.socket.emit('REFRESH', {id : this.droneId})
     }
+
+    public takeOff() {
+      this.socket.emit('TAKEOFF', {id : this.droneId})
+    }
+
+    public returnToBase() {
+      this.socket.emit('RETURN_BASE', {id: this.droneId});
+    }
+
+    public receivePosition() {
+      this.socket.on('POSITION', (position) => {
+        console.log('position' + position);
+      });
+    }
   }
