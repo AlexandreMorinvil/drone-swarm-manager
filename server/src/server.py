@@ -12,6 +12,7 @@ from argos_server import ArgosServer
 import threading
 from enum import Enum
 from threading import *
+from DBconnect import DatabaseConnector
 
 class Mode(Enum):
     REAL_TIME = 0
@@ -25,6 +26,8 @@ default_port = 5015
 
 # Select mode
 mode = Mode.SIMULATION
+
+db = DatabaseConnector()
 
 # Initialize the low-level drivers (don't list the debug drivers)
 cflib.crtp.init_drivers(enable_debug_driver=False)
