@@ -24,37 +24,45 @@
 /****************************************/
 
 
+void CDemoPdr::checkForCollisionAvoidance() {
+      if (cTimer->GetTimer(TimerType::kAvoidTimer) < 0) {
+         m_pcPropellers->SetAbsolutePosition(
+            *cP2P->GetNewVectorToAvoidCollision(cPos, idRobot));
+      }
 
-
-
-void CDemoPdr::setPosVelocity() {
-   if (m_uiCurrentStep % 10 == 0 && m_uiCurrentStep != 0) {
-      posInitial = cPos;
-   }
-   if (m_uiCurrentStep % 10 == 9) {
-      posFinal = cPos;
-   }
-   
+      // Prevent robot from touching ground
+      if (cPos.GetZ() < 0.2) {
+         CVector3* vector = new CVector3(cPos.GetX(), cPos.GetY(), 0.2);
+         m_pcPropellers->SetRelativePosition(*vector);
+      }
 }
 
 
-/*float CDemoPdr::computeAngleToFollow()
-{
-   float xdiff = objective.GetX() - cPos.GetX();
-   float ydiff = objective.GetY() - cPos.GetY();
-   if (std::abs(xdiff) < 1 && std::abs(ydiff) < 1)
-   {
-      stateMode = kLanding;
-      count = 100;
-   }
-   float length = sqrt(pow(xdiff, 2) + pow(ydiff, 2));
-   if (xdiff > 0)
-   {
-      return asin(ydiff/length);
-   }
-   return acos(ydiff/length);
+void CDemoPdr::setPosVelocity() {
+      if (m_uiCurrentStep % 10 == 0 && m_uiCurrentStep != 0) {
+         posInitial = cPos;
+      }
+      if (m_uiCurrentStep % 10 == 9) {
+         posFinal = cPos;
+      }
+}
 
-}*/
+
+float CDemoPdr::computeAngleToFollow() {
+      float xdiff = objective.GetX() - cPos.GetX();
+      float ydiff = objective.GetY() - cPos.GetY();
+      LOG << "cpos x : " << cPos.GetX() << std::endl;
+      LOG << "cpos y : " << cPos.GetY() << std::endl;
+      if (std::abs(xdiff) < 0.5 && std::abs(ydiff) < 0.5) {
+         stateMode = kLanding;
+         cTimer->SetTimer(TimerType::kLandingTimer, 100);
+      }
+      float length = sqrt(pow(xdiff, 2) + pow(ydiff, 2));
+      if (ydiff < 0) {
+         return (- atan(xdiff/ydiff) + PI_VALUE);
+      }
+      return (- atan(xdiff/ydiff));
+}
 
 
 CDemoPdr::CDemoPdr() : m_pcDistance(NULL),
@@ -85,8 +93,8 @@ void CDemoPdr::Init(TConfigurationNode &t_node) {
       } catch (CARGoSException &ex) {
       }
 
-      cMoving = new CMoving(m_pcPropellers, m_pcPos);
-      cSensors = new CSensors(m_pcDistance);
+      cMoving = new CMoving();
+      cSensors = new CSensors();
       cTimer = new CTimer();
       cP2P = new CP2P(m_pcRABSens, m_pcRABAct, cTimer);
       cRadio = new CRadio();
@@ -113,12 +121,32 @@ void CDemoPdr::ControlStep() {
       cRadio->connectToServer(idRobot);
 
       // Update metrics
+      CRadians* currentAngle = new CRadians(0.1f);
+      CRadians *useless = new CRadians(0.1f);
+      m_pcPos->GetReading()
+        .Orientation.ToEulerAngles(*currentAngle, *useless, *useless);
       const CCI_BatterySensor::SReading& sBatRead = m_pcBattery->GetReading();
       cPos = m_pcPos->GetReading().Position;
       cP2P->sendPacketToOtherRobots(cPos.GetZ(), idRobot);
       setPosVelocity();
       cRadio->sendTelemetry(cPos, stateMode, sBatRead.AvailableCharge);
-      cSensors->UpdateValues();
+      CCI_CrazyflieDistanceScannerSensor::TReadingsMap sDistRead =
+        m_pcDistance->GetReadingsMap();
+      auto iterDistRead = sDistRead.begin();
+      float sensorValues[4];
+      // {leftDist, backDist, rightDist, frontDist};
+      sensorValues[1] = (iterDistRead++)->second;
+      sensorValues[2] = (iterDistRead++)->second;
+      sensorValues[3] = (iterDistRead++)->second;
+      sensorValues[0] = (iterDistRead++)->second;
+
+      if (GetId() == "s0") {
+         LOG << "left " << sensorValues[0] << std::endl;
+         LOG << "back " << sensorValues[1] << std::endl;
+         LOG << "right " << sensorValues[2] << std::endl;
+         LOG << "front " << sensorValues[3] << std::endl;
+      }
+
 
       // Update StateMode received from ground station
       StateMode* stateModeReceived = cRadio->ReceiveData();
@@ -126,37 +154,46 @@ void CDemoPdr::ControlStep() {
          stateMode = *stateModeReceived;
       }
 
+      LOG << "stateMode : " << stateMode << std::endl;
+
+      cTimer->CountOneCycle();
+
       switch (stateMode) {
          case kStandby:
             return;
             break;
          case kTakeOff:
-            //if (sBatRead.AvailableCharge < 0.3) {
+            // if (sBatRead.AvailableCharge < 0.3) {
             //   stateMode = kReturnToBase;
             //}
             // Check for collision avoidance
-            if (cTimer->GetTimer(TimerType::kAvoidTimer) < 0) {
-               m_pcPropellers->SetAbsolutePosition(
-                  *cP2P->GetNewVectorToAvoidCollision(cPos, idRobot));
-            }
-            cTimer->CountOneCycle();
+            checkForCollisionAvoidance();
             if (m_uiCurrentStep < 20) {  // decolage
                cPos.SetZ(cPos.GetZ() + 0.25f);
                m_pcPropellers->SetAbsolutePosition(cPos);
             } else {
-               LOG << "freeSide() : " << cSensors->FreeSide() << std::endl;
-               cMoving->GoInSpecifiedDirection(cSensors->FreeSide());
-            }
-            // Prevent robot from touching ground
-            if (cPos.GetZ() < 0.2) {
-               CVector3* test = new CVector3(cPos.GetX(), cPos.GetY(), 0.2);
-               m_pcPropellers->SetRelativePosition(*test);
+               if (sensorValues[3] < 130 && sensorValues[3] != -2.0) {
+                  m_pcPropellers->SetRelativeYaw(CRadians::PI_OVER_FOUR/2);
+               }
+               m_pcPropellers->SetRelativePosition(
+                  *cMoving->GoInSpecifiedDirection(
+                     cSensors->FreeSide(sensorValues), currentAngle));
             }
             break;
          case kReturnToBase:
+            checkForCollisionAvoidance();
+            m_pcPropellers->SetRelativePosition(
+            *cMoving->GoInSpecifiedDirection(
+                  cSensors->FreeSide(sensorValues), currentAngle));
+
+            if (cSensors->CriticalProximity(sensorValues) == kDefault) {
+               m_pcPropellers->SetAbsoluteYaw(
+                     (*new CRadians(computeAngleToFollow())));
+            }
             break;
          case kLanding:
-            if (cPos.GetZ() > 0.2) {
+            if (cPos.GetZ() > 0.2
+             && cTimer->GetTimer(TimerType::kLandingTimer) < 0) {
                CVector3* test = new CVector3(0, 0, -0.1);
                m_pcPropellers->SetRelativePosition(*test);
             }

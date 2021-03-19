@@ -19,9 +19,12 @@
 #include "./sensors.h"
 
 
+#define PI_VALUE 3.14
+#define PI_DIVIDE_TWO 1.52
 #define PI_DIVIDE_FOUR 0.8
-#define SPEED_SRAIGHT 0.4
+#define SPEED_SRAIGHT 0.2
 #define SPEED_SIDE 0.3
+#define MAGIC 1.84
 
 using argos::CCI_QuadRotorPositionActuator;
 using argos::CCI_PositioningSensor;
@@ -34,21 +37,15 @@ using argos::Real;
  */
 class CMoving {
  public:
-      CMoving(
-         argos::CCI_QuadRotorPositionActuator* pcPropellers,
-         argos::CCI_PositioningSensor* pcPos);
+      CMoving();
 
       virtual ~CMoving() {}
 
-      void GoInSpecifiedDirection(SensorSide sensorSide);
-
-      CVector3 GetPosition();
+      CVector3* GoInSpecifiedDirection(
+          SensorSide freeSide,
+          CRadians* currentAngle);
 
  private:
-      void updateAngle();
-      argos::CCI_QuadRotorPositionActuator* m_pcPropellers;
-      argos::CCI_PositioningSensor* m_pcPos;
-      argos::CRadians* currentAngle;
 };
 
 #endif

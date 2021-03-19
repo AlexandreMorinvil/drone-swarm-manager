@@ -1,56 +1,37 @@
 #include "controllers/demo_pdr/sensors.h"
 
 
-CSensors::CSensors(
-    argos::CCI_CrazyflieDistanceScannerSensor* pcDistance) {
-    m_pcDistance = pcDistance;
-}
+CSensors::CSensors() { }
 
-void CSensors::UpdateValues() {
-    CCI_CrazyflieDistanceScannerSensor::TReadingsMap sDistRead =
-        m_pcDistance->GetReadingsMap();
-    auto iterDistRead = sDistRead.begin();
-    rightDist = (iterDistRead++)->second;
-    frontDist = (iterDistRead++)->second;
-    leftDist = (iterDistRead++)->second;
-    backDist = (iterDistRead++)->second;
-}
 
-SensorSide CSensors::FreeSide() {
-    float sensor[4]  = {leftDist, backDist, rightDist, frontDist};
-    SensorSide closeSens = CriticalProximity();
+SensorSide CSensors::FreeSide(float sensorValues[4]) {
+    SensorSide closeSens = CriticalProximity(sensorValues);
     if (closeSens == SensorSide::kDefault) return closeSens;
     SensorSide oppSens = (SensorSide) ((closeSens +2) % 4);
-    if (sensor[oppSens] == -2 || sensor[oppSens] > 2 * CRITICAL_VALUE )
+    if (sensorValues[oppSens] == -2
+      || sensorValues[oppSens] > 2 * CRITICAL_VALUE)
         return oppSens;
-    float max   = sensor[closeSens];
+    float max   = sensorValues[closeSens];
     SensorSide maxSensor = SensorSide::kDefault;
-    for (unsigned i = 0; i < 4; i++) {
-        if (sensor[i] == -2 ) return (SensorSide) i;
-        if (max < sensor[i]) {
-            max = sensor[i];
+    for (unsigned i = 4; i > -1; i--) {
+        if (sensorValues[i] == -2 ) return (SensorSide) i;
+        if (max < sensorValues[i]) {
+            max = sensorValues[i];
             maxSensor = (SensorSide) i;
         }
     }
     return maxSensor;
 }
 
-SensorSide CSensors::CriticalProximity() {
-    float sensor[4]  = {leftDist, backDist, rightDist, frontDist};
+SensorSide CSensors::CriticalProximity(float sensorValues[4]) {
     float min   = CRITICAL_VALUE;
     SensorSide minSensor = SensorSide::kDefault;
 
     for (unsigned i = 0; i < 4; i++) {
-        if (min > sensor[i] && sensor[i] > 0.0) {
-            min = sensor[i];
+        if (min > sensorValues[i] && sensorValues[i] > 0.0) {
+            min = sensorValues[i];
             minSensor = (SensorSide) i;
         }
-    }
-
-    if (((frontDist < 130.0 && frontDist > 0)
-            && minSensor == SensorSide::kDefault)
-        || (frontDist < min && frontDist > 0)) {
-        minSensor = SensorSide::kFront;
     }
 
     return minSensor;

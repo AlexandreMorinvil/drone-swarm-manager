@@ -29,16 +29,13 @@ using std::string;
  */
 class CSensors {
  public:
-      CSensors(
-          CCI_CrazyflieDistanceScannerSensor* pcDistance);
+      CSensors();
 
       virtual ~CSensors() {}
 
-      void UpdateValues();
+      SensorSide FreeSide(float sensorValues[4]);
 
-      SensorSide FreeSide();
-
-      SensorSide CriticalProximity();
+      SensorSide CriticalProximity(float sensorValues[4]);
 
  private:
       CCI_CrazyflieDistanceScannerSensor* m_pcDistance;

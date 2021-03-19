@@ -95,6 +95,8 @@ class CDemoPdr : public CCI_Controller {
 
     void setPosVelocity();
 
+    float computeAngleToFollow();
+
  private:
     CCI_CrazyflieDistanceScannerSensor* m_pcDistance;
     CCI_RangeAndBearingSensor* m_pcRABSens;
@@ -124,6 +126,8 @@ class CDemoPdr : public CCI_Controller {
     CVector3 cPos;
 
     int idRobot;
+
+    void checkForCollisionAvoidance();
 };
 
 #endif
