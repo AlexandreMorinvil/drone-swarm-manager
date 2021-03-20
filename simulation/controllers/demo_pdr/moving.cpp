@@ -3,8 +3,7 @@
 
 CMoving::CMoving() {}
 
-CVector3* CMoving::GoInSpecifiedDirection(SensorSide freeSide,
-    CRadians* currentAngle) {
+CVector3* CMoving::GoInSpecifiedDirection(SensorSide freeSide) {
     Real xVector = 0.0;
     Real yVector = 0.0;
     switch (freeSide) {

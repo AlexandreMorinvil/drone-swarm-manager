@@ -51,8 +51,7 @@ void CDemoPdr::setPosVelocity() {
 float CDemoPdr::computeAngleToFollow() {
       float xdiff = objective.GetX() - cPos.GetX();
       float ydiff = objective.GetY() - cPos.GetY();
-      LOG << "cpos x : " << cPos.GetX() << std::endl;
-      LOG << "cpos y : " << cPos.GetY() << std::endl;
+
       if (std::abs(xdiff) < 0.5 && std::abs(ydiff) < 0.5) {
          stateMode = kLanding;
          cTimer->SetTimer(TimerType::kLandingTimer, 100);
@@ -85,7 +84,6 @@ void CDemoPdr::Init(TConfigurationNode &t_node) {
          ("crazyflie_distance_scanner");
       m_pcPropellers =
          GetActuator<CCI_QuadRotorPositionActuator>("quadrotor_position");
-
 
       try {
          m_pcBattery = GetSensor<CCI_BatterySensor>("battery");
@@ -130,6 +128,7 @@ void CDemoPdr::ControlStep() {
       cP2P->sendPacketToOtherRobots(cPos.GetZ(), idRobot);
       setPosVelocity();
       cRadio->sendTelemetry(cPos, stateMode, sBatRead.AvailableCharge);
+
       CCI_CrazyflieDistanceScannerSensor::TReadingsMap sDistRead =
         m_pcDistance->GetReadingsMap();
       auto iterDistRead = sDistRead.begin();
@@ -177,14 +176,15 @@ void CDemoPdr::ControlStep() {
                }
                m_pcPropellers->SetRelativePosition(
                   *cMoving->GoInSpecifiedDirection(
-                     cSensors->FreeSide(sensorValues), currentAngle));
+                     cSensors->FreeSide(sensorValues)));
             }
             break;
          case kReturnToBase:
             checkForCollisionAvoidance();
             m_pcPropellers->SetRelativePosition(
-            *cMoving->GoInSpecifiedDirection(
-                  cSensors->FreeSide(sensorValues), currentAngle));
+               *cMoving->GoInSpecifiedDirection(
+                  cSensors->ReturningSide(sensorValues,
+                     computeAngleToFollow())));
 
             if (cSensors->CriticalProximity(sensorValues) == kDefault) {
                m_pcPropellers->SetAbsoluteYaw(
