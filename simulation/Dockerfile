@@ -61,17 +61,17 @@ RUN chmod +x /root/argos3/build_simulator/argos_post_install.sh &&\
 # Add dummy argument to force rebuild starting from that point
 ARG UPDATE_CODE=unknown
 
-# Clone repository
-RUN mkdir /root/.ssh/
-ADD id_ed25519 /root/.ssh/id_ed25519
-RUN touch /root/.ssh/known_hosts
-RUN ssh-keyscan gitlab.com >> /root/.ssh/known_hosts
+# Copy repository
 RUN cd /root &&\
-    git clone git@gitlab.com:polytechnique-montr-al/inf3995/20211/equipe-204/alfred.git alfred &&\
-    cd alfred &&
+    mkdir /root/simulation &&\
+    cd /root/simulation
+
+WORKDIR /root/simulation
+COPY . .
 
 # Build code
-RUN cd /root/alfred/simulation &&\
-    mkdir build && cd build &&\
+RUN cd /root/simulation &&\
+    mkdir build &&\
+    cd build &&\
     cmake -DCMAKE_BUILD_TYPE=Debug .. &&\
     make -j $(nproc)

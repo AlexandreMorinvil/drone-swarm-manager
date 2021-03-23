@@ -48,9 +48,7 @@ class ArgosServer() :
         print('entree receive_data')
         while True:
             self.connection.settimeout(5.0)
-            print("ALLO1")
             self.data_received = self.connection.recv(16)   
-            print("ALLO2")
             self.data_received += bytearray(16 - len(self.data_received)) 
 
             if PacketType(self.data_received[0]) == PacketType.TX:
