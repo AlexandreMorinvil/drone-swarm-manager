@@ -10,7 +10,7 @@ import os
 
 # Add paths toward dependecies in different subdirectories
 sys.path.insert(1, os.path.abspath('./map/'))
-from map_handler import MapHandler
+from map.map_handler import MapHandler
 
 class PacketType(Enum):
     TX = 0

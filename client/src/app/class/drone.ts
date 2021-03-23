@@ -7,7 +7,7 @@ const MIN_BATTERY_LEVEL: number = 0;
 const MAX_BATTERY_LEVEL: number = 100;
 const DECIMALS_TO_DISPLAY: number = 3;
 
-enum DroneState {
+export enum DroneState {
   STANDBY = 0,
   TAKE_OFF = 1,
   RETURN_TO_BASE = 2,

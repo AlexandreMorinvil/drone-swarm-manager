@@ -11,6 +11,7 @@ import {io, Socket} from 'socket.io-client/build/index';
     vbat: Number[] = [0.0, 0.0]
     online: Boolean[] = [false, false]
     droneId: number = 0;
+    inMission: Boolean = false;
     constructor() {}
   
     public initSocket(){
@@ -33,6 +34,7 @@ import {io, Socket} from 'socket.io-client/build/index';
 
     public takeOff() {
       this.socket.emit('TAKEOFF', {id : this.droneId})
+      this.inMission = true;
     }
 
     public returnToBase() {

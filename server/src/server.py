@@ -13,6 +13,9 @@ import threading
 from enum import Enum
 from threading import *
 from DBconnect import DatabaseConnector
+from map.map_catalog import MapCatalog
+from map.map_handler import MapHandler
+
 
 class Mode(Enum):
     REAL_TIME = 0
@@ -21,13 +24,13 @@ class Mode(Enum):
 
 app = Flask(__name__)
 socketio = SocketIO(app ,cors_allowed_origins='*')
+db = DatabaseConnector()
+mapCatalog = MapCatalog()
 
 default_port = 5015
 
 # Select mode
 mode = Mode.SIMULATION
-
-db = DatabaseConnector()
 
 # Initialize the low-level drivers (don't list the debug drivers)
 cflib.crtp.init_drivers(enable_debug_driver=False)
@@ -77,6 +80,17 @@ def returnToBase(data):
     else:
         socks[data['id']].send_data(StateMode.RETURN_TO_BASE.value, "<i")
 
+@socketio.on('MAP_CATALOG')
+def getMapList(data):
+    maps = mapCatalog.getMapList()
+    map_list = json.dumps([mapCatalog.toJson(map) for map in maps])
+    socketio.emit('MAP_LIST', map_list)
+
+@socketio.on('END_MISSION')
+def endOfMission(data):
+    mapHandler = MapHandler()
+    mapHandler.current_map.end_mission()
+
 def sendPosition():
     position_json = json.dumps({"x": socks[0].drone_argos.currentPos.x, "y": socks[0].drone_argos.currentPos.y, "z": socks[0].drone_argos.currentPos.z})
     socketio.emit('POSITION', position_json)
@@ -94,17 +108,21 @@ def set_interval(func, sec):
         return t
 
 
-def set_interval(func, sec):
-    def func_wrapper():
-        set_interval(func, sec) 
-        func()  
-    t = threading.Timer(sec, func_wrapper)
-    t.start()
-    return t
-
 if __name__ == '__main__':
     #t2 = threading.Thread(target=socks[1].receive_data, name='receive_data')
     #t2.start()
+    db.delete_all_table()
+    db.create_table()
+    maphandler = MapHandler()
+    
+    maphandler.initialize_map()
+    maphandler.initialize_map()
+    maphandler.initialize_map()
+    for i in range(60):
+        point = Vec3(i,i,i)
+        maphandler.current_map.addPoint(point)  
+    db.show_content_map(maphandler.current_map.id) 
+    
     set_interval(sendPosition, 1)
     set_interval(send_data, 1)
     app.run()

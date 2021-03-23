@@ -1,6 +1,4 @@
 import { Injectable } from "@angular/core";
-import { Observable, Subscriber } from "rxjs";
-import { HttpClient } from "@angular/common/http";
 import { io, Socket } from "socket.io-client/build/index";
 @Injectable({
   providedIn: "root",

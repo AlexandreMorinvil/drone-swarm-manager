@@ -6,6 +6,7 @@ import { io, Socket } from "socket.io-client/build/index";
 })
 export class DroneControlService {
   private socket: Socket;
+  inMission: boolean = false;
 
   constructor() {
     this.initSocket();
@@ -20,10 +21,15 @@ export class DroneControlService {
   }
 
   public sendTakeOffRequest(droneId: number): void {
+    this.inMission = true;
     this.socket.emit("TAKEOFF", { id: droneId });
   }
 
   public sendReturnToBaseRequest(droneId: number): void {
     this.socket.emit("RETURN_BASE", { id: droneId });
+  }
+
+  public sendEndOfMission(): void{
+    this.socket.emit("END_MISSION")
   }
 }

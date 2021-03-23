@@ -1,6 +1,7 @@
-from map import Map
+from map.map import Map
 import socketio
 from vec3 import Vec3
+from DBconnect import DatabaseConnector
 
 import sys
 import os
@@ -11,14 +12,18 @@ sys.path.insert(1, os.path.abspath('../'))
 class MapHandler:
     class __OnlyOne:
         def __init__(self):
+            self.db = DatabaseConnector()
+            self.t = None
             self.current_map = None
             self.points_in_making = {}
             self.x_position = 0
             self.y_position = 0
             self.z_position = 0
 
-        def initialize_map():
-            self.current_map = Map()
+        def initialize_map(self):
+            mapId = self.db.add_map("mission")
+            self.current_map = Map("mission", mapId)
+
 
         def send_base_map(self):
             json_map = self.current_map.toJson()
@@ -31,6 +36,7 @@ class MapHandler:
             self.x_position = x
             self.y_position = y
             self.z_position = z
+
             
 
 

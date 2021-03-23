@@ -1,6 +1,8 @@
 import { Injectable } from "@angular/core";
 import { io, Socket } from "socket.io-client/build/index";
-import { Drone } from "@app/class/drone";
+import { Drone, DroneState } from "@app/class/drone";
+import {DroneControlService} from "@app/service/api/drone-control/drone-control.service";
+
 @Injectable({
   providedIn: "root",
 })
@@ -9,17 +11,20 @@ export class DroneListService {
   droneId: number = 0;
   droneList: Drone[] = [];
 
-  constructor() {
+  constructor(public droneControlService: DroneControlService) {
     this.initSocket();
   }
 
   public initSocket() {
     this.socket = io("127.0.0.1:5000");
-    this.socket.on("drone_data", (data) => this.receiveData(data));
+    this.socket.on("drone_data", (data: any) => this.receiveData(data));
   }
 
-  public receiveData(data) {
+  public receiveData(data: any) {
     const droneData = JSON.parse(data);
+    if(this.droneControlService.inMission){
+      this.isEndOfMission(droneData);
+    }
     this.updateList(droneData);
   }
 
@@ -37,7 +42,6 @@ export class DroneListService {
         droneData[i].currentPos,
         droneData[i].currentSpeed
       );
-
       // If the drone does not exist, we add it to the drone list
       if (!this.droneList[i]) this.droneList.push(updatedDrone);
       // If the drone order does not correspond, we add the drone in the right order
@@ -48,6 +52,23 @@ export class DroneListService {
     if (this.droneList.length !== droneData.length) {
       this.droneList = this.droneList.slice(0, droneData.length);
     }
+  }
+
+  isEndOfMission(droneData: any): boolean {
+    let droneEndMission = 0;
+    for (let i = 0; i < droneData.length; i++) {
+      if(droneData[i].state == DroneState.STANDBY || droneData[i].state == DroneState.LANDING){
+        droneEndMission += 1;
+      }
+    }
+    if(droneEndMission == droneData.length){
+      this.droneControlService.sendEndOfMission();
+      
+    }
+    else{
+      return false;
+    }
+
   }
 
   public getDroneNumber() {

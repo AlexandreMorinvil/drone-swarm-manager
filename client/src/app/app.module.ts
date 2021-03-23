@@ -17,6 +17,8 @@ import { DroneSwarmBoardComponent } from "./components/drone/drone-swarm-board/d
 import { MapComponent } from "./components/map/map/map.component";
 import { MapGeneratedBoardComponent } from "./components/map/map-generated-board/map-generated-board.component";
 import { NavigationBarComponent } from "./components/navigation-bar/navigation-bar.component";
+import { MapListComponent } from "./components/map_catalog/map-list/map-list.component"
+import { SelectMapComponent } from "./components/map_catalog/select-map/select-map.component"
 
 //Service
 import { DroneListService } from "./service/api/drone-list/drone-list.service";
@@ -44,6 +46,8 @@ import { MatCardModule } from "@angular/material/card";
     MapComponent,
     MapGeneratedBoardComponent,
     NavigationBarComponent,
+    MapListComponent,
+    SelectMapComponent,
   ],
   imports: [
     BrowserModule,
