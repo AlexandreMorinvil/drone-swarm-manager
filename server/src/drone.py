@@ -28,12 +28,15 @@ class StateMode(Enum):
     UPDATE = 5
 
 class Drone :
-    sensors = Sensor(0,0,0,0,0,0,0,0,0)
-    __startPos = Vec3(0,0,0)
-    currentPos = Vec3(0,0,0)
-    led = True
 
-    def __init__(self, link_uri, initialPos: Vec3, id):
+    # Static variable
+    id_counter = 0
+
+
+    def __init__(self, link_uri="", initialPos=Vec3()):
+        # Constructor
+        self._id = Drone.id_counter
+        Drone.id_counter += 1
 
         self._cf = Crazyflie()
         self.__startPos = initialPos
@@ -48,8 +51,13 @@ class Drone :
         self._isConnected = False
         self._state = StateMode.STANDBY.value
         self._vbat = 10
-        self._id = id
-        self._speed = Vec3(0, 0, 0)      
+        self._speed = Vec3(0, 0, 0)
+
+        self.__startPos = Vec3(0,0,0)
+        self.currentPos = Vec3(0,0,0)
+        self.led = True
+
+        self.sensors = Sensor()
 
         print('Connecting to %s' % link_uri)
 

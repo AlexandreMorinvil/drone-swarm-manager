@@ -25,13 +25,14 @@ class ArgosServer() :
     
     
     def __init__(self, id, port):
-        self.drone_argos = Drone("id", Vec3(0, 0, 0),id)
+        self.drone_argos = Drone()
         self.data_received = None
         self.sent_data = None
         self.point = Vec3(0,0,0)
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.bind(('localhost', port))
-         # listen for incoming connections (server mode) with one connection at a time
+        
+        # listen for incoming connections (server mode) with one connection at a time
         self.sock.listen()
 
         # Initialize the live map handler
@@ -85,6 +86,7 @@ class ArgosServer() :
                 self.drone_argos.sensors.left = left
                 self.drone_argos.sensors.right = right
                 self.drone_argos.sensors.down = zrange
+                print("Received :", front, back, up, left, right, zrange)
                 
 
     def set_interval(self, func, sec):

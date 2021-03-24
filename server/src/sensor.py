@@ -17,7 +17,7 @@ class Sensor:
     roll = 0  # X axis rotation (rad)
 
     def __init__(self, up=0, down=0, left=0, right=0, front=0, back=0, yaw=0, pitch=0, roll=0):
-        self.set_sensor_ranges(up, down, left, right, front, back, yaw, pitch, roll)
+        self.set_sensor_ranges(up, down, left, right, front, back)
         self.set_sensor_orientations(yaw, pitch, roll)
 
     def set_sensor_ranges(self, up=0, down=0, left=0, right=0, front=0, back=0):

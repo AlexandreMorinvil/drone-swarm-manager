@@ -34,7 +34,12 @@ available = cflib.crtp.scan_interfaces()
 print('Crazyflies found:')
 
 if (mode == Mode.REAL_TIME):
-    drones = [Drone("radio://0/80/250K",Vec3(0,0,0),0), Drone("radio://0/72/250K",Vec3(0,0,0),1), Drone("radio://0/72/250K",Vec3(0,0,0),2), Drone("radio://0/72/250K",Vec3(0,0,0),4)]
+    drones = [
+        Drone("radio://0/80/250K", Vec3(0,0,0)), 
+        Drone("radio://0/72/250K", Vec3(0,0,0)), 
+        Drone("radio://0/72/250K", Vec3(0,0,0)), 
+        Drone("radio://0/72/250K", Vec3(0,0,0))
+    ]
 else:
     drones = []
 
