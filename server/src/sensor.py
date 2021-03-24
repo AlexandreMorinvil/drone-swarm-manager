@@ -16,13 +16,19 @@ class Sensor:
     pitch = 0  # Y axis rotation (rad)
     roll = 0  # X axis rotation (rad)
 
-    def __init__(self, up, down, left, right, front, back, yaw, pitch, roll):
+    def __init__(self, up=0, down=0, left=0, right=0, front=0, back=0, yaw=0, pitch=0, roll=0):
+        self.set_sensor_ranges(up, down, left, right, front, back, yaw, pitch, roll)
+        self.set_sensor_orientations(yaw, pitch, roll)
+
+    def set_sensor_ranges(self, up=0, down=0, left=0, right=0, front=0, back=0):
         self.up = up
         self.down = down
         self.left = left
         self.right = right
         self.front = front
         self.back = back
+
+    def set_sensor_orientations(self, yaw=0, pitch=0, roll=0):
         self.yaw = yaw
         self.pitch = pitch
         self.roll = roll
@@ -48,6 +54,13 @@ class Sensor:
         coord.x = round(self.left * math.cos(self.roll) * math.sin(self.yaw), 8)
         coord.y = round(self.left * math.cos(self.roll) * math.cos(self.yaw), 8)
         coord.z = round(self.left * math.sin(self.roll), 8)
+        return coord
+
+    def getEdgeBack(self) -> Vec3:
+        coord = Vec3(0, 0, 0)
+        coord.x = round(self.back * math.cos(self.pitch) * math.cos(self.yaw), 8)
+        coord.z = round(self.back * math.sin(self.pitch), 8)
+        coord.y = round(self.back * math.cos(self.pitch) * math.sin(self.yaw), 8)
         return coord
 
     def toJson(self):

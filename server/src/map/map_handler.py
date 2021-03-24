@@ -5,7 +5,7 @@ from vec3 import Vec3
 import sys
 import os
 
-sys.path.insert(1, os.path.abspath('../'))
+sys.path.append(1, os.path.abspath('../'))
 
 # Using the singleton desing pattern
 class MapHandler:

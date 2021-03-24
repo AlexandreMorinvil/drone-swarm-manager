@@ -15,7 +15,7 @@ class Map:
         self.__points.append(point)
 
     def setBaseMap(self, points, name="Map Name"):
-        self.__name =
+        self.__name = name
         self.__points = points
 
     def toJson(self):

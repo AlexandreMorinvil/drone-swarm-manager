@@ -1,10 +1,15 @@
 from map import Map
-import socketio
+from vec3 import Vec3
+from sensor import Sensor
+from threading import Lock
+from queue import Queue 
 
 import sys
 import os
 
-sys.path.insert(1, os.path.abspath('../'))
+# Add paths toward dependecies in different subdirectories
+sys.path.append(os.path.abspath('./src'))
+from sensor import Sensor
 
 
 class MapObservationAccumulator:
@@ -12,33 +17,49 @@ class MapObservationAccumulator:
     # Using the singleton desing pattern
     class __OnlyOne:
         def __init__(self):
-            self.current_map = None
-            self.points_in_making = {}
+            self.queue = Queue()
+            self.position = Vec3()
+            self.point_front = Vec3()
+            self.point_back = Vec3()
+            self.point_left = Vec3()
+            self.point_right = Vec3()
 
-        def receive_position(self, id, x, y, z):
-            if not self.points_in_making[id]:
-                self.points_in_making[id] = {}
+            self.sensor = Sensor()
+            self.lock = Lock()
 
-            self.points_in_making[id].x_position = x
-            self.points_in_making[id].y_position = y
-            self.points_in_making[id].z_position = z
+        def receive_position(self, x, y, z):
+            self.position = Vec3(x, y, z)
 
-        def receive_position(self, id, x, y, z):
-            if not self.points_in_making[id]:
-                self.points_in_making[id] = {}
+        def receive_sensor_distances(self, front, back, up, left, right, zrange):
+            self.sensor.set_sensor_ranges(front, back, up, left, right, zrange)
 
-            self.points_in_making[id].x_position = x
-            self.points_in_making[id].y_position = y
-            self.points_in_making[id].z_position = z
+        def receive_sensor_orientations(yaw, pitch, roll):
+            self.sensior.set_sensor_orientations(yaw, pitch, roll)
+
+        def make_points():
+            self.point_front = self.sensor.getEdgeFront()
+            self.point_back = self.sensor.getEdgeLeft()
+            self.point_left = self.sensor.getEdgeRight()
+            self.point_right = self.sensor.getEdgeBack()
+
+        def add_point(point):
+            self.lock.acquire()
+            self.queue.put(point)
+            self.lock.release()
+
+        def provide_point():
+            self.lock.acquire()
+            last_point =  self.queue.get()
+            self.lock.release()
+            return last_point
 
     # Initialization of the singleton
     instance = None
-
     def __init__(self):
-        if not MapHandler.instance:
-            MapHandler.instance = MapHandler.__OnlyOne()
+        if not MapObservationAccumulator.instance:
+            MapObservationAccumulator.instance = MapObservationAccumulator.__OnlyOne()
         else:
-            MapHandler.instance
+            MapObservationAccumulator.instance
 
     def __getattr__(self, name):
         return getattr(self.instance, name)

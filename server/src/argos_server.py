@@ -9,8 +9,8 @@ import sys
 import os
 
 # Add paths toward dependecies in different subdirectories
-sys.path.insert(1, os.path.abspath('./map/'))
-from map_handler import MapHandler
+sys.path.append(os.path.abspath('./src/map'))
+from data_accumulator import MapObservationAccumulator
 
 class PacketType(Enum):
     TX = 0
@@ -35,7 +35,7 @@ class ArgosServer() :
         self.sock.listen()
 
         # Initialize the live map handler
-        self.live_map_handler = MapHandler()
+        self.map_observation_accumulator = MapObservationAccumulator()
 
     def waiting_connection(self):
         # wait for a connection
@@ -69,7 +69,7 @@ class ArgosServer() :
                 self.drone_argos.currentPos.x = x
                 self.drone_argos.currentPos.y = y
                 self.drone_argos.currentPos.z = z
-
+                self.map_observation_accumulator.receive_position(x, y, z)
 
             elif PacketType(self.data_received[0]) == PacketType.VELOCITY:
                 (packet_type, px, py, pz) = struct.unpack("<ffff", self.data_received)
@@ -96,7 +96,7 @@ class ArgosServer() :
         return t
     
     def start_receive_data(self):
-        t2 = threading.Thread(target=self.receive_data, name="receive_data")
+        t2 = threading.Thread(target=self.receive_data, args=(queue), name="receive_data_{}".format(id))
         t2.start
     
     
