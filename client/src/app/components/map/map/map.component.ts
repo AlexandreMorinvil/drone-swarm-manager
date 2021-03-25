@@ -1,10 +1,12 @@
 import { Component } from "@angular/core";
 import { Vec3 } from "@app/class/vec3";
+import { io, Socket } from "socket.io-client/build/index";
 
 import * as d3 from "d3";
 
+
 const TOTAL_WIDTH: number = 700;
-const TOTAL_HEIGHT: number = 500;
+const TOTAL_HEIGHT: number = 350;
 
 const BORDER_FACTOR: number = 0.1;
 const MIN_WIDTH: number = 100;
@@ -17,7 +19,10 @@ const GRID_OPACITY: number = 0.25;
   templateUrl: "./map.component.html",
   styleUrls: ["./map.component.scss"],
 })
+
 export class MapComponent {
+  private socket: Socket;
+
   currentRate = 8;
   title = "D3 Barchart with Angular 10";
   width: number = 0;
@@ -59,7 +64,12 @@ export class MapComponent {
     this.min_y = -MIN_HEIGHT / 2;
     this.max_y = MIN_HEIGHT / 2;
 
-    const interval: ReturnType<typeof setTimeout> = setInterval(() => {
+    this.socket = io("127.0.0.1:5000");
+    this.socket.on("MAP_POINTS",(data) => {
+      this.receiveSelectMapPoints(data)
+    });
+
+    /*const interval: ReturnType<typeof setTimeout> = setInterval(() => {
       this.addWallPoint(
         new Vec3(this.valueToIncrease, this.valueToIncrease / 2, 0)
       );
@@ -68,7 +78,7 @@ export class MapComponent {
 
     setTimeout(() => {
       clearInterval(interval);
-    }, 13000);
+    }, 13000);*/
   }
 
   ngOnInit() {
@@ -280,5 +290,15 @@ export class MapComponent {
       .attr("cy", (d) => this.yScale(d.y))
       .attr("r", 1.5)
       .style("fill", "#69b3a2");
+  }
+
+  receiveSelectMapPoints(data:any): void{
+    this.deleteMap();
+    this.resetMap();
+    const pointsData = JSON.parse(data);
+    for(let i = 0; i < pointsData.length; i++){
+      this.addWallPoint(new Vec3(pointsData[i].x, pointsData[i].y, pointsData[i].z));
+    }
+
   }
 }

@@ -52,7 +52,7 @@ class DatabaseConnector:
        print(self._c.fetchall()) 
 
     def get_map(self, mapid):
-        self._c.execute('''SELECT x,y FROM listOfPoints WHERE mapid = ?''',(mapid,))
+        self._c.execute('''SELECT x,y,z FROM listOfPoints WHERE mapid = ?''',(mapid,))
         dataMap = self._c.fetchall()
         return dataMap
 

@@ -8,3 +8,5 @@ export class Map {
     }
 
 }
+
+export const UNSET_MAP_INDEX: number = -1;

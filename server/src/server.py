@@ -24,8 +24,6 @@ class Mode(Enum):
 
 app = Flask(__name__)
 socketio = SocketIO(app ,cors_allowed_origins='*')
-db = DatabaseConnector()
-mapCatalog = MapCatalog()
 
 default_port = 5015
 
@@ -81,15 +79,30 @@ def returnToBase(data):
         socks[data['id']].send_data(StateMode.RETURN_TO_BASE.value, "<i")
 
 @socketio.on('MAP_CATALOG')
-def getMapList(data):
-    maps = mapCatalog.getMapList()
-    map_list = json.dumps([mapCatalog.toJson(map) for map in maps])
+def getMapList():
+    map_catalog = MapCatalog()
+    maps = map_catalog.get_map_list()
+    map_list = json.dumps([map_catalog.map_list_to_Json(map) for map in maps])
     socketio.emit('MAP_LIST', map_list)
 
 @socketio.on('END_MISSION')
 def endOfMission(data):
     mapHandler = MapHandler()
     mapHandler.current_map.end_mission()
+
+@socketio.on('SELECT_MAP')
+def getMapPoints(data):
+    map_catalog = MapCatalog()
+    map_points_json = map_catalog.get_select_map(data['id'])
+    socketio.emit('MAP_POINTS', map_points_json)
+
+@socketio.on("DELETE_MAP")
+def deleteMap(data):
+    map_catalog = MapCatalog()
+    map_catalog.delete_map(data['id'])
+    maps = map_catalog.get_map_list()
+    map_list = json.dumps([map_catalog.map_list_to_Json(map) for map in maps])
+    socketio.emit('MAP_LIST', map_list)
 
 def sendPosition():
     position_json = json.dumps({"x": socks[0].drone_argos.currentPos.x, "y": socks[0].drone_argos.currentPos.y, "z": socks[0].drone_argos.currentPos.z})
@@ -111,18 +124,18 @@ def set_interval(func, sec):
 if __name__ == '__main__':
     #t2 = threading.Thread(target=socks[1].receive_data, name='receive_data')
     #t2.start()
-    db.delete_all_table()
-    db.create_table()
-    maphandler = MapHandler()
+    #db.delete_all_table()
+    #db.create_table()
+    #maphandler = MapHandler()
     
-    maphandler.initialize_map()
-    maphandler.initialize_map()
-    maphandler.initialize_map()
-    for i in range(60):
-        point = Vec3(i,i,i)
-        maphandler.current_map.addPoint(point)  
-    db.show_content_map(maphandler.current_map.id) 
-    
+    #maphandler.initialize_map()
+    #maphandler.initialize_map()
+    #maphandler.initialize_map()
+    #for i in range(60):
+    #    point = Vec3(i,i,i)
+    #    maphandler.current_map.addPoint(point)  
+    #db.show_content_map(maphandler.current_map.id) 
+
     set_interval(sendPosition, 1)
     set_interval(send_data, 1)
     app.run()

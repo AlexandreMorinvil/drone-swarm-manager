@@ -1,4 +1,5 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, ViewChild } from "@angular/core";
+import { MatSidenav } from "@angular/material/sidenav";
 import { MapCatalogService } from "@app/service/map-catalog/map-catalog.service";
 
 @Component({
@@ -13,5 +14,7 @@ export class MapPageComponent implements OnInit{
   ngOnInit(){
     this.mapCatalogService.reloadMap();
   }
+
+
 
 }

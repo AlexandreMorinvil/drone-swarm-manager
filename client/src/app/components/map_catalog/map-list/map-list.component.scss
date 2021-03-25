@@ -1,0 +1,23 @@
+.map-id {
+    margin: auto 0 auto;
+    padding: 0 0 0 10px;
+  }
+
+.map-card:hover {
+    -webkit-filter: brightness(90%);
+    filter: brightness(90%);
+}
+
+.map-card {
+    background-color: lightgrey;
+    border: #818181 solid 1px;
+    margin:2px
+}
+
+.map-id-area {
+    color: black;
+}
+
+.title {
+    border-radius: 0%;
+}
