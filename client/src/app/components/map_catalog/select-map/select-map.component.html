@@ -1,7 +1,24 @@
 <div class="select-map">
-    <div class="info-select-map">
-        <p>ID : {{ selectedMap.id }} </p>
-        <p>Date : </p>
+    
+    <div class="info-select-map" *ngIf="isMapSelected">
+        <div class="title">
+            <p>
+              <span> Détail </span>  
+            </p>
+            
+        </div>
+        <div class="detail">
+            <p class="map-id">
+               <span>ID : </span> <span> {{ selectedMap.id }} </span>
+            </p>
+            <p class="map-date">
+                <span>Date : </span><span> {{selectedMap.date}} </span>
+            </p> 
+        </div>
+        
     </div>
-    <button mat-raised-button class="delete-select-map" color="primary" (click)="deleteMap()">Delete this map</button>
+    <p class="no-map-selected" *ngIf="!isMapSelected">
+        <span>No Map Selected</span>
+    </p>
+    <button mat-raised-button class="delete-select-map" color="primary" (click)="deleteMap()" [disabled]="!isMapSelected">Delete this map</button>
 </div>

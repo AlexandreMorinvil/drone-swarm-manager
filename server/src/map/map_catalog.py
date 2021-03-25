@@ -11,7 +11,8 @@ class MapCatalog:
     def map_list_to_Json(self, data):
         return{
             'id': data[0],
-            'name': data[1]
+            'name': data[1],
+            'date': data[2]
         }
     
     def get_select_map(self, id):

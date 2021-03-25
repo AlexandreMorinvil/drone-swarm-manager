@@ -7,7 +7,7 @@ class DatabaseConnector:
 
     def create_table(self):
         self._c.execute('''CREATE TABLE IF NOT EXISTS map 
-             (mapid INTEGER PRIMARY KEY AUTOINCREMENT, name text)''')
+             (mapid INTEGER PRIMARY KEY AUTOINCREMENT, name text, date text)''')
         self._c.execute('''CREATE TABLE IF NOT EXISTS listOfPoints 
              (mapid INTEGER, x real, y real, z real,
             FOREIGN KEY(mapid) REFERENCES map (mapid) 
@@ -23,8 +23,8 @@ class DatabaseConnector:
         self._c.execute("SELECT name FROM sqlite_master WHERE type='table';")
         print(self._c.fetchall())
 
-    def add_map(self, name):
-        self._c.execute(''' INSERT INTO map(name) VALUES(?)''', (name,))
+    def add_map(self, name, date):
+        self._c.execute(''' INSERT INTO map(name, date) VALUES(?,?)''', (name, date,))
         self._conn.commit()
         self._c.execute('SELECT * FROM map')
         print(self._c.fetchall())

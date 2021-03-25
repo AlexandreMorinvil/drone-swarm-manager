@@ -2,6 +2,7 @@ from map.map import Map
 import socketio
 from vec3 import Vec3
 from DBconnect import DatabaseConnector
+from datetime import datetime
 
 import sys
 import os
@@ -21,7 +22,10 @@ class MapHandler:
             self.z_position = 0
 
         def initialize_map(self):
-            mapId = self.db.add_map("mission")
+            now = datetime.now()
+            dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+            print(dt_string)
+            mapId = self.db.add_map("mission",dt_string )
             self.current_map = Map("mission", mapId)
 
 

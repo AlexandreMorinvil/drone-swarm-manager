@@ -17,6 +17,10 @@ export class SelectMapComponent{
     return this.mapCatalogService.selectedMap;
   }
 
+  public get isMapSelected(): Boolean {
+    return this.selectedMap.id != -1;
+  }
+
   deleteMap(): void {
     this.mapCatalogService.deleteSelectedMap(this.selectedMap.id);
   }

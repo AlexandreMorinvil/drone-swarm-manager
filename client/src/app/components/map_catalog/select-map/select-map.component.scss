@@ -10,7 +10,21 @@
     display: flex;
     flex-direction: row;
 }
+p {
+    margin: 0;
+    font: 16px Roboto, "Helvetica Neue", sans-serif;
+}
 
 .delete-select-map {
     margin: 5px;
+}
+
+.detail{
+    display: flex;
+    flex-direction: column;
+}
+
+.title{
+    margin-left:10px;
+    margin-right: 10px;
 }

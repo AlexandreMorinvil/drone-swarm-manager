@@ -1,10 +1,13 @@
 export class Map {
     id : Number;
     name: String;
+    date: String
 
-    constructor(id:Number, name:String ){
+    constructor(id:Number, name:String, date: String ){
         this.id = id;
         this.name = name;
+        this.date = date;
+
     }
 
 }

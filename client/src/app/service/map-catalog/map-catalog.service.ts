@@ -1,7 +1,6 @@
 import { Injectable } from "@angular/core";
 import { io, Socket } from "socket.io-client/build/index";
 import {Map} from "@app/class/map";
-import { Vec3 } from "@app/class/vec3";
 
 
 
@@ -12,7 +11,7 @@ import { Vec3 } from "@app/class/vec3";
     map_list: Map[] = [];
     private socket: Socket;
     isNewSelection: boolean = false;
-    selectedMap: Map = {id:-1, name:""};
+    selectedMap: Map = {id:-1, name:"", date:""};
 
     constructor() {
         this.initSocket();
@@ -33,7 +32,7 @@ import { Vec3 } from "@app/class/vec3";
     receiveMap(data: any): void {
         const mapData = JSON.parse(data);
         for(let i = 0; i < mapData.length; i++){
-            this.map_list.push(new Map(mapData[i].id, mapData[i].name));
+            this.map_list.push(new Map(mapData[i].id, mapData[i].name,mapData[i].date));
         }
     }
 
