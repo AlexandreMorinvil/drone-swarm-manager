@@ -82,17 +82,17 @@ export class MapComponent {
   }
 
   ngOnInit() {
-    this.setPlot();
+    this.setPlot(true);
   }
 
-  resetMap(): void {
+  resetMap(isFirstTime = false): void {
     this.deleteMap();
-    this.setPlot();
+    this.setPlot(isFirstTime);
   }
 
   setBaseMap(points: Vec3[]): void {
     this.wallPoints = points;
-    this.resetMap();
+    this.resetMap(false);
   }
 
   addWallPoint(point: Vec3): void {
@@ -118,8 +118,8 @@ export class MapComponent {
     this.drawWalls();
   }
 
-  private setPlot(): void {
-    this.initSvg(true);
+  private setPlot(isFirstTime = false): void {
+    this.initSvg(isFirstTime);
     this.updateAxisRange(true);
     this.drawAxis();
     this.drawWalls();
@@ -180,7 +180,7 @@ export class MapComponent {
   }
 
   private deleteMap(): void {
-    this.chart.selectAll("#map > *").remove();
+    this.chart.selectAll("svg > *").remove();
   }
 
   private erasePlot(): void {
@@ -293,12 +293,13 @@ export class MapComponent {
   }
 
   receiveSelectMapPoints(data:any): void{
-    this.deleteMap();
-    this.resetMap();
+    let points = [];
     const pointsData = JSON.parse(data);
     for(let i = 0; i < pointsData.length; i++){
-      this.addWallPoint(new Vec3(pointsData[i].x, pointsData[i].y, pointsData[i].z));
+      points.push(new Vec3(pointsData[i].x, pointsData[i].y, pointsData[i].z));
     }
+    this.deleteMap();
+    this.setBaseMap(points);
 
   }
 }
