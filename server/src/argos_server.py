@@ -18,6 +18,7 @@ class PacketType(Enum):
     ATTITUDE = 2
     VELOCITY = 3
     DISTANCE = 4
+    ORIENTATION = 5
 
 
 class ArgosServer() : 
@@ -62,31 +63,37 @@ class ArgosServer() :
             self.data_received += bytearray(16 - len(self.data_received)) 
 
             if PacketType(self.data_received[0]) == PacketType.TX:
-                (a, b, packet_type, is_led_activated, vbattery, rssi) = struct.unpack("<hffbfb", self.data_received)
+                (packet_type, state, vbattery, is_led_activated, a, b, c) = struct.unpack("<iif?bbb", self.data_received)
                 self.drone_argos._vbat = vbattery
+                print('TX: ', packet_type, state, vbattery, is_led_activated)
 
             elif PacketType(self.data_received[0]) == PacketType.POSITION:
-                (a, b, c, packet_type, x, y, z) = struct.unpack("<bbbbfff", self.data_received)
+                (packet_type, x, y, z) = struct.unpack("<ifff", self.data_received)
                 self.drone_argos.currentPos.x = x
                 self.drone_argos.currentPos.y = y
                 self.drone_argos.currentPos.z = z
                 self.map_observation_accumulator.receive_position(x, y, z)
 
             elif PacketType(self.data_received[0]) == PacketType.VELOCITY:
-                (packet_type, px, py, pz) = struct.unpack("<ffff", self.data_received)
-                self.drone_argos._speed.x = px
-                self.drone_argos._speed.y = py
-                self.drone_argos._speed.z = pz
+                (packet_type, x_speed, y_speed, z_speed) = struct.unpack("<ifff", self.data_received)
+                self.drone_argos._speed.x = x_speed
+                self.drone_argos._speed.y = y_speed
+                self.drone_argos._speed.z = z_speed
                 
             elif PacketType(self.data_received[0]) == PacketType.DISTANCE:
-                (packet_type, front, back, up, left, right, zrange, a, b) = struct.unpack("<hbhhhhhhb", self.data_received)
+                (packet_type, front, back, up, left, right, zrange) = struct.unpack("<ihhhhhh", self.data_received)
                 self.drone_argos.sensors.front = front
                 self.drone_argos.sensors.back = back
                 self.drone_argos.sensors.up = up
                 self.drone_argos.sensors.left = left
                 self.drone_argos.sensors.right = right
                 self.drone_argos.sensors.down = zrange
-                print("Received :", front, back, up, left, right, zrange)
+
+            elif PacketType(self.data_received[0]) == PacketType.ORIENTATION:
+                (packet_type, pitch, roll, yaw) = struct.unpack("<ifff", self.data_received)
+                self.drone_argos.sensors.back = roll
+                self.drone_argos.sensors.front = pitch
+                self.drone_argos.sensors.up = yaw
                 
 
     def set_interval(self, func, sec):

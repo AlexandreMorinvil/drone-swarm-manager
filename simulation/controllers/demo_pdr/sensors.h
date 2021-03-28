@@ -18,6 +18,9 @@
 #define SPEED_SIDE 0.3
 #define MAGIC 1.84
 
+#define ROOF_HEIGHT 10.0
+#define SECONDS_PER_STEP 0.1f
+
 #include <argos3/plugins/robots/crazyflie/control_interface/ci_crazyflie_distance_scanner_sensor.h>
 #include <argos3/core/control_interface/ci_controller.h>
 #include <string>
