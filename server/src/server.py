@@ -14,7 +14,7 @@ from enum import Enum
 from threading import *
 
 class Mode(Enum):
-    REAL_TIME = 0
+    REAL = 0
     SIMULATION = 1
 
 
@@ -33,23 +33,39 @@ print('Scanning interfaces for Crazyflies...')
 available = cflib.crtp.scan_interfaces()
 print('Crazyflies found:')
 
-if (mode == Mode.REAL_TIME):
-    drones = [Drone("radio://0/80/250K",Vec3(0,0,0),0), Drone("radio://0/72/250K",Vec3(0,0,0),1), Drone("radio://0/72/250K",Vec3(0,0,0),2), Drone("radio://0/72/250K",Vec3(0,0,0),4)]
+if (mode == Mode.REAL):
+    drones = [Drone("radio://0/80/250K",Vec3(0,0,0),0), Drone("radio://0/72/250K",Vec3(0,0,0),1)]
 else:
     drones = []
 
 socks = []
-for i in range(4):
-    socks.append(ArgosServer(i, default_port + i))
-    t = threading.Thread(target=socks[i].waiting_connection, name='waiting_connection')
-    t.start()
 
-    if mode == Mode.SIMULATION:
-        drones.append(socks[i].drone_argos)
+def createDrones(numberOfDrone):
+    for i in range(numberOfDrone):
+        socks.append(ArgosServer(i, default_port + i))
+        t = threading.Thread(target=socks[i].waiting_connection, name='waiting_connection')
+        t.start()
+
+        if mode == Mode.SIMULATION:
+            drones.append(socks[i].drone_argos)
+
+def deleteDrones():
+    for i in socks:
+        if hasattr(i, "connection"):
+            i.connection.close()
+        i.sock.shutdown(2)
+        i.sock.close()
+        del i
+    drones.clear()
+    socks.clear()
 
 
-def setMode(mode_choosen):
-    mode = mode_choosen
+@socketio.on('SET_MODE')
+def setMode(data):
+    deleteDrones()
+    mode = data['mode_chosen']
+    numberOfDrone = data['number_of_drone']
+    createDrones(int(numberOfDrone))
 
 
 @socketio.on('TOGGLE_LED')
@@ -61,16 +77,16 @@ def ledToggler(data):
 @socketio.on('TAKEOFF')
 def takeOff(data):
     if (data['id'] == -2):
-        for i in range(4):
-            socks[i].send_data(StateMode.TAKE_OFF.value, "<i")
+        for i in range(numberOfDrone):
+            i.send_data(StateMode.TAKE_OFF.value, "<i")
     else:
         socks[data['id']].send_data(StateMode.TAKE_OFF.value, "<i")
     
 @socketio.on('RETURN_BASE')
 def returnToBase(data):
     if (data['id'] == -2):
-        for i in range(4):
-            socks[i].send_data(StateMode.RETURN_TO_BASE.value, "<i")
+        for i in socks:
+            o.send_data(StateMode.RETURN_TO_BASE.value, "<i")
     else:
         socks[data['id']].send_data(StateMode.RETURN_TO_BASE.value, "<i")
 
@@ -100,13 +116,12 @@ def set_interval(func, sec):
     return t
 
 if __name__ == '__main__':
-    #t2 = threading.Thread(target=socks[1].receive_data, name='receive_data')
-    #t2.start()
-    set_interval(sendPosition, 1)
+    createDrones(4)
+    #set_interval(sendPosition, 1)
     set_interval(send_data, 1)
     app.run()
 
     while True:
-        for i in range(4):
+        for i in range(numberOfDrone):
             if (socks[i].data_received != None):
                 socks[i].start_receive_data()

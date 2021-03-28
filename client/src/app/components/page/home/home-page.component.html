@@ -1,6 +1,18 @@
 <div class="page-container page-layout">
   <h1 class="title">Polytechnique Swarm Space Explorators</h1>
-  <button mat-button routerLink="/control" routerLinkActive="active">
+
+  <mat-form-field appearance="fill">
+    <mat-label>Number of drones</mat-label>
+    <input matInput [(ngModel)]="numberOfDrone">
+  </mat-form-field>
+
+  <mat-radio-group aria-label="Mode" [(ngModel)]="modeSelected">
+    <mat-radio-button value="ServerMode.SIMULATION">Simulation</mat-radio-button>
+    <mat-radio-button value="ServerMode.REAL">Real</mat-radio-button>
+  </mat-radio-group>
+  
+  
+  <button mat-button routerLink="/control" routerLinkActive="active" (click)="sendModeToServer()">
     Control Page
   </button>
   <button mat-button  routerLink="/map" routerLinkActive="active">

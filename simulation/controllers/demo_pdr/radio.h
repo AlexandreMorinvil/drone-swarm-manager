@@ -80,7 +80,7 @@ class CRadio {
 
       virtual ~CRadio() {}
 
-      void connectToServer(int idRobot);
+      bool connectToServer(int idRobot);
 
       void sendTelemetry(CVector3 pos, StateMode stateMode, float vBat);
 
