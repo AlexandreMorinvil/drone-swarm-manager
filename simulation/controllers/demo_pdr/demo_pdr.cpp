@@ -127,9 +127,9 @@ void CDemoPdr::ControlStep() {
 
       // Speed
       float speedValues[3];
-      speedValues[0] = cPos.GetX() - previousPos.GetX() / SECONDS_PER_STEP;
-      speedValues[1] = cPos.GetY() - previousPos.GetY() / SECONDS_PER_STEP;
-      speedValues[2] = cPos.GetZ() - previousPos.GetZ() / SECONDS_PER_STEP;
+      speedValues[0] = (cPos.GetX() - previousPos.GetX()) / SECONDS_PER_STEP;
+      speedValues[1] = (cPos.GetY() - previousPos.GetY()) / SECONDS_PER_STEP;
+      speedValues[2] = (cPos.GetZ() - previousPos.GetZ()) / SECONDS_PER_STEP;
 
       // Range distances
       // [ leftDist, backDist, rightDist, frontDist, downDistance, upDistance ]
@@ -144,9 +144,9 @@ void CDemoPdr::ControlStep() {
       sensorValues[5] = ROOF_HEIGHT - cPos.GetZ(); // Roof distance
 
       if (GetId() == "s0") {
-         LOG << "SPEED X " << speedValues[0] << std::endl;
-         LOG << "SPEED Y " << speedValues[1] << std::endl;
-         LOG << "SPEED Z " << speedValues[2] << std::endl;
+         LOG << "PREV X " << previousPos.GetX() << std::endl;
+         LOG << "PREV Y " << previousPos.GetY() << std::endl;
+         LOG << "PREV Z " << previousPos.GetZ() << std::endl;
       }
 
       cRadio->sendTelemetry(cPos, stateMode, sBatRead.AvailableCharge, sensorValues, orientationValues, speedValues);

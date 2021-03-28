@@ -65,7 +65,6 @@ class ArgosServer() :
             if PacketType(self.data_received[0]) == PacketType.TX:
                 (packet_type, state, vbattery, is_led_activated, a, b, c) = struct.unpack("<iif?bbb", self.data_received)
                 self.drone_argos._vbat = vbattery
-                print('TX: ', packet_type, state, vbattery, is_led_activated)
 
             elif PacketType(self.data_received[0]) == PacketType.POSITION:
                 (packet_type, x, y, z) = struct.unpack("<ifff", self.data_received)
