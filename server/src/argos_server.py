@@ -48,9 +48,6 @@ class ArgosServer() :
     def send_data(self, packet, format_packer):
         data = struct.pack(format_packer, packet)
         self.connection.send(data)
-        print('data send ')
-        print(data)
-
         
     def receive_data(self):
         print('entree receive_data')
@@ -87,7 +84,7 @@ class ArgosServer() :
                 self.drone_argos._speed.z       = z_speed
     
     def start_receive_data(self):
-        t2 = threading.Thread(target=self.receive_data, args=(queue), name="receive_data_{}".format(id))
+        t2 = threading.Thread(target=self.receive_data, args=(), name="receive_data_{}".format(id))
         t2.start
     
     

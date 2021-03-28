@@ -4,7 +4,7 @@ from vec3 import Vec3
 from drone import *
 import threading
 
-from flask import Flask, jsonify, render_template
+from flask import Flask, jsonify
 from flask_socketio import *
 import cflib
 from cflib.crazyflie import Crazyflie
@@ -12,6 +12,10 @@ from argos_server import ArgosServer
 import threading
 from enum import Enum
 from threading import *
+
+# Add paths toward dependecies in different subdirectories
+sys.path.append(os.path.abspath('./src/map'))
+from map_handler import MapHandler
 
 class Mode(Enum):
     REAL_TIME = 0
@@ -52,6 +56,9 @@ for i in range(4):
     if mode == Mode.SIMULATION:
         drones.append(socks[i].drone_argos)
 
+map_handler = MapHandler()
+thread_map_handler = threading.Thread(target=map_handler.send_point, name='send_new_points')
+thread_map_handler.start()
 
 def setMode(mode_choosen):
     mode = mode_choosen
@@ -86,15 +93,6 @@ def sendPosition():
 def send_data():
     data_to_send = json.dumps([drone.dump() for drone in drones])
     socketio.emit('drone_data', data_to_send, broadcast=True)
-
-def set_interval(func, sec):
-        def func_wrapper():
-            set_interval(func, sec)
-            func()  
-        t = threading.Timer(sec, func_wrapper)
-        t.start()
-        return t
-
 
 def set_interval(func, sec):
     def func_wrapper():

@@ -59,30 +59,30 @@ export class MapComponent {
     this.min_y = -MIN_HEIGHT / 2;
     this.max_y = MIN_HEIGHT / 2;
 
-    const interval: ReturnType<typeof setTimeout> = setInterval(() => {
-      this.addWallPoint(
-        new Vec3(this.valueToIncrease, this.valueToIncrease / 2, 0)
-      );
-      this.valueToIncrease += 1;
-    }, 10);
+    // const interval: ReturnType<typeof setTimeout> = setInterval(() => {
+    //   this.addWallPoint(
+    //     new Vec3(this.valueToIncrease, this.valueToIncrease / 2, 0)
+    //   );
+    //   this.valueToIncrease += 1;
+    // }, 10);
 
-    setTimeout(() => {
-      clearInterval(interval);
-    }, 13000);
+    // setTimeout(() => {
+    //   clearInterval(interval);
+    // }, 13000);
   }
 
   ngOnInit() {
-    this.setPlot();
+    this.setPlot(true);
   }
 
-  resetMap(): void {
+  resetMap(isFirstTime = false): void {
     this.deleteMap();
-    this.setPlot();
+    this.setPlot(isFirstTime);
   }
 
   setBaseMap(points: Vec3[]): void {
     this.wallPoints = points;
-    this.resetMap();
+    this.resetMap(false);
   }
 
   addWallPoint(point: Vec3): void {
@@ -108,8 +108,8 @@ export class MapComponent {
     this.drawWalls();
   }
 
-  private setPlot(): void {
-    this.initSvg(true);
+  private setPlot(isFirstTime = false): void {
+    this.initSvg(isFirstTime);
     this.updateAxisRange(true);
     this.drawAxis();
     this.drawWalls();

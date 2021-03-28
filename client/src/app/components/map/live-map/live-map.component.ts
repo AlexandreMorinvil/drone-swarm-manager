@@ -1,4 +1,5 @@
 import { AfterViewInit, Component, ViewChild } from "@angular/core";
+import { Vec3 } from "@app/class/vec3";
 import { io, Socket } from "socket.io-client/build/index";
 
 @Component({
@@ -10,17 +11,15 @@ export class LiveMapComponent implements AfterViewInit {
   @ViewChild("live-map") map;
 
   private socket: Socket;
-  points: any[] = [];
 
   constructor() {
     this.socket = io("127.0.0.1:5000");
-    this.socket.on("drone_data", (data) => {
+    this.socket.on("LIVE_MAP_NEW_POINT", (data) => {
       console.log("The data received : " + data);
-      this.points.push(data.left);
-      this.points.push(data.right);
-      this.points.push(data.front);
-      this.points.push(data.back);
-      // this.drawBars();
+
+      // const pointData: any = JSON.parse(data);
+
+      // this.map.addWallPoint(new Vec3(data.x, data.y, data.z))
     });
   }
 

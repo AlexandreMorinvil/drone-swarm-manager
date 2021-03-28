@@ -70,11 +70,11 @@ class MapObservationAccumulator:
         MapObservationAccumulator.queue.put(point_back)  if point_back is not None  else None 
         MapObservationAccumulator.queue.put(point_left)  if point_left is not None  else None 
         MapObservationAccumulator.queue.put(point_right) if point_right is not None else None
-        print("MAP OBSERVATIONS : ", MapObservationAccumulator.queue.qsize())
         MapObservationAccumulator.provide_lock.release()
 
-    def provide_point(self):
-        MapObservationAccumulator.consume_lock.acquire()
-        last_point = MapObservationAccumulator.queue.get()
-        MapObservationAccumulator.consume_lock.release()
+    @classmethod
+    def provide_point(cls):
+        cls.consume_lock.acquire()
+        last_point = cls.queue.get()
+        cls.consume_lock.release()
         return last_point
