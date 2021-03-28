@@ -20,39 +20,60 @@ class MapObservationAccumulator:
 
     # Using the singleton desing pattern
     def __init__(self):
+        # Data structures used to generate the points
         self.position = Vec3()
-        self.point_front = Vec3()
-        self.point_back = Vec3()
-        self.point_left = Vec3()
-        self.point_right = Vec3()
         self.sensor = Sensor()
+
+        # Track the value updates
+        self.got_new_positions = False
+        self.got_new_distances = False
+        self.got_new_orientations = False
 
     def receive_position(self, x, y, z):
         self.position = Vec3(x, y, z)
+        self.got_new_positions = True
+        self.make_points()
 
     def receive_sensor_distances(self, front, back, up, left, right, zrange):
         self.sensor.set_sensor_ranges(front, back, up, left, right, zrange)
-        print(front, back, up, left, right, zrange)
-
-    def receive_sensor_orientations(yaw, pitch, roll):
-        self.sensior.set_sensor_orientations(yaw, pitch, roll)
-
-    def make_points():
-        self.point_front = self.position + self.sensor.getEdgeFront()
-        self.point_back = self.position + self.sensor.getEdgeLeft()
-        self.point_left = self.position + self.sensor.getEdgeRight()
-        self.point_right = self.position + self.sensor.getEdgeBack()
-
-    def add_points():
+        self.got_new_distances = True
         self.make_points()
+
+    def receive_sensor_orientations(self, yaw, pitch, roll):
+        self.sensor.set_sensor_orientations(yaw, pitch, roll)
+        self.got_new_orientations = True
+        self.make_points()
+
+    def make_points(self):
+        if not(self.got_new_positions and self.got_new_distances and  self.got_new_orientations) :
+            return
+
+        edge_front  = self.sensor.getEdgeFront()
+        edge_back   = self.sensor.getEdgeLeft()
+        edge_left   = self.sensor.getEdgeRight()
+        edge_right  = self.sensor.getEdgeBack()
+
+        point_front = (self.position + edge_front) if edge_front is not None else None
+        point_back  = (self.position + edge_back ) if edge_back is not None  else None
+        point_left  = (self.position + edge_left ) if edge_left is not None  else None
+        point_right = (self.position + edge_right) if edge_right is not None else None
+
+        self.got_new_positions = False
+        self.got_new_distances = False
+        self.got_new_orientations = False
+
+        self.add_points(point_front, point_back, point_left, point_right)
+
+    def add_points(self, point_front, point_back, point_left, point_right):
         MapObservationAccumulator.provide_lock.acquire()
-        MapObservationAccumulator.queue.put(self.point_front)
-        MapObservationAccumulator.queue.put(self.point_back)
-        MapObservationAccumulator.queue.put(self.point_left)
-        MapObservationAccumulator.queue.put(self.point_right)
+        MapObservationAccumulator.queue.put(point_front) if point_front is not None else None
+        MapObservationAccumulator.queue.put(point_back)  if point_back is not None  else None 
+        MapObservationAccumulator.queue.put(point_left)  if point_left is not None  else None 
+        MapObservationAccumulator.queue.put(point_right) if point_right is not None else None
+        print("MAP OBSERVATIONS : ", MapObservationAccumulator.queue.qsize())
         MapObservationAccumulator.provide_lock.release()
 
-    def provide_point():
+    def provide_point(self):
         MapObservationAccumulator.consume_lock.acquire()
         last_point = MapObservationAccumulator.queue.get()
         MapObservationAccumulator.consume_lock.release()

@@ -35,6 +35,12 @@ void CRadio::sendTelemetry(CVector3 pos, StateMode stateMode, float vBat, float 
     int flags = fcntl(sock, F_GETFL);
     fcntl(sock, F_SETFL, flags | O_NONBLOCK);
 
+    struct PacketTX packetTx;
+    packetTx.packetType = PacketType::tx;
+    packetTx.stateMode      = stateMode;
+    packetTx.vbat           = vBat;
+    packetTx.isLedActivated = true;
+    send(sock, &packetTx, sizeof(packetTx), 0 );
 
     struct PacketPosition packetPosition;
     packetPosition.x = pos.GetX();
@@ -42,13 +48,6 @@ void CRadio::sendTelemetry(CVector3 pos, StateMode stateMode, float vBat, float 
     packetPosition.z = pos.GetZ();
     packetPosition.packetType = PacketType::position;
     send(sock, &packetPosition, sizeof(packetPosition), 0 );
-
-    struct PacketVelocity packetVelocity;
-    packetVelocity.packetType = PacketType::velocity;
-    packetVelocity.px = speed[0];
-    packetVelocity.py = speed[1];
-    packetVelocity.pz = speed[2];
-    send(sock, &packetVelocity, sizeof(packetVelocity), 0 );
 
     struct PacketDistance packetDistance;
     packetDistance.packetType = PacketType::distance;
@@ -67,12 +66,12 @@ void CRadio::sendTelemetry(CVector3 pos, StateMode stateMode, float vBat, float 
     packetOrientation.yaw   = orientation[0];
     send(sock, &packetOrientation, sizeof(packetOrientation), 0 );
 
-    struct PacketTX packetTx;
-    packetTx.packetType = PacketType::tx;
-    packetTx.stateMode      = stateMode;
-    packetTx.vbat           = vBat;
-    packetTx.isLedActivated = true;
-    send(sock, &packetTx, sizeof(packetTx), 0 );
+    struct PacketVelocity packetVelocity;
+    packetVelocity.packetType = PacketType::velocity;
+    packetVelocity.px = speed[0];
+    packetVelocity.py = speed[1];
+    packetVelocity.pz = speed[2];
+    send(sock, &packetVelocity, sizeof(packetVelocity), 0 );
 }
 
 
