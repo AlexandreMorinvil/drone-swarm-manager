@@ -58,7 +58,6 @@ class Sensor:
         coord.x = round(self.right * cos(self.roll) * sin(self.yaw), 8)
         coord.y = -round(self.right * cos(self.roll) * cos(self.yaw), 8)
         coord.z = round(self.right * sin(self.roll), 8)
-        print("SENSOR RIGHT : x: ", coord.x, "; y: ", coord.y, "; z: ", coord.z, "( RIGHT: ", self.right ,", YAW :", self.yaw, " )")
         return coord.mul(self.DISTANCE_FACTOR)
 
     def getEdgeBack(self) -> Vec3:

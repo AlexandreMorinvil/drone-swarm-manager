@@ -67,9 +67,9 @@ class MapObservationAccumulator:
     def add_points(self, point_front, point_back, point_left, point_right):
         MapObservationAccumulator.provide_lock.acquire()
         # MapObservationAccumulator.queue.put(self.position)
-        # MapObservationAccumulator.queue.put(point_front) if point_front is not None else None
-        # MapObservationAccumulator.queue.put(point_back)  if point_back is not None  else None 
-        # MapObservationAccumulator.queue.put(point_left)  if point_left is not None  else None 
+        MapObservationAccumulator.queue.put(point_front) if point_front is not None else None
+        MapObservationAccumulator.queue.put(point_back)  if point_back is not None  else None 
+        MapObservationAccumulator.queue.put(point_left)  if point_left is not None  else None 
         MapObservationAccumulator.queue.put(point_right) if point_right is not None else None
         MapObservationAccumulator.provide_lock.release()
 

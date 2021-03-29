@@ -238,7 +238,7 @@ export class MapComponent {
       .range([0, this.width]);
     this.yScale = d3
       .scaleLinear()
-      .domain([this.display_min_y, this.display_max_y])
+      .domain([this.display_max_y, this.display_min_y])
       .range([0, this.height]);
 
     // Redraw map
