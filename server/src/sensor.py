@@ -11,18 +11,18 @@ class Sensor:
     # when all 3 angular values are null :
     # the front sensor has the same direction and sens as (1,0,0)
     # the right sensor has the same direction and sens as (0,1,0)
-    def __init__(self, up=0, down=0, left=0, right=0, front=0, back=0, yaw=0, pitch=0, roll=0):
-        self.set_sensor_ranges(up, down, left, right, front, back)
+    def __init__(self, front=0, back=0, down=0, left=0, right=0, up=0, yaw=0, pitch=0, roll=0):
+        self.set_sensor_ranges(front, back, down, left, right, up)
         self.set_sensor_orientations(yaw, pitch, roll)
         self.DISTANCE_FACTOR = 0.01
 
-    def set_sensor_ranges(self, front=0, up=0, down=0, left=0, right=0, back=0):
-        self.up = up
+    def set_sensor_ranges(self, front=0, back=0, down=0, left=0, right=0, up=0):
+        self.front = front
+        self.back = back
         self.down = down
         self.left = left
         self.right = right
-        self.front = front
-        self.back = back
+        self.up = up
 
     def set_sensor_orientations(self, yaw=0, pitch=0, roll=0):
         self.yaw = yaw
@@ -66,7 +66,8 @@ class Sensor:
             return None
 
         coord = Vec3(0, 0, 0)
-        coord.x = round(self.back * cos(self.pitch) * cos(self.yaw + Sensor.BACK_ANGLE_OFFSET), 8)
-        coord.y = round(self.back * cos(self.pitch) * sin(self.yaw + Sensor.BACK_ANGLE_OFFSET), 8)
-        coord.z = round(self.back * sin(self.pitch), 8)
+        coord.x = -1 * round(self.back * cos(self.pitch) * cos(self.yaw), 8)
+        coord.y = -1 * round(self.back * cos(self.pitch) * sin(self.yaw), 8)
+        coord.z = -1 * round(self.back * sin(self.pitch), 8)
+        print("SENSOR BACK : ", coord.x, coord.y, coord.z, "(", self.back ,")")
         return coord.mul(self.DISTANCE_FACTOR)

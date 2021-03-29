@@ -64,9 +64,9 @@ class ArgosServer() :
 
             elif PacketType(self.data_received[0]) == PacketType.POSITION:
                 (packet_type, x, y, z) = struct.unpack("<ifff", self.data_received)
-                self.drone_argos.currentPos.x   = x
-                self.drone_argos.currentPos.y   = y
-                self.drone_argos.currentPos.z   = z
+                self.drone_argos.currentPos.x = x
+                self.drone_argos.currentPos.y = y
+                self.drone_argos.currentPos.z = z
                 self.map_observation_accumulator.receive_position(x, y, z)
                 
             elif PacketType(self.data_received[0]) == PacketType.DISTANCE:
@@ -80,9 +80,9 @@ class ArgosServer() :
 
             elif PacketType(self.data_received[0]) == PacketType.VELOCITY:
                 (packet_type, x_speed, y_speed, z_speed) = struct.unpack("<ifff", self.data_received)
-                self.drone_argos._speed.x       = x_speed
-                self.drone_argos._speed.y       = y_speed
-                self.drone_argos._speed.z       = z_speed
+                self.drone_argos._speed.x = x_speed
+                self.drone_argos._speed.y = y_speed
+                self.drone_argos._speed.z = z_speed
     
     def start_receive_data(self):
         t2 = threading.Thread(target=self.receive_data, args=(), name="receive_data_{}".format(id))
