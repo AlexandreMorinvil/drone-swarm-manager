@@ -117,9 +117,6 @@ class Drone :
                 'state': self._state,
                 'vbat': self._vbat,
                 'isConnected': self._isConnected,
-                'left':  (posAbs +self.sensors.getEdgeLeft()).toJson() ,
-                'front': (posAbs + self.sensors.getEdgeFront()).toJson(),
-                'right': (posAbs + self.sensors.getEdgeRight()).toJson(),
                 'currentPos': posAbs.toJson(),
                 'currentSpeed': self._speed.toJson(),
                 }

@@ -1,16 +1,22 @@
-import math
+from math import pi, sin, cos
 from vec3 import Vec3
 
 
 class Sensor:
+
+    RIGHT_ANGLE_OFFSET = 3 * pi / 2
+    LEFT_ANGLE_OFFSET = pi / 2
+    BACK_ANGLE_OFFSET = pi
+
     # when all 3 angular values are null :
     # the front sensor has the same direction and sens as (1,0,0)
     # the right sensor has the same direction and sens as (0,1,0)
     def __init__(self, up=0, down=0, left=0, right=0, front=0, back=0, yaw=0, pitch=0, roll=0):
         self.set_sensor_ranges(up, down, left, right, front, back)
         self.set_sensor_orientations(yaw, pitch, roll)
+        self.DISTANCE_FACTOR = 0.01
 
-    def set_sensor_ranges(self, up=0, down=0, left=0, right=0, front=0, back=0):
+    def set_sensor_ranges(self, front=0, up=0, down=0, left=0, right=0, back=0):
         self.up = up
         self.down = down
         self.left = left
@@ -30,53 +36,37 @@ class Sensor:
             return None
 
         coord = Vec3(0, 0, 0)
-        coord.x = round(self.front * math.cos(self.pitch) * math.cos(self.yaw), 8)
-        coord.z = round(self.front * math.sin(self.pitch), 8)
-        coord.y = round(self.front * math.cos(self.pitch) * math.sin(self.yaw), 8)
-        return coord
+        coord.x = round(self.front * cos(self.pitch) * cos(self.yaw), 8)
+        coord.y = round(self.front * cos(self.pitch) * sin(self.yaw), 8)
+        coord.z = round(self.front * sin(self.pitch), 8)
+        return coord.mul(self.DISTANCE_FACTOR)
 
     def getEdgeLeft(self) -> Vec3:
         if self.left < 0:
             return None
 
         coord = Vec3(0, 0, 0)
-        coord.x = round(self.left * math.cos(self.roll) * math.sin(self.yaw), 8)
-        coord.y = round(self.left * math.cos(self.roll) * math.cos(self.yaw) * -1, 8)
-        coord.z = round(self.left * math.sin(self.roll), 8)
-        return coord
+        coord.x = round(self.left * cos(self.roll) * sin(self.yaw + Sensor.LEFT_ANGLE_OFFSET), 8)
+        coord.y = round(self.left * cos(self.roll) * cos(self.yaw + Sensor.LEFT_ANGLE_OFFSET), 8)
+        coord.z = round(self.left * sin(self.roll), 8)
+        return coord.mul(self.DISTANCE_FACTOR)
 
     def getEdgeRight(self) -> Vec3:
         if self.right < 0:
             return None
 
         coord = Vec3(0, 0, 0)
-        coord.x = round(self.right * math.cos(self.roll) * math.sin(self.yaw), 8)
-        coord.y = round(self.right * math.cos(self.roll) * math.cos(self.yaw), 8)
-        coord.z = round(self.right * math.sin(self.roll), 8)
-        return coord
+        coord.x = round(self.right * cos(self.roll) * sin(self.yaw + Sensor.RIGHT_ANGLE_OFFSET), 8)
+        coord.y = round(self.right * cos(self.roll) * cos(self.yaw + Sensor.RIGHT_ANGLE_OFFSET), 8)
+        coord.z = round(self.right * sin(self.roll), 8)
+        return coord.mul(self.DISTANCE_FACTOR)
 
     def getEdgeBack(self) -> Vec3:
         if self.back < 0:
             return None
 
         coord = Vec3(0, 0, 0)
-        coord.x = round(self.back * math.cos(self.pitch) * math.cos(self.yaw), 8)
-        coord.z = round(self.back * math.sin(self.pitch), 8)
-        coord.y = round(self.back * math.cos(self.pitch) * math.sin(self.yaw), 8)
-        return coord
-
-    def toJson(self):
-        return {
-            'up   ': self.up,
-            'down ': self.down,
-            'left ': self.left,
-            'right': self.right,
-            'front': self.front,
-            'back ': self.back,
-            'yaw  ': self.yaw,
-            'pitch': self.pitch,
-            'roll ': self.roll,
-            'detectedR': self.getEdgeRight().toJson(),
-            'detectedL': self.getEdgeLeft().toJson(),
-            'detectedF': self.getEdgeFront().toJson()
-        }
+        coord.x = round(self.back * cos(self.pitch) * cos(self.yaw + Sensor.BACK_ANGLE_OFFSET), 8)
+        coord.y = round(self.back * cos(self.pitch) * sin(self.yaw + Sensor.BACK_ANGLE_OFFSET), 8)
+        coord.z = round(self.back * sin(self.pitch), 8)
+        return coord.mul(self.DISTANCE_FACTOR)

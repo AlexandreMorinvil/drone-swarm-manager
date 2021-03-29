@@ -72,6 +72,7 @@ class ArgosServer() :
             elif PacketType(self.data_received[0]) == PacketType.DISTANCE:
                 (packet_type, front, back, up, left, right, zrange) = struct.unpack("<ihhhhhh", self.data_received)
                 self.map_observation_accumulator.receive_sensor_distances(front, back, up, left, right, zrange)
+                print('BACK : ', back)
 
             elif PacketType(self.data_received[0]) == PacketType.ORIENTATION:
                 (packet_type, pitch, roll, yaw) = struct.unpack("<ifff", self.data_received)

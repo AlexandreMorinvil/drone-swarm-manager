@@ -5,6 +5,7 @@
 #include <string.h>
 #include <fcntl.h>
 #include <regex>
+#include <math.h>
 
 /* Include the controller definition */
 #include "demo_pdr.h"
@@ -112,7 +113,7 @@ void CDemoPdr::ControlStep() {
       CRadians rollAngle = CRadians(0.0f);
       m_pcPos->GetReading().Orientation.ToEulerAngles(yawAngle, pitchAngle, rollAngle);
       float orientationValues[3];
-      orientationValues[0] = yawAngle.GetValue();
+      orientationValues[0] = yawAngle.GetValue()  + M_PI/2;
       orientationValues[1] = pitchAngle.GetValue();
       orientationValues[2] = rollAngle.GetValue();
 
@@ -143,7 +144,9 @@ void CDemoPdr::ControlStep() {
       sensorValues[5] = ROOF_HEIGHT - cPos.GetZ(); // Roof distance
 
       if (GetId() == "s0") {
-         LOG << "FRONT_SENSOR " << sensorValues[3] << std::endl;
+         // LOG << "FRONT_SENSOR " << sensorValues[3] << std::endl;
+         // LOG << "POSITION : " << cPos.GetX() << " ; " << cPos.GetY() << " ; " << cPos.GetZ() << std::endl;
+         LOG << "YAW" << orientationValues[0] << std::endl;
       }
 
       cRadio->sendTelemetry(cPos, stateMode, sBatRead.AvailableCharge, sensorValues, orientationValues, speedValues);
@@ -154,7 +157,7 @@ void CDemoPdr::ControlStep() {
          stateMode = *stateModeReceived;
       }
 
-      LOG << "stateMode : " << stateMode << std::endl;
+      // LOG << "stateMode : " << stateMode << std::endl;
 
       cTimer->CountOneCycle();
 

@@ -49,9 +49,9 @@ class MapObservationAccumulator:
             return
 
         edge_front  = self.sensor.getEdgeFront()
-        edge_back   = self.sensor.getEdgeLeft()
-        edge_left   = self.sensor.getEdgeRight()
-        edge_right  = self.sensor.getEdgeBack()
+        edge_left   = self.sensor.getEdgeLeft()
+        edge_right  = self.sensor.getEdgeRight()
+        edge_back   = self.sensor.getEdgeBack()
 
         point_front = (self.position + edge_front) if edge_front is not None else None
         point_back  = (self.position + edge_back ) if edge_back is not None  else None
@@ -66,6 +66,7 @@ class MapObservationAccumulator:
 
     def add_points(self, point_front, point_back, point_left, point_right):
         MapObservationAccumulator.provide_lock.acquire()
+        MapObservationAccumulator.queue.put(self.position)
         MapObservationAccumulator.queue.put(point_front) if point_front is not None else None
         MapObservationAccumulator.queue.put(point_back)  if point_back is not None  else None 
         MapObservationAccumulator.queue.put(point_left)  if point_left is not None  else None 
