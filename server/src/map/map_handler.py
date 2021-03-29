@@ -1,3 +1,4 @@
+import json
 import socketio
 from flask import Flask
 from flask_socketio import *
@@ -29,11 +30,10 @@ class MapHandler:
             json_map = self.current_map.toJson()
             MapHandler.socketio.emit('LIVE_BASE_MAP', json_map, broadcast=True)
 
-        def send_point(self):
+        def send_point(self, socketio_socket):
             while self.is_consuming:
                 point = MapObservationAccumulator.provide_point()
-                print("SO FAR SO GOOD: ", point.x, point.y, point.z)
-                MapHandler.socketio.emit('LIVE_MAP_NEW_POINT', point, broadcast=True)
+                socketio_socket.emit('LIVE_MAP_NEW_POINT', json.dumps(point.toJson()), broadcast=True)
 
     # Initialization of the singleton
     instance = None

@@ -74,7 +74,7 @@ class MapObservationAccumulator:
 
     @classmethod
     def provide_point(cls):
-        cls.consume_lock.acquire()
+        # cls.consume_lock.acquire()
         last_point = cls.queue.get()
-        cls.consume_lock.release()
+        # cls.consume_lock.release()
         return last_point
