@@ -45,7 +45,6 @@ float CDemoPdr::computeAngleToFollow() {
          stateMode = kLanding;
          cTimer->SetTimer(TimerType::kLandingTimer, 100);
       }
-      float length = sqrt(pow(xdiff, 2) + pow(ydiff, 2));
       if (ydiff < 0) {
          return (- atan(xdiff/ydiff) + PI_VALUE);
       }
@@ -144,9 +143,7 @@ void CDemoPdr::ControlStep() {
       sensorValues[5] = ROOF_HEIGHT - cPos.GetZ(); // Roof distance
 
       if (GetId() == "s0") {
-         LOG << "PREV X " << previousPos.GetX() << std::endl;
-         LOG << "PREV Y " << previousPos.GetY() << std::endl;
-         LOG << "PREV Z " << previousPos.GetZ() << std::endl;
+         LOG << "FRONT_SENSOR " << sensorValues[3] << std::endl;
       }
 
       cRadio->sendTelemetry(cPos, stateMode, sBatRead.AvailableCharge, sensorValues, orientationValues, speedValues);
