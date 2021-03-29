@@ -56,7 +56,6 @@ float CDemoPdr::computeAngleToFollow() {
          stateMode = kLanding;
          cTimer->SetTimer(TimerType::kLandingTimer, 100);
       }
-      float length = sqrt(pow(xdiff, 2) + pow(ydiff, 2));
       if (ydiff < 0) {
          return (- atan(xdiff/ydiff) + PI_VALUE);
       }
@@ -181,14 +180,14 @@ void CDemoPdr::ControlStep() {
             break;
          case kReturnToBase:
             checkForCollisionAvoidance();
-            m_pcPropellers->SetRelativePosition(
-               *cMoving->GoInSpecifiedDirection(
-                  cSensors->ReturningSide(sensorValues,
-                     computeAngleToFollow())));
-
-            if (cSensors->CriticalProximity(sensorValues) == kDefault) {
-               m_pcPropellers->SetAbsoluteYaw(
-                     (*new CRadians(computeAngleToFollow())));
+            if (sensorValues[3] > 130 || sensorValues[3] == -2.0) {
+                  m_pcPropellers->SetRelativeYaw(computeAngleToFollow());
+               }
+            else{
+               computeAngleToFollow();
+               m_pcPropellers->SetRelativePosition(
+                  *cMoving->GoInSpecifiedDirection(
+                     cSensors->ReturningSide(sensorValues)));
             }
             break;
          case kLanding:
