@@ -25,8 +25,8 @@ class MapHandler:
             now = datetime.now()
             dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
             print(dt_string)
-            mapId = self.db.add_map("mission",dt_string )
-            self.current_map = Map("mission", mapId)
+            mapId = self.db.add_map("Mission",dt_string )
+            self.current_map = Map("Mission", mapId)
 
 
         def send_base_map(self):

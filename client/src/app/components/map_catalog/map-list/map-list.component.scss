@@ -1,7 +1,7 @@
-.map-id {
-    margin: auto 0 auto;
-    padding: 0 0 0 10px;
-  }
+.map-name {
+    font-size: 18px;
+    align-items: center;
+}
 
 .map-card:hover {
     -webkit-filter: brightness(90%);
@@ -20,4 +20,20 @@
 
 .title {
     border-radius: 0%;
+}
+.sidebar-title {
+    text-align: center;
+}
+
+.map-creation-date-area {
+    margin: 3px;
+}
+
+.map-date{
+    color: black;
+    padding: 5px;
+}
+
+.map-icon{
+    height: 1.5em;
 }
