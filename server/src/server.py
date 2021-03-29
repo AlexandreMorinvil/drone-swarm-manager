@@ -13,6 +13,10 @@ import threading
 from enum import Enum
 from threading import *
 
+import logging
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
+
 # Add paths toward dependecies in different subdirectories
 sys.path.append(os.path.abspath('./src/map'))
 from map_handler import MapHandler

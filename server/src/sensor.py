@@ -6,7 +6,6 @@ class Sensor:
 
     RIGHT_ANGLE_OFFSET = 3 * pi / 2
     LEFT_ANGLE_OFFSET = pi / 2
-    BACK_ANGLE_OFFSET = pi
 
     # when all 3 angular values are null :
     # the front sensor has the same direction and sens as (1,0,0)
@@ -46,9 +45,9 @@ class Sensor:
             return None
 
         coord = Vec3(0, 0, 0)
-        coord.x = round(self.left * cos(self.roll) * sin(self.yaw + Sensor.LEFT_ANGLE_OFFSET), 8)
-        coord.y = round(self.left * cos(self.roll) * cos(self.yaw + Sensor.LEFT_ANGLE_OFFSET), 8)
-        coord.z = round(self.left * sin(self.roll), 8)
+        coord.x = -round(self.left * cos(self.roll) * sin(self.yaw), 8)
+        coord.y = round(self.left * cos(self.roll) * cos(self.yaw), 8)
+        coord.z = -round(self.left * sin(self.roll), 8)
         return coord.mul(self.DISTANCE_FACTOR)
 
     def getEdgeRight(self) -> Vec3:
@@ -56,9 +55,10 @@ class Sensor:
             return None
 
         coord = Vec3(0, 0, 0)
-        coord.x = round(self.right * cos(self.roll) * sin(self.yaw + Sensor.RIGHT_ANGLE_OFFSET), 8)
-        coord.y = round(self.right * cos(self.roll) * cos(self.yaw + Sensor.RIGHT_ANGLE_OFFSET), 8)
+        coord.x = round(self.right * cos(self.roll) * sin(self.yaw), 8)
+        coord.y = -round(self.right * cos(self.roll) * cos(self.yaw), 8)
         coord.z = round(self.right * sin(self.roll), 8)
+        print("SENSOR RIGHT : x: ", coord.x, "; y: ", coord.y, "; z: ", coord.z, "( RIGHT: ", self.right ,", YAW :", self.yaw, " )")
         return coord.mul(self.DISTANCE_FACTOR)
 
     def getEdgeBack(self) -> Vec3:
@@ -66,8 +66,7 @@ class Sensor:
             return None
 
         coord = Vec3(0, 0, 0)
-        coord.x = -1 * round(self.back * cos(self.pitch) * cos(self.yaw), 8)
-        coord.y = -1 * round(self.back * cos(self.pitch) * sin(self.yaw), 8)
-        coord.z = -1 * round(self.back * sin(self.pitch), 8)
-        print("SENSOR BACK : ", coord.x, coord.y, coord.z, "(", self.back ,")")
+        coord.x = -round(self.back * cos(self.pitch) * cos(self.yaw), 8)
+        coord.y = -round(self.back * cos(self.pitch) * sin(self.yaw), 8)
+        coord.z = -round(self.back * sin(self.pitch), 8)
         return coord.mul(self.DISTANCE_FACTOR)
