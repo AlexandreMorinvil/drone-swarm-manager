@@ -1,3 +1,0 @@
-/home/farid/Desktop/projetIII/alfred/simulation/controllers/demo_pdr/CMakeFiles/rebuild_cache.dir
-/home/farid/Desktop/projetIII/alfred/simulation/controllers/demo_pdr/CMakeFiles/edit_cache.dir
-/home/farid/Desktop/projetIII/alfred/simulation/controllers/demo_pdr/CMakeFiles/demo_pdr.dir
