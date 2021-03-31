@@ -6,7 +6,10 @@ SensorSide* prioritise(float angle) {
     if (angle < 0) {
         retval[1] = SensorSide::kBack;
         retval[3] = SensorSide::kFront;
-        if (angle < - PI_DIVIDE_TWO) {
+        if (angle > - PI_DIVIDE_TWO - 0.1 && angle < - PI_DIVIDE_TWO + 0.1) {
+            retval[0] = SensorSide::kBack;
+            retval[2] = SensorSide::kFront;
+        } else if (angle < - PI_DIVIDE_TWO - 0.1) {
             retval[0] = SensorSide::kLeft;
             retval[2] = SensorSide::kRight;
         } else {
@@ -16,7 +19,10 @@ SensorSide* prioritise(float angle) {
     } else {
         retval[3] = SensorSide::kBack;
         retval[1] = SensorSide::kFront;
-        if (angle < PI_DIVIDE_TWO) {
+        if (angle > PI_DIVIDE_TWO - 0.1 && angle < PI_DIVIDE_TWO + 0.1) {
+            retval[0] = SensorSide::kFront;
+            retval[2] = SensorSide::kBack;
+        } else if (angle < PI_DIVIDE_TWO - 0.1) {
             retval[0] = SensorSide::kRight;
             retval[2] = SensorSide::kLeft;
         } else {
@@ -72,7 +78,7 @@ SensorSide CSensors::ReturningSide(float sensorValues[4], float angle) {
     SensorSide* prioList = prioritise(angle);
     for (unsigned i =0 ; i < 4; ++i) {
         int index = static_cast<int>(prioList[i]);
-        if (sensorValues[index] > 2* CRITICAL_VALUE ||
+        if (sensorValues[index] > CRITICAL_VALUE ||
             sensorValues[index] == -2)
             return prioList[i];
     }
