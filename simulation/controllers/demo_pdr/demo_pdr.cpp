@@ -143,6 +143,7 @@ void CDemoPdr::ControlStep() {
          LOG << "back " << sensorValues[1] << std::endl;
          LOG << "right " << sensorValues[2] << std::endl;
          LOG << "front " << sensorValues[3] << std::endl;
+         LOG << "currentAngle " << *currentAngle << std::endl;
       }
 
 
@@ -181,14 +182,12 @@ void CDemoPdr::ControlStep() {
          case kReturnToBase:
             checkForCollisionAvoidance();
             if (sensorValues[3] > 130 || sensorValues[3] == -2.0) {
-                  m_pcPropellers->SetRelativeYaw(computeAngleToFollow());
-               }
-            else{
-               computeAngleToFollow();
-               m_pcPropellers->SetRelativePosition(
-                  *cMoving->GoInSpecifiedDirection(
-                     cSensors->ReturningSide(sensorValues)));
+               m_pcPropellers->SetAbsoluteYaw(*new CRadians(computeAngleToFollow()));
             }
+            computeAngleToFollow();
+            m_pcPropellers->SetRelativePosition(
+               *cMoving->GoInSpecifiedDirection(
+                  cSensors->ReturningSide(sensorValues, computeAngleToFollow())));
             break;
          case kLanding:
             if (cPos.GetZ() > 0.2

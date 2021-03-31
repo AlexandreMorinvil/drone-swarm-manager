@@ -45,15 +45,15 @@ include_directories(${CMAKE_SOURCE_DIR} ${ARGOS_INCLUDE_DIRS} ${LUA_INCLUDE_DIR}
 link_directories(${ARGOS_LIBRARY_DIRS})
 
 # Descend into the controllers directory
-#add_subdirectory(controllers)
+add_subdirectory(controllers)
 
-#add_subdirectory(googletest)
+add_subdirectory(googletest)
 
-#include_directories(googletest/include)
+include_directories(googletest/include)
 
-#add_executable(movingtest test/controllers/demo_pdr/movingtest.cpp)
-#add_executable(sensorstest test/controllers/demo_pdr/sensorstest.cpp)
-#target_link_libraries(movingtest PRIVATE gtest)
-#target_link_libraries(sensorstest PRIVATE gtest)
-#target_link_libraries(movingtest PRIVATE gmock)
-#target_link_libraries(sensorstest PRIVATE gmock)
+add_executable(movingtest test/controllers/demo_pdr/movingtest.cpp)
+add_executable(sensorstest test/controllers/demo_pdr/sensorstest.cpp)
+target_link_libraries(movingtest PRIVATE gtest)
+target_link_libraries(sensorstest PRIVATE gtest)
+target_link_libraries(movingtest PRIVATE gmock)
+target_link_libraries(sensorstest PRIVATE gmock)
