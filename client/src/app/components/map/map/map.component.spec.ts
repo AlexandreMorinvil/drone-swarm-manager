@@ -15,4 +15,8 @@ describe("MapComponent", () => {
     const app = fixture.componentInstance;
     expect(app).toBeTruthy();
   });
+
+  it("should get points of a selected map from server", () => {
+  
+  });
 });

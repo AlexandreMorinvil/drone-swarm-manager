@@ -11,7 +11,7 @@ import {Map} from "@app/class/map";
     map_list: Map[] = [];
     private socket: Socket;
     isNewSelection: boolean = false;
-    selectedMap: Map = {id:-1, name:"", date:""};
+    mapSelected: Map = {id:-1, name:"", date:""};
 
     constructor() {
         this.initSocket();
@@ -36,10 +36,10 @@ import {Map} from "@app/class/map";
         }
     }
 
-    selectMap(mapId:Number): void{
+    selectedMap(mapId:Number): void{
         this.socket.emit("SELECT_MAP", { id: mapId });
         this.map_list.forEach((data)=>{
-            if(data.id == mapId) this.selectedMap = data;
+            if(data.id == mapId) this.mapSelected = data;
         });
     }
 

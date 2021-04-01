@@ -14,7 +14,7 @@ export class SelectMapComponent{
   constructor(public mapCatalogService: MapCatalogService){}
 
   public get selectedMap(): Map {
-    return this.mapCatalogService.selectedMap;
+    return this.mapCatalogService.mapSelected;
   }
 
   public get isMapSelected(): Boolean {

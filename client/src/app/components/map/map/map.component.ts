@@ -66,7 +66,7 @@ export class MapComponent {
 
     this.socket = io("127.0.0.1:5000");
     this.socket.on("MAP_POINTS",(data) => {
-      this.receiveSelectMapPoints(data)
+      this.receiveSelectedMapPoints(data)
     });
 
     /*const interval: ReturnType<typeof setTimeout> = setInterval(() => {
@@ -292,7 +292,7 @@ export class MapComponent {
       .style("fill", "#69b3a2");
   }
 
-  receiveSelectMapPoints(data:any): void{
+  receiveSelectedMapPoints(data:any): void{
     let points = [];
     const pointsData = JSON.parse(data);
     for(let i = 0; i < pointsData.length; i++){
@@ -300,6 +300,5 @@ export class MapComponent {
     }
     this.deleteMap();
     this.setBaseMap(points);
-
   }
 }

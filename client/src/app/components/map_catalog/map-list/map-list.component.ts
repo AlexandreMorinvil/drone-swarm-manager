@@ -11,7 +11,6 @@ import { MapCatalogService } from "@app/service/map-catalog/map-catalog.service"
   styleUrls: ["./map-list.component.scss"],
 })
 export class MapListComponent { 
-  points : Vec3[] = []
   constructor(public mapCatalogService : MapCatalogService){
   }
   public get maps(): Map[] {
@@ -19,7 +18,7 @@ export class MapListComponent {
   }
 
   getMapSelected(id:Number):void {
-    this.mapCatalogService.selectMap(id);
+    this.mapCatalogService.selectedMap(id);
   }
 
 }
