@@ -72,11 +72,10 @@ SensorSide ReturningSide(Sensor *sensor, float sensorValues[4], float angle) {
     if (closeSens == kDefault) return closeSens;
     SensorSide* prioList = prioritise(angle);
     for (unsigned i =0 ; i < 4; ++i) {
-        auto index = (int)(prioList[i]);
+        int index = (int)(prioList[i]);
         if (sensorValues[index] > 2* CRITICAL_VALUE ||
             sensorValues[index] == -2)
             return prioList[i];
     }
     return FreeSide(sensor, sensorValues);
 }
-
