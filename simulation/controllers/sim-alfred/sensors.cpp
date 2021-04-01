@@ -1,4 +1,4 @@
-#include "controllers/demo_pdr/sensors.h"
+#include "controllers/sim-alfred/sensors.h"
 
 
 SensorSide* prioritise(float angle) {

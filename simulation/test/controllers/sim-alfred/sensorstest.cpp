@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
-#include "controllers/demo_pdr/sensors.cpp"
+#include "controllers/sim-alfred/sensors.cpp"
 
 
 TEST(sensorstest, freeSide_basic_test_back) {

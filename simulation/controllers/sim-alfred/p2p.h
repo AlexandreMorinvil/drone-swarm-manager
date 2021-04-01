@@ -15,9 +15,9 @@
 #include <argos3/plugins/robots/generic/control_interface/ci_range_and_bearing_sensor.h>
 #include <algorithm>
 
-#include "controllers/demo_pdr/sensors.h"
-#include "controllers/demo_pdr/moving.h"
-#include "controllers/demo_pdr/timer.h"
+#include "controllers/sim-alfred/sensors.h"
+#include "controllers/sim-alfred/moving.h"
+#include "controllers/sim-alfred/timer.h"
 
 using argos::CCI_RangeAndBearingSensor;
 using argos::CCI_RangeAndBearingActuator;
@@ -39,6 +39,8 @@ class CP2P {
       CVector3* GetNewVectorToAvoidCollision(CVector3 position, int idRobot);
 
       void sendPacketToOtherRobots(float altitude, int idRobot);
+
+      bool isThereARobotClose();
 
  private:
       CCI_RangeAndBearingSensor* m_pcRABSens;

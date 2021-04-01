@@ -1,4 +1,4 @@
-#include "controllers/demo_pdr/timer.h"
+#include "controllers/sim-alfred/timer.h"
 
 
 CTimer::CTimer() {

@@ -19,7 +19,7 @@
 #include <regex.h>
 #include <arpa/inet.h>
 #include <argos3/core/utility/math/vector3.h>
-#include "controllers/demo_pdr/sensors.h"
+#include "controllers/sim-alfred/sensors.h"
 
 
 using std::regex;
@@ -30,7 +30,8 @@ typedef enum {
     kStandby,
     kTakeOff,
     kReturnToBase,
-    kLanding
+    kLanding,
+    kCollisionResolver
   } StateMode;
 
 typedef enum {

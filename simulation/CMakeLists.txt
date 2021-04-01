@@ -51,8 +51,8 @@ add_subdirectory(googletest)
 
 include_directories(googletest/include)
 
-add_executable(movingtest test/controllers/demo_pdr/movingtest.cpp)
-add_executable(sensorstest test/controllers/demo_pdr/sensorstest.cpp)
+add_executable(movingtest test/controllers/sim-alfred/movingtest.cpp)
+add_executable(sensorstest test/controllers/sim-alfred/sensorstest.cpp)
 target_link_libraries(movingtest PRIVATE gtest)
 target_link_libraries(sensorstest PRIVATE gtest)
 target_link_libraries(movingtest PRIVATE gmock)

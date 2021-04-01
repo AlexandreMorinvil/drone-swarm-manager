@@ -48,10 +48,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/farid/Desktop/projetIII/alfred/simulation/controllers/demo_pdr
+CMAKE_SOURCE_DIR = /home/farid/Desktop/projetIII/alfred/simulation/controllers/sim-alfred
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/farid/Desktop/projetIII/alfred/simulation/controllers/demo_pdr
+CMAKE_BINARY_DIR = /home/farid/Desktop/projetIII/alfred/simulation/controllers/sim-alfred
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -80,9 +80,9 @@ edit_cache/fast: edit_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/farid/Desktop/projetIII/alfred/simulation/controllers/demo_pdr/CMakeFiles /home/farid/Desktop/projetIII/alfred/simulation/controllers/demo_pdr/CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/farid/Desktop/projetIII/alfred/simulation/controllers/sim-alfred/CMakeFiles /home/farid/Desktop/projetIII/alfred/simulation/controllers/sim-alfred/CMakeFiles/progress.marks
 	$(MAKE) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/farid/Desktop/projetIII/alfred/simulation/controllers/demo_pdr/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/farid/Desktop/projetIII/alfred/simulation/controllers/sim-alfred/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -111,44 +111,44 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named demo_pdr
+# Target rules for targets named sim-alfred
 
 # Build rule for target.
-demo_pdr: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 demo_pdr
-.PHONY : demo_pdr
+sim-alfred: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 sim-alfred
+.PHONY : sim-alfred
 
 # fast build rule for target.
-demo_pdr/fast:
-	$(MAKE) -f CMakeFiles/demo_pdr.dir/build.make CMakeFiles/demo_pdr.dir/build
-.PHONY : demo_pdr/fast
+sim-alfred/fast:
+	$(MAKE) -f CMakeFiles/sim-alfred.dir/build.make CMakeFiles/sim-alfred.dir/build
+.PHONY : sim-alfred/fast
 
-demo_pdr.o: demo_pdr.cpp.o
+sim-alfred.o: sim-alfred.cpp.o
 
-.PHONY : demo_pdr.o
+.PHONY : sim-alfred.o
 
 # target to build an object file
-demo_pdr.cpp.o:
-	$(MAKE) -f CMakeFiles/demo_pdr.dir/build.make CMakeFiles/demo_pdr.dir/demo_pdr.cpp.o
-.PHONY : demo_pdr.cpp.o
+sim-alfred.cpp.o:
+	$(MAKE) -f CMakeFiles/sim-alfred.dir/build.make CMakeFiles/sim-alfred.dir/sim-alfred.cpp.o
+.PHONY : sim-alfred.cpp.o
 
-demo_pdr.i: demo_pdr.cpp.i
+sim-alfred.i: sim-alfred.cpp.i
 
-.PHONY : demo_pdr.i
+.PHONY : sim-alfred.i
 
 # target to preprocess a source file
-demo_pdr.cpp.i:
-	$(MAKE) -f CMakeFiles/demo_pdr.dir/build.make CMakeFiles/demo_pdr.dir/demo_pdr.cpp.i
-.PHONY : demo_pdr.cpp.i
+sim-alfred.cpp.i:
+	$(MAKE) -f CMakeFiles/sim-alfred.dir/build.make CMakeFiles/sim-alfred.dir/sim-alfred.cpp.i
+.PHONY : sim-alfred.cpp.i
 
-demo_pdr.s: demo_pdr.cpp.s
+sim-alfred.s: sim-alfred.cpp.s
 
-.PHONY : demo_pdr.s
+.PHONY : sim-alfred.s
 
 # target to generate assembly for a file
-demo_pdr.cpp.s:
-	$(MAKE) -f CMakeFiles/demo_pdr.dir/build.make CMakeFiles/demo_pdr.dir/demo_pdr.cpp.s
-.PHONY : demo_pdr.cpp.s
+sim-alfred.cpp.s:
+	$(MAKE) -f CMakeFiles/sim-alfred.dir/build.make CMakeFiles/sim-alfred.dir/sim-alfred.cpp.s
+.PHONY : sim-alfred.cpp.s
 
 moving.o: moving.cpp.o
 
@@ -156,7 +156,7 @@ moving.o: moving.cpp.o
 
 # target to build an object file
 moving.cpp.o:
-	$(MAKE) -f CMakeFiles/demo_pdr.dir/build.make CMakeFiles/demo_pdr.dir/moving.cpp.o
+	$(MAKE) -f CMakeFiles/sim-alfred.dir/build.make CMakeFiles/sim-alfred.dir/moving.cpp.o
 .PHONY : moving.cpp.o
 
 moving.i: moving.cpp.i
@@ -165,7 +165,7 @@ moving.i: moving.cpp.i
 
 # target to preprocess a source file
 moving.cpp.i:
-	$(MAKE) -f CMakeFiles/demo_pdr.dir/build.make CMakeFiles/demo_pdr.dir/moving.cpp.i
+	$(MAKE) -f CMakeFiles/sim-alfred.dir/build.make CMakeFiles/sim-alfred.dir/moving.cpp.i
 .PHONY : moving.cpp.i
 
 moving.s: moving.cpp.s
@@ -174,7 +174,7 @@ moving.s: moving.cpp.s
 
 # target to generate assembly for a file
 moving.cpp.s:
-	$(MAKE) -f CMakeFiles/demo_pdr.dir/build.make CMakeFiles/demo_pdr.dir/moving.cpp.s
+	$(MAKE) -f CMakeFiles/sim-alfred.dir/build.make CMakeFiles/sim-alfred.dir/moving.cpp.s
 .PHONY : moving.cpp.s
 
 p2p.o: p2p.cpp.o
@@ -183,7 +183,7 @@ p2p.o: p2p.cpp.o
 
 # target to build an object file
 p2p.cpp.o:
-	$(MAKE) -f CMakeFiles/demo_pdr.dir/build.make CMakeFiles/demo_pdr.dir/p2p.cpp.o
+	$(MAKE) -f CMakeFiles/sim-alfred.dir/build.make CMakeFiles/sim-alfred.dir/p2p.cpp.o
 .PHONY : p2p.cpp.o
 
 p2p.i: p2p.cpp.i
@@ -192,7 +192,7 @@ p2p.i: p2p.cpp.i
 
 # target to preprocess a source file
 p2p.cpp.i:
-	$(MAKE) -f CMakeFiles/demo_pdr.dir/build.make CMakeFiles/demo_pdr.dir/p2p.cpp.i
+	$(MAKE) -f CMakeFiles/sim-alfred.dir/build.make CMakeFiles/sim-alfred.dir/p2p.cpp.i
 .PHONY : p2p.cpp.i
 
 p2p.s: p2p.cpp.s
@@ -201,7 +201,7 @@ p2p.s: p2p.cpp.s
 
 # target to generate assembly for a file
 p2p.cpp.s:
-	$(MAKE) -f CMakeFiles/demo_pdr.dir/build.make CMakeFiles/demo_pdr.dir/p2p.cpp.s
+	$(MAKE) -f CMakeFiles/sim-alfred.dir/build.make CMakeFiles/sim-alfred.dir/p2p.cpp.s
 .PHONY : p2p.cpp.s
 
 radio.o: radio.cpp.o
@@ -210,7 +210,7 @@ radio.o: radio.cpp.o
 
 # target to build an object file
 radio.cpp.o:
-	$(MAKE) -f CMakeFiles/demo_pdr.dir/build.make CMakeFiles/demo_pdr.dir/radio.cpp.o
+	$(MAKE) -f CMakeFiles/sim-alfred.dir/build.make CMakeFiles/sim-alfred.dir/radio.cpp.o
 .PHONY : radio.cpp.o
 
 radio.i: radio.cpp.i
@@ -219,7 +219,7 @@ radio.i: radio.cpp.i
 
 # target to preprocess a source file
 radio.cpp.i:
-	$(MAKE) -f CMakeFiles/demo_pdr.dir/build.make CMakeFiles/demo_pdr.dir/radio.cpp.i
+	$(MAKE) -f CMakeFiles/sim-alfred.dir/build.make CMakeFiles/sim-alfred.dir/radio.cpp.i
 .PHONY : radio.cpp.i
 
 radio.s: radio.cpp.s
@@ -228,7 +228,7 @@ radio.s: radio.cpp.s
 
 # target to generate assembly for a file
 radio.cpp.s:
-	$(MAKE) -f CMakeFiles/demo_pdr.dir/build.make CMakeFiles/demo_pdr.dir/radio.cpp.s
+	$(MAKE) -f CMakeFiles/sim-alfred.dir/build.make CMakeFiles/sim-alfred.dir/radio.cpp.s
 .PHONY : radio.cpp.s
 
 sensors.o: sensors.cpp.o
@@ -237,7 +237,7 @@ sensors.o: sensors.cpp.o
 
 # target to build an object file
 sensors.cpp.o:
-	$(MAKE) -f CMakeFiles/demo_pdr.dir/build.make CMakeFiles/demo_pdr.dir/sensors.cpp.o
+	$(MAKE) -f CMakeFiles/sim-alfred.dir/build.make CMakeFiles/sim-alfred.dir/sensors.cpp.o
 .PHONY : sensors.cpp.o
 
 sensors.i: sensors.cpp.i
@@ -246,7 +246,7 @@ sensors.i: sensors.cpp.i
 
 # target to preprocess a source file
 sensors.cpp.i:
-	$(MAKE) -f CMakeFiles/demo_pdr.dir/build.make CMakeFiles/demo_pdr.dir/sensors.cpp.i
+	$(MAKE) -f CMakeFiles/sim-alfred.dir/build.make CMakeFiles/sim-alfred.dir/sensors.cpp.i
 .PHONY : sensors.cpp.i
 
 sensors.s: sensors.cpp.s
@@ -255,7 +255,7 @@ sensors.s: sensors.cpp.s
 
 # target to generate assembly for a file
 sensors.cpp.s:
-	$(MAKE) -f CMakeFiles/demo_pdr.dir/build.make CMakeFiles/demo_pdr.dir/sensors.cpp.s
+	$(MAKE) -f CMakeFiles/sim-alfred.dir/build.make CMakeFiles/sim-alfred.dir/sensors.cpp.s
 .PHONY : sensors.cpp.s
 
 timer.o: timer.cpp.o
@@ -264,7 +264,7 @@ timer.o: timer.cpp.o
 
 # target to build an object file
 timer.cpp.o:
-	$(MAKE) -f CMakeFiles/demo_pdr.dir/build.make CMakeFiles/demo_pdr.dir/timer.cpp.o
+	$(MAKE) -f CMakeFiles/sim-alfred.dir/build.make CMakeFiles/sim-alfred.dir/timer.cpp.o
 .PHONY : timer.cpp.o
 
 timer.i: timer.cpp.i
@@ -273,7 +273,7 @@ timer.i: timer.cpp.i
 
 # target to preprocess a source file
 timer.cpp.i:
-	$(MAKE) -f CMakeFiles/demo_pdr.dir/build.make CMakeFiles/demo_pdr.dir/timer.cpp.i
+	$(MAKE) -f CMakeFiles/sim-alfred.dir/build.make CMakeFiles/sim-alfred.dir/timer.cpp.i
 .PHONY : timer.cpp.i
 
 timer.s: timer.cpp.s
@@ -282,7 +282,7 @@ timer.s: timer.cpp.s
 
 # target to generate assembly for a file
 timer.cpp.s:
-	$(MAKE) -f CMakeFiles/demo_pdr.dir/build.make CMakeFiles/demo_pdr.dir/timer.cpp.s
+	$(MAKE) -f CMakeFiles/sim-alfred.dir/build.make CMakeFiles/sim-alfred.dir/timer.cpp.s
 .PHONY : timer.cpp.s
 
 # Help Target
@@ -293,10 +293,10 @@ help:
 	@echo "... depend"
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
-	@echo "... demo_pdr"
-	@echo "... demo_pdr.o"
-	@echo "... demo_pdr.i"
-	@echo "... demo_pdr.s"
+	@echo "... sim-alfred"
+	@echo "... sim-alfred.o"
+	@echo "... sim-alfred.i"
+	@echo "... sim-alfred.s"
 	@echo "... moving.o"
 	@echo "... moving.i"
 	@echo "... moving.s"

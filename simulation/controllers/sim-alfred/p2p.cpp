@@ -1,4 +1,5 @@
-#include "controllers/demo_pdr/p2p.h"
+#include "controllers/sim-alfred/p2p.h"
+#include <argos3/core/utility/logging/argos_log.h>
 
 CP2P::CP2P(
     CCI_RangeAndBearingSensor* pcRABSens,
@@ -9,6 +10,19 @@ CP2P::CP2P(
     _cTimer = cTimer;
 }
 
+bool CP2P::isThereARobotClose() {
+    const CCI_RangeAndBearingSensor::TReadings& tMsgs =
+        m_pcRABSens->GetReadings();
+    if (!tMsgs.empty()) {
+        int idMax = -1;
+        for (int i = 0; i < tMsgs.size(); i++) {
+            if (tMsgs[i].Range < 300.0) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
 
 CVector3* CP2P::GetNewVectorToAvoidCollision(CVector3 position, int idRobot) {
     const CCI_RangeAndBearingSensor::TReadings& tMsgs =
