@@ -29,3 +29,12 @@ h1 {
   text-align: center;
   margin-bottom: 40px;
 }
+
+mat-radio-group {
+  display: flex;
+  flex-direction: column;
+}
+
+mat-radio-button {
+  margin: 5px;
+}

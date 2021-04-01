@@ -3,7 +3,6 @@ import json
 from vec3 import Vec3
 from drone import *
 import threading
-
 from flask import Flask, jsonify, render_template
 from flask_socketio import *
 import cflib
@@ -12,6 +11,7 @@ from argos_server import ArgosServer
 import threading
 from enum import Enum
 from threading import *
+from subprocess import call
 
 class Mode(Enum):
     REAL = 0
@@ -60,12 +60,22 @@ def deleteDrones():
     socks.clear()
 
 
+
 @socketio.on('SET_MODE')
 def setMode(data):
     deleteDrones()
     mode = data['mode_chosen']
     numberOfDrone = data['number_of_drone']
-    createDrones(int(numberOfDrone))
+    dronesAreCreated = False
+    while not dronesAreCreated:
+        try:
+            createDrones(int(numberOfDrone))
+            dronesAreCreated = True
+        except:
+            deleteDrones()
+            dronesAreCreated = False
+            
+    call(['./start-simulation.sh'])
 
 
 @socketio.on('TOGGLE_LED')
@@ -77,7 +87,7 @@ def ledToggler(data):
 @socketio.on('TAKEOFF')
 def takeOff(data):
     if (data['id'] == -2):
-        for i in range(numberOfDrone):
+        for i in socks:
             i.send_data(StateMode.TAKE_OFF.value, "<i")
     else:
         socks[data['id']].send_data(StateMode.TAKE_OFF.value, "<i")
@@ -86,7 +96,7 @@ def takeOff(data):
 def returnToBase(data):
     if (data['id'] == -2):
         for i in socks:
-            o.send_data(StateMode.RETURN_TO_BASE.value, "<i")
+            i.send_data(StateMode.RETURN_TO_BASE.value, "<i")
     else:
         socks[data['id']].send_data(StateMode.RETURN_TO_BASE.value, "<i")
 
