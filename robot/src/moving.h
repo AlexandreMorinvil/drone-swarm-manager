@@ -1,6 +1,18 @@
+#ifndef MOVING_H
+#define MOVING_H
+
 #include "sensor.h"
-#include "pdr_demo.h"
+#include <math.h>
 
 
-    Vector3* GoInSpecifiedDirection(SensorSide freeSide);
+typedef struct  Vector3
+{
+    float x;
+    float y;
+    float z;
+} __attribute__((packed)) Vector3;
 
+Vector3* GoInSpecifiedDirection(SensorSide freeSide);
+
+
+#endif

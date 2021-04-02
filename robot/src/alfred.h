@@ -1,4 +1,6 @@
-/*
+#ifndef ALFRED_H
+#define ALFRED_H
+
 #include "app.h"
 #include "app_channel.h"
 #include "ledseq.h"
@@ -6,23 +8,21 @@
 #include "crtp.h"
 #include "radiolink.h"
 #include "configblock.h"
-*/
 #include <string.h>
-
 #include <stdio.h>
 #include <stdint.h>
-#include <stdbool.h>
-/*
 #include "FreeRTOS.h"
 #include "timers.h"
 #include "estimator_kalman.h"
 #include "param.h"
+#include "moving.h"
+#include "sensor.h"
+#include "crtp_commander_high_level.h"
 
 #include "debug.h"
-*/
+
 #define NON_BLOCKING 0
 #define DEBUG_MODULE "HELLOWORLD"
-
 
 typedef enum {
     tx,
@@ -31,8 +31,17 @@ typedef enum {
     distance
 } PacketType;
 
+typedef enum {
+    kStandby,
+    kTakeOff,
+    kReturnToBase,
+    kLanding,
+    kFlying
+  } StateMode;
+
 typedef struct packetRX {
   bool ledActivation;
+  StateMode stateMode;
 } __attribute__((packed)) packetRX;
 
 typedef struct PacketTX {
@@ -66,12 +75,5 @@ typedef struct PacketDistance {
   uint16_t zrange;
 } __attribute__((packed)) PacketDistance;
 
-typedef struct  Vector3
-{
-    float x;
-    float y;
-    float z;
-} __attribute__((packed)) Vector3;
 
-
-bool isLedActivated = false;
+#endif
