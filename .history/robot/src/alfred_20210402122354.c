@@ -184,7 +184,8 @@ void appMain()
         crtpCommanderHighLevelGoTo(vec3->x, vec3->y, vec3->z, yaw, 1.0, true);
         if (CriticalProximity(sensorValues) == kDefault) {
           crtpCommanderHighLevelLandYaw(abs(vec3->x - vec3->y), 1.0, computeAngleToFollow())
-        } 
+        }
+        
         break;
       case kLanding:
         
