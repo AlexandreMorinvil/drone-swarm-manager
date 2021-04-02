@@ -44,6 +44,8 @@ ledseqContext_t seq_lock = {
 
 bool isLedActivated = false;
 static xTimerHandle timer;
+static xTimerHandle landingTimer;
+static xTimerHandle avoidTimer;
 StateMode stateMode = kStandby;
 
 P2PPacket initializeP2PPacket() {
@@ -128,7 +130,7 @@ float computeAngleToFollow() {
   float posX = logGetFloat(logGetVarId("stateEstimate", "x");
   float posY = logGetFloat(logGetVarId("stateEstimate", "y");
   float xdiff = objective->x - posX);
-  float xdiff = objective->y - posY);
+  float ydiff = objective->y - posY);
 
   if (abs(xdiff) < 0.5 && abs(ydiff) < 0.5) {
     stateMode = kLanding;
@@ -151,6 +153,8 @@ void appMain()
   timer = xTimerCreate("SendInfos", M2T(500), pdTRUE, NULL, sendInfos);
   xTimerStart(timer, 500);
   sendInfos();
+
+  
 
   float yaw = 0.0;
   uint16_t leftDistance = logGetUint(logGetVarId("range", "left"));
@@ -187,7 +191,9 @@ void appMain()
         } 
         break;
       case kLanding:
-        
+        if (logGetFloat(logGetVarId("stateEstimate", "z")) > 0.2 && ) {
+          crtpCommanderHighLevelGoTo(0.0f, 0.0f, -0.1f));
+        }
         break;
       default:
         break;
