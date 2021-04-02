@@ -44,7 +44,6 @@ ledseqContext_t seq_lock = {
 
 bool isLedActivated = false;
 static xTimerHandle timer;
-static xTimerHandle landingTimer;
 static xTimerHandle avoidTimer;
 StateMode stateMode = kStandby;
 
@@ -68,6 +67,12 @@ void processRXPacketReceived(struct packetRX rxPacket){
     ledseqStop(&seq_lock);
   }
   stateMode = rxPacket.stateMode;
+}
+
+void setObjective(float x, float y, float z) {
+  objective->x = x;
+  objective->y = y;
+  objective->z = z;
 }
 
 
@@ -154,7 +159,7 @@ void appMain()
   xTimerStart(timer, 500);
   sendInfos();
 
-  
+  setObjective(0.0f, 0.0f, 0.0f);
 
   float yaw = 0.0;
   uint16_t leftDistance = logGetUint(logGetVarId("range", "left"));
@@ -179,6 +184,7 @@ void appMain()
       case kFlying:
         if (frontDistance < 130) {
           yaw = PI_OVER_8;
+          crtpCommanderHighLevelLandYaw(0.5f, 1.0, yaw); // valeurs arbitraires
         }
         Vector3* vec3 = GoInSpecifiedDirection(FreeSide(sensorValues));
         crtpCommanderHighLevelGoTo(vec3->x, vec3->y, vec3->z, yaw, 1.0, true);
@@ -191,8 +197,8 @@ void appMain()
         } 
         break;
       case kLanding:
-        if (logGetFloat(logGetVarId("stateEstimate", "z")) > 0.2 && ) {
-          crtpCommanderHighLevelGoTo(0.0f, 0.0f, -0.1f));
+        if (logGetFloat(logGetVarId("stateEstimate", "z")) > 0.2) {
+          crtpCommanderHighLevelGoTo(0.0f, 0.0f, -0.1f)); // temporaire
         }
         break;
       default:
