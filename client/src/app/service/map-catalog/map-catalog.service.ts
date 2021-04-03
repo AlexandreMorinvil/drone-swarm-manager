@@ -21,7 +21,8 @@ import {Map} from "@app/class/map";
         this.socket = io("127.0.0.1:5000");
         this.socket.on("MAP_LIST", (data) => {
             this.map_list = [];
-            this.receiveMap(data);           
+            const mapData = JSON.parse(data);  
+            this.receiveMap(mapData);         
         });
     }
 
@@ -29,8 +30,7 @@ import {Map} from "@app/class/map";
         this.socket.emit("MAP_CATALOG");
     }
 
-    receiveMap(data: any): void {
-        const mapData = JSON.parse(data);
+    receiveMap(mapData: any): void {
         for(let i = 0; i < mapData.length; i++){
             this.map_list.push(new Map(mapData[i].id, mapData[i].name,mapData[i].date));
         }
@@ -46,7 +46,5 @@ import {Map} from "@app/class/map";
     deleteSelectedMap(mapId: Number): void {
         this.socket.emit("DELETE_MAP", {id: mapId});
     }
-
-
 
   }

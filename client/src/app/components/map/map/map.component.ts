@@ -66,7 +66,8 @@ export class MapComponent {
 
     this.socket = io("127.0.0.1:5000");
     this.socket.on("MAP_POINTS",(data) => {
-      this.receiveSelectedMapPoints(data)
+      const points = JSON.parse(data);
+      this.receiveSelectedMapPoints(points);
     });
 
     /*const interval: ReturnType<typeof setTimeout> = setInterval(() => {
@@ -292,9 +293,9 @@ export class MapComponent {
       .style("fill", "#69b3a2");
   }
 
-  receiveSelectedMapPoints(data:any): void{
+  receiveSelectedMapPoints(pointsData:any): void{
     let points = [];
-    const pointsData = JSON.parse(data);
+    console.log(pointsData);
     for(let i = 0; i < pointsData.length; i++){
       points.push(new Vec3(pointsData[i].x, pointsData[i].y, pointsData[i].z));
     }
