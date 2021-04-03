@@ -114,8 +114,10 @@ void sendInfos() {
 
   // Send info to other robots
   P2PPacket p_reply = initializeP2PPacket();
+  float altitudeZ = logGetFloat(logGetVarId("stateEstimate", "z"));
   memcpy(&p_reply.data[1], &packetTX, sizeof(packetTX));
-  p_reply.size = sizeof(packetTX)+1;
+  memcpy(&p_reply.data[2], &altitudeZ, sizeof(altitudeZ));
+  p_reply.size = sizeof(packetTX)+ sizeof(altitudeZ) + 1;
   radiolinkSendP2PPacketBroadcast(&p_reply);
 }
 
