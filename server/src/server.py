@@ -74,8 +74,7 @@ def setMode(data):
         except:
             deleteDrones()
             dronesAreCreated = False
-            
-    call(['./start-simulation.sh'])
+    call(['./start-simulation.sh', '{}'.format(numberOfDrone)])
 
 
 @socketio.on('TOGGLE_LED')

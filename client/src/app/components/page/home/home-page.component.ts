@@ -1,12 +1,6 @@
 import { Component } from "@angular/core";
-import { Router } from "@angular/router";
-import { io, Socket } from "socket.io-client/build/index";
-
-
-enum ServerMode {
-  REAL = 0,
-  SIMULATION = 1,
-}
+import { FormControl, Validators } from "@angular/forms";
+import { DroneListService, ServerMode } from "@app/service/api/drone-list/drone-list.service"
 
 @Component({
   selector: "app-home-page",
@@ -15,17 +9,13 @@ enum ServerMode {
 })
 export class HomePageComponent {
 
-  private socket: Socket;
   modeSelected: ServerMode = ServerMode.REAL;
-  numberOfDrone: Number = 0;
+  numberOfDrone = new FormControl(1, Validators.min(1));
 
-  constructor() {
-    this.socket = io("127.0.0.1:5000");
-  }
+  constructor(public droneListService: DroneListService) { }
   
   sendModeToServer() {
-    this.socket.emit("SET_MODE", { mode_chosen: this.modeSelected, number_of_drone: this.numberOfDrone });
+    this.droneListService.sendModeToServer(this.modeSelected, this.numberOfDrone.value);
   }
 
-  
 }

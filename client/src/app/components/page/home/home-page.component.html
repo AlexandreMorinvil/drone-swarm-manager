@@ -4,7 +4,7 @@
   <form class="example-form">
   <mat-form-field appearance="fill">
     <mat-label>Number of drones</mat-label>
-    <input matInput [(ngModel)]="numberOfDrone">
+    <input matInput type="number" name="numberOfDrone" [formControl]="numberOfDrone" min="1" required>
   </mat-form-field>
 </form>
 

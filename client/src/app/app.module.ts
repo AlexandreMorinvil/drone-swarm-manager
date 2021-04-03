@@ -33,7 +33,7 @@ import { MatCardModule } from "@angular/material/card";
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatRadioModule } from '@angular/material/radio';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 
 @NgModule({
@@ -68,6 +68,7 @@ import { FormsModule } from '@angular/forms';
     MatInputModule,
     MatRadioModule,
     FormsModule,
+    ReactiveFormsModule,
   ],
   providers: [DroneListService],
   bootstrap: [AppComponent],
