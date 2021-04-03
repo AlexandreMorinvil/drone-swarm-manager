@@ -23,20 +23,6 @@
 /****************************************/
 
 
-void CSimAlfred::checkForCollisionAvoidance() {
-      if (cTimer->GetTimer(TimerType::kAvoidTimer) < 0) {
-         m_pcPropellers->SetAbsolutePosition(
-            *cP2P->GetNewVectorToAvoidCollision(cPos, idRobot));
-      }
-
-      // Prevent robot from touching ground
-      if (cPos.GetZ() < 0.2) {
-         CVector3* vector = new CVector3(cPos.GetX(), cPos.GetY(), 0.2);
-         m_pcPropellers->SetRelativePosition(*vector);
-      }
-}
-
-
 void CSimAlfred::setPosVelocity() {
       if (m_uiCurrentStep % 10 == 0 && m_uiCurrentStep != 0) {
          posInitial = cPos;
@@ -137,14 +123,6 @@ void CSimAlfred::ControlStep() {
       sensorValues[3] = (iterDistRead++)->second;
       sensorValues[0] = (iterDistRead++)->second;
 
-      if (GetId() == "s0") {
-         LOG << "left " << sensorValues[0] << std::endl;
-         LOG << "back " << sensorValues[1] << std::endl;
-         LOG << "right " << sensorValues[2] << std::endl;
-         LOG << "front " << sensorValues[3] << std::endl;
-         LOG << "currentAngle " << *currentAngle << std::endl;
-      }
-
       // Update StateMode received from ground station
       StateMode* stateModeReceived = cRadio->ReceiveData();
       if (stateModeReceived) {
@@ -160,10 +138,10 @@ void CSimAlfred::ControlStep() {
             return;
             break;
          case kTakeOff:
-            // if (sBatRead.AvailableCharge < 0.3) {
-            //   stateMode = kReturnToBase;
-            // }
-            // Check for collision avoidance
+         {
+            if (sBatRead.AvailableCharge < 0.3) {
+               stateMode = kReturnToBase;
+            }
             if (m_uiCurrentStep < 20) {  // decolage
                cPos.SetZ(cPos.GetZ() + 0.25f);
                m_pcPropellers->SetAbsolutePosition(cPos);
@@ -171,39 +149,40 @@ void CSimAlfred::ControlStep() {
                if (sensorValues[3] < 130 && sensorValues[3] != -2.0) {
                   m_pcPropellers->SetRelativeYaw(CRadians::PI_OVER_FOUR/2);
                }
-               m_pcPropellers->SetRelativePosition(
-                  *cMoving->GoInSpecifiedDirection(
-                     cSensors->FreeSide(sensorValues)));
-               // if (cP2P->isThereARobotClose()) {
-               //   stateMode = kCollisionResolver;
-               // }
-               cPos = m_pcPos->GetReading().Position;
-               checkForCollisionAvoidance();
+               CVector3* vector = cMoving->GoInSpecifiedDirection(
+                     cSensors->FreeSide(sensorValues));
+               vector->SetZ(cP2P->GetAltitudeToAvoidCollision(cPos, idRobot));
+               // Prevent robot from touching ground
+               if (cPos.GetZ() < 0.2) {
+                  vector->SetZ(0.1);
+               }
+               m_pcPropellers->SetRelativePosition(*vector);
             }
             break;
+         }
          case kReturnToBase:
+         {
             if (sensorValues[3] > 130 || sensorValues[3] == -2.0) {
                m_pcPropellers->SetAbsoluteYaw(
                   *new CRadians(computeAngleToFollow()));
             }
             computeAngleToFollow();
-            m_pcPropellers->SetRelativePosition(
-               *cMoving->GoInSpecifiedDirection(
-                  cSensors->ReturningSide(
-                     sensorValues, computeAngleToFollow())));
-            if (cP2P->isThereARobotClose()) {
-               stateMode = kCollisionResolver;
+            CVector3* vector = cMoving->GoInSpecifiedDirection(
+               cSensors->ReturningSide(sensorValues, computeAngleToFollow()));
+            vector->SetZ(cP2P->GetAltitudeToAvoidCollision(cPos, idRobot));
+            // Prevent robot from touching ground
+            if (cPos.GetZ() < 0.2) {
+               vector->SetZ(0.1);
             }
+            m_pcPropellers->SetRelativePosition(*vector);
             break;
+         }
          case kLanding:
             if (cPos.GetZ() > 0.2
              && cTimer->GetTimer(TimerType::kLandingTimer) < 0) {
                CVector3* test = new CVector3(0, 0, -0.1);
                m_pcPropellers->SetRelativePosition(*test);
             }
-            break;
-         case kCollisionResolver:
-            checkForCollisionAvoidance();
             break;
       }
       m_uiCurrentStep++;

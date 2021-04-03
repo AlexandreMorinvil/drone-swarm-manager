@@ -126,8 +126,6 @@ class CSimAlfred : public CCI_Controller {
     CVector3 cPos;
 
     int idRobot;
-
-    void checkForCollisionAvoidance();
 };
 
 #endif

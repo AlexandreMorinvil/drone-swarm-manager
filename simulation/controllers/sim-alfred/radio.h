@@ -30,8 +30,7 @@ typedef enum {
     kStandby,
     kTakeOff,
     kReturnToBase,
-    kLanding,
-    kCollisionResolver
+    kLanding
   } StateMode;
 
 typedef enum {

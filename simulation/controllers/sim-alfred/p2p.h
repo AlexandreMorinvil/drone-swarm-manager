@@ -36,11 +36,9 @@ class CP2P {
 
       virtual ~CP2P() {}
 
-      CVector3* GetNewVectorToAvoidCollision(CVector3 position, int idRobot);
+      float GetAltitudeToAvoidCollision(CVector3 position, int idRobot);
 
       void sendPacketToOtherRobots(float altitude, int idRobot);
-
-      bool isThereARobotClose();
 
  private:
       CCI_RangeAndBearingSensor* m_pcRABSens;
