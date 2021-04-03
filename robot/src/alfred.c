@@ -44,7 +44,7 @@ ledseqContext_t seq_lock = {
 
 bool isLedActivated = false;
 static xTimerHandle timer;
-// static xTimerHandle avoidTimer;
+static xTimerHandle timerAltitude;
 StateMode stateMode = kStandby;
 
 P2PPacket initializeP2PPacket() {
@@ -114,11 +114,17 @@ void sendInfos() {
 
   // Send info to other robots
   P2PPacket p_reply = initializeP2PPacket();
-  float altitudeZ = logGetFloat(logGetVarId("stateEstimate", "z"));
   memcpy(&p_reply.data[1], &packetTX, sizeof(packetTX));
-  memcpy(&p_reply.data[2], &altitudeZ, sizeof(altitudeZ));
-  p_reply.size = sizeof(packetTX)+ sizeof(altitudeZ) + 1;
+  p_reply.size = sizeof(packetTX)+1;
   radiolinkSendP2PPacketBroadcast(&p_reply);
+}
+
+void sendAltitude() {
+  P2PPacket p_altitude = initializeP2PPacket();
+  float altitudeZ = logGetFloat(logGetVarId("stateEstimate", "z"));
+  memcpy(&p_altitude.data[1], &altitudeZ, sizeof(altitudeZ));
+  p_altitude.size = sizeof(altitudeZ) + 1;
+  radiolinkSendP2PPacketBroadcast(&p_altitude);
 }
 
 
@@ -131,6 +137,10 @@ void p2pcallbackHandler(P2PPacket *p) {
     isLedActivated = false;
     ledseqStop(&seq_lock);
   }
+}
+
+void p2pcallbackHandlerAltitude(P2PPacket *p) {
+
 }
 
 float computeAngleToFollow() {
@@ -157,9 +167,15 @@ void appMain()
   ledseqRegisterSequence(&seq_lock);
 
   p2pRegisterCB(p2pcallbackHandler);
+
   timer = xTimerCreate("SendInfos", M2T(500), pdTRUE, NULL, sendInfos);
   xTimerStart(timer, 500);
   sendInfos();
+
+  p2pRegisterCB(p2pcallbackHandlerAltitude);
+  timerAltitude = xTimerCreate("sendAltitude", M2T(100), pdTRUE, NULL, sendAltitude);
+  xTimerStart(timerAltitude, 100);
+  sendAltitude();
 
   Vector3* posTemp;
   setObjective(0.0f, 0.0f, 0.0f);
