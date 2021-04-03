@@ -75,6 +75,6 @@ typedef struct PacketDistance {
   uint16_t zrange;
 } __attribute__((packed)) PacketDistance;
 
-Vector3* objective = malloc(sizeof(Vector3));
+Vector3* objective;
 
 #endif

@@ -44,7 +44,7 @@ ledseqContext_t seq_lock = {
 
 bool isLedActivated = false;
 static xTimerHandle timer;
-static xTimerHandle avoidTimer;
+// static xTimerHandle avoidTimer;
 StateMode stateMode = kStandby;
 
 P2PPacket initializeP2PPacket() {
@@ -132,15 +132,15 @@ void p2pcallbackHandler(P2PPacket *p) {
 }
 
 float computeAngleToFollow() {
-  float posX = logGetFloat(logGetVarId("stateEstimate", "x");
-  float posY = logGetFloat(logGetVarId("stateEstimate", "y");
-  float xdiff = objective->x - posX);
-  float ydiff = objective->y - posY);
+  float posX = logGetFloat(logGetVarId("stateEstimate", "x"));
+  float posY = logGetFloat(logGetVarId("stateEstimate", "y"));
+  float xdiff = objective->x - posX;
+  float ydiff = objective->y - posY;
 
   if (abs(xdiff) < 0.5 && abs(ydiff) < 0.5) {
     stateMode = kLanding;
   }
-  float length = sqrt(pow(xdiff, 2) + pow(ydiff, 2));
+  // float length = sqrt(pow(xdiff, 2) + pow(ydiff, 2));
   if (ydiff < 0) {
       return (- atan(xdiff/ydiff) + PI_VALUE);
   }
@@ -159,6 +159,7 @@ void appMain()
   xTimerStart(timer, 500);
   sendInfos();
 
+  Vector3* posTemp;
   setObjective(0.0f, 0.0f, 0.0f);
 
   float yaw = 0.0;
@@ -190,15 +191,15 @@ void appMain()
         crtpCommanderHighLevelGoTo(vec3->x, vec3->y, vec3->z, yaw, 1.0, true);
         break;
       case kReturnToBase:
-        Vector3* vec3 = GoInSpecifiedDirection(ReturningSide(sensorValues, computeAngleToFollow());
-        crtpCommanderHighLevelGoTo(vec3->x, vec3->y, vec3->z, yaw, 1.0, true);
+        posTemp = GoInSpecifiedDirection(ReturningSide(sensorValues, computeAngleToFollow()));
+        crtpCommanderHighLevelGoTo(posTemp->x, posTemp->y, posTemp->z, yaw, 1.0, true);
         if (CriticalProximity(sensorValues) == kDefault) {
-          crtpCommanderHighLevelLandYaw(abs(vec3->x - vec3->y), 1.0, computeAngleToFollow())
+          crtpCommanderHighLevelLandYaw(abs(posTemp->x - posTemp->y), 1.0, computeAngleToFollow());
         } 
         break;
       case kLanding:
-        if (logGetFloat(logGetVarId("stateEstimate", "z")) > 0.2) {
-          crtpCommanderHighLevelGoTo(0.0f, 0.0f, -0.1f)); // temporaire
+        if (logGetFloat(logGetVarId("stateEstimate", "z")) > 0.2f) {
+          crtpCommanderHighLevelGoTo(0.0f, 0.0f, -0.1f, yaw, 1.0f, true); // temporaire
         }
         break;
       default:
