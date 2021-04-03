@@ -1,3 +1,3 @@
 include_directories(${CMAKE_SOURCE_DIR}/controllers)
 
-add_subdirectory(demo_pdr)
+add_subdirectory(sim-alfred)

@@ -18,9 +18,6 @@
 #include <argos3/plugins/robots/generic/control_interface/ci_quadrotor_position_actuator.h>
 #include "./sensors.h"
 
-
-
-
 using argos::CCI_QuadRotorPositionActuator;
 using argos::CCI_PositioningSensor;
 using argos::CRadians;

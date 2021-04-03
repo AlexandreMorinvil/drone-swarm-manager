@@ -1,13 +1,15 @@
-#include "controllers/demo_pdr/sensors.h"
+#include "controllers/sim-alfred/sensors.h"
 
 
 SensorSide* prioritise(float angle) {
-    printf("angle : %f", angle);
     SensorSide* retval = new SensorSide[4];
     if (angle < 0) {
         retval[1] = SensorSide::kBack;
         retval[3] = SensorSide::kFront;
-        if (angle < - PI_DIVIDE_TWO) {
+        if (angle > - PI_DIVIDE_TWO - 0.1 && angle < - PI_DIVIDE_TWO + 0.1) {
+            retval[0] = SensorSide::kBack;
+            retval[2] = SensorSide::kFront;
+        } else if (angle < - PI_DIVIDE_TWO - 0.1) {
             retval[0] = SensorSide::kLeft;
             retval[2] = SensorSide::kRight;
         } else {
@@ -17,7 +19,10 @@ SensorSide* prioritise(float angle) {
     } else {
         retval[3] = SensorSide::kBack;
         retval[1] = SensorSide::kFront;
-        if (angle < PI_DIVIDE_TWO) {
+        if (angle > PI_DIVIDE_TWO - 0.1 && angle < PI_DIVIDE_TWO + 0.1) {
+            retval[0] = SensorSide::kFront;
+            retval[2] = SensorSide::kBack;
+        } else if (angle < PI_DIVIDE_TWO - 0.1) {
             retval[0] = SensorSide::kRight;
             retval[2] = SensorSide::kLeft;
         } else {
@@ -27,6 +32,7 @@ SensorSide* prioritise(float angle) {
     }
     return retval;
 }
+
 
 
 CSensors::CSensors() { }
@@ -41,7 +47,7 @@ SensorSide CSensors::FreeSide(float sensorValues[4]) {
         return oppSens;
     float max   = sensorValues[closeSens];
     SensorSide maxSensor = SensorSide::kDefault;
-    for (unsigned i = 4; i > -1; i--) {
+    for (int i = 3; i > -1; i--) {
         if (sensorValues[i] == -2 ) return (SensorSide) i;
         if (max < sensorValues[i]) {
             max = sensorValues[i];
@@ -71,8 +77,8 @@ SensorSide CSensors::ReturningSide(float sensorValues[4], float angle) {
     if (closeSens == SensorSide::kDefault) return closeSens;
     SensorSide* prioList = prioritise(angle);
     for (unsigned i =0 ; i < 4; ++i) {
-        auto index = static_cast<int>(prioList[i]);
-        if (sensorValues[index] > 2* CRITICAL_VALUE ||
+        int index = static_cast<int>(prioList[i]);
+        if (sensorValues[index] > CRITICAL_VALUE ||
             sensorValues[index] == -2)
             return prioList[i];
     }
