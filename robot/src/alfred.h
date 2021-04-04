@@ -56,6 +56,7 @@ typedef struct PacketPosition {
   float x;
   float y;
   float z;
+  float yaw;
 } __attribute__((packed)) PacketPosition;
 
 typedef struct PacketVelocity {

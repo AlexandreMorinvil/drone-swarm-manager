@@ -29,6 +29,7 @@
 #define NON_BLOCKING 0
 #define DEBUG_MODULE "HELLOWORLD"
 #define PI_OVER_8 0.4
+#define DISTANCE_AVOID_COLLISION 200
 
 
 
@@ -90,6 +91,7 @@ void sendInfos() {
   packetPosition.x = logGetFloat(logGetVarId("stateEstimate", "x"));
   packetPosition.y = logGetFloat(logGetVarId("stateEstimate", "y"));
   packetPosition.z = logGetFloat(logGetVarId("stateEstimate", "z"));
+  packetPosition.yaw = logGetFloat(logGetVarId("stateEstimate", "yaw"));
   packetPosition.packetType = position;
 
   packetVelocity.px = logGetFloat(logGetVarId("kalman", "varPX"));
@@ -140,7 +142,17 @@ void p2pcallbackHandler(P2PPacket *p) {
 }
 
 void p2pcallbackHandlerAltitude(P2PPacket *p) {
-
+  uint64_t address = configblockGetRadioAddress();
+  uint8_t my_id =(uint8_t)((address) & 0x00000000ff);
+  uint8_t id_received = p->data[0];
+  if (p->rssi < DISTANCE_AVOID_COLLISION && id_received < my_id) {
+    float x = logGetFloat(logGetVarId("stateEstimate", "x"));
+    float y = logGetFloat(logGetVarId("stateEstimate", "y"));
+    float z = logGetFloat(logGetVarId("stateEstimate", "z")) - 0.25f;
+    float cYaw = logGetFloat(logGetVarId("stateEstimate", "yaw"));
+    crtpCommanderHighLevelGoTo(x, y, z, cYaw, 1.0f, true);
+    
+  }
 }
 
 float computeAngleToFollow() {
@@ -152,7 +164,6 @@ float computeAngleToFollow() {
   if (abs(xdiff) < 0.5 && abs(ydiff) < 0.5) {
     stateMode = kLanding;
   }
-  // float length = sqrt(pow(xdiff, 2) + pow(ydiff, 2));
   if (ydiff < 0) {
       return (- atan(xdiff/ydiff) + PI_VALUE);
   }
@@ -178,7 +189,7 @@ void appMain()
   sendAltitude();
 
   Vector3* posTemp;
-  setObjective(0.0f, 0.0f, 0.0f);
+  setObjective(0.0f, 0.0f, 0.0f); // Temporaire
 
   float yaw = 0.0;
   uint16_t leftDistance = logGetUint(logGetVarId("range", "left"));
@@ -202,13 +213,17 @@ void appMain()
         break;
       case kFlying:
         if (frontDistance < 130) {
-          yaw = PI_OVER_8;
-          crtpCommanderHighLevelLandYaw(0.5f, 1.0, yaw); // valeurs arbitraires
+          yaw = logGetFloat(logGetVarId("stateEstimate", "yaw")) + (float)PI_OVER_8;
+          crtpCommanderHighLevelLandYaw(0.5f, 2.0f, yaw); // valeurs arbitraires: 0.5f et 2.0
         }
         Vector3* vec3 = GoInSpecifiedDirection(FreeSide(sensorValues));
         crtpCommanderHighLevelGoTo(vec3->x, vec3->y, vec3->z, yaw, 1.0, true);
         break;
       case kReturnToBase:
+        if (frontDistance > 130) {
+          crtpCommanderHighLevelLandYaw(1.0f, 1.0f, computeAngleToFollow());          
+        }
+        
         posTemp = GoInSpecifiedDirection(ReturningSide(sensorValues, computeAngleToFollow()));
         crtpCommanderHighLevelGoTo(posTemp->x, posTemp->y, posTemp->z, yaw, 1.0, true);
         if (CriticalProximity(sensorValues) == kDefault) {
@@ -217,7 +232,7 @@ void appMain()
         break;
       case kLanding:
         if (logGetFloat(logGetVarId("stateEstimate", "z")) > 0.2f) {
-          crtpCommanderHighLevelGoTo(0.0f, 0.0f, -0.1f, yaw, 1.0f, true); // temporaire
+          crtpCommanderHighLevelLand(0.0f, 2.0f); 
         }
         break;
       default:
