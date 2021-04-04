@@ -14,6 +14,7 @@ import { MapPageComponent } from "./components/page/map/map-page.component";
 import { DroneListComponent } from "./components/drone/drone-list/drone-list.component";
 import { DroneSelectedBoardComponent } from "./components/drone/drone-selected-board/drone-selected-board.component";
 import { DroneSwarmBoardComponent } from "./components/drone/drone-swarm-board/drone-swarm-board.component";
+import { LiveMapComponent } from "./components/map/live-map/live-map.component";
 import { MapComponent } from "./components/map/map/map.component";
 import { MapGeneratedBoardComponent } from "./components/map/map-generated-board/map-generated-board.component";
 import { NavigationBarComponent } from "./components/navigation-bar/navigation-bar.component";
@@ -43,6 +44,7 @@ import { MatCardModule } from "@angular/material/card";
     DroneListComponent,
     DroneSelectedBoardComponent,
     DroneSwarmBoardComponent,
+    LiveMapComponent,
     MapComponent,
     MapGeneratedBoardComponent,
     NavigationBarComponent,

@@ -4,7 +4,7 @@ from vec3 import Vec3
 from drone import *
 import threading
 
-from flask import Flask, jsonify, render_template
+from flask import Flask, jsonify
 from flask_socketio import *
 import cflib
 from cflib.crazyflie import Crazyflie
@@ -13,9 +13,17 @@ import threading
 from enum import Enum
 from threading import *
 from DBconnect import DatabaseConnector
-from map.map_catalog import MapCatalog
-from map.map_handler import MapHandler
+from map_catalog import MapCatalog
+from map_handler import MapHandler
 
+
+import logging
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
+
+# Add paths toward dependecies in different subdirectories
+sys.path.append(os.path.abspath('./src/map'))
+from map_handler import MapHandler
 
 class Mode(Enum):
     REAL_TIME = 0
@@ -38,7 +46,12 @@ available = cflib.crtp.scan_interfaces()
 print('Crazyflies found:')
 
 if (mode == Mode.REAL_TIME):
-    drones = [Drone("radio://0/80/250K",Vec3(0,0,0),0), Drone("radio://0/72/250K",Vec3(0,0,0),1), Drone("radio://0/72/250K",Vec3(0,0,0),2), Drone("radio://0/72/250K",Vec3(0,0,0),4)]
+    drones = [
+        Drone("radio://0/80/250K", Vec3(0,0,0)), 
+        Drone("radio://0/72/250K", Vec3(0,0,0)), 
+        Drone("radio://0/72/250K", Vec3(0,0,0)), 
+        Drone("radio://0/72/250K", Vec3(0,0,0))
+    ]
 else:
     drones = []
 
@@ -51,6 +64,9 @@ for i in range(4):
     if mode == Mode.SIMULATION:
         drones.append(socks[i].drone_argos)
 
+map_handler = MapHandler()
+thread_map_handler = threading.Thread(target=map_handler.send_point, args=(socketio,), name='send_new_points')
+thread_map_handler.start()
 
 def setMode(mode_choosen):
     mode = mode_choosen
@@ -113,13 +129,12 @@ def send_data():
     socketio.emit('drone_data', data_to_send, broadcast=True)
 
 def set_interval(func, sec):
-        def func_wrapper():
-            set_interval(func, sec)
-            func()  
-        t = threading.Timer(sec, func_wrapper)
-        t.start()
-        return t
-
+    def func_wrapper():
+        set_interval(func, sec) 
+        func()  
+    t = threading.Timer(sec, func_wrapper)
+    t.start()
+    return t
 
 if __name__ == '__main__':
     #t2 = threading.Thread(target=socks[1].receive_data, name='receive_data')

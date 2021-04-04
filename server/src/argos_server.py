@@ -5,12 +5,13 @@ from vec3 import Vec3
 from enum import Enum
 from drone import Drone
 
+
 import sys
 import os
 
 # Add paths toward dependecies in different subdirectories
-sys.path.insert(1, os.path.abspath('./map/'))
-from map.map_handler import MapHandler
+sys.path.append(os.path.abspath('./src/map'))
+from data_accumulator import MapObservationAccumulator
 
 class PacketType(Enum):
     TX = 0
@@ -18,6 +19,7 @@ class PacketType(Enum):
     ATTITUDE = 2
     VELOCITY = 3
     DISTANCE = 4
+    ORIENTATION = 5
 
 
 class ArgosServer() : 
@@ -25,17 +27,15 @@ class ArgosServer() :
     
     
     def __init__(self, id, port):
-        self.drone_argos = Drone("id", Vec3(0, 0, 0),id)
-        self.data_received = None
-        self.sent_data = None
-        self.point = Vec3(0,0,0)
+        self.drone_argos = Drone()
+
+        # listen for incoming connections (server mode) with one connection at a time
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.bind(('localhost', port))
-         # listen for incoming connections (server mode) with one connection at a time
         self.sock.listen()
 
         # Initialize the live map handler
-        self.live_map_handler = MapHandler()
+        self.map_observation_accumulator = MapObservationAccumulator()
 
     def waiting_connection(self):
         # wait for a connection
@@ -49,9 +49,6 @@ class ArgosServer() :
     def send_data(self, packet, format_packer):
         data = struct.pack(format_packer, packet)
         self.connection.send(data)
-        print('data send ')
-        print(data)
-
         
     def receive_data(self):
         print('entree receive_data')
@@ -61,42 +58,34 @@ class ArgosServer() :
             self.data_received += bytearray(16 - len(self.data_received)) 
 
             if PacketType(self.data_received[0]) == PacketType.TX:
-                (a, b, packet_type, is_led_activated, vbattery, rssi) = struct.unpack("<hffbfb", self.data_received)
+                (packet_type, state, vbattery, is_led_activated, a, b, c) = struct.unpack("<iif?bbb", self.data_received)
+                self.drone_argos._state = state
                 self.drone_argos._vbat = vbattery
+                self.drone_argos.led = is_led_activated
 
             elif PacketType(self.data_received[0]) == PacketType.POSITION:
-                (a, b, c, packet_type, x, y, z) = struct.unpack("<bbbbfff", self.data_received)
+                (packet_type, x, y, z) = struct.unpack("<ifff", self.data_received)
                 self.drone_argos.currentPos.x = x
                 self.drone_argos.currentPos.y = y
                 self.drone_argos.currentPos.z = z
-
-
-            elif PacketType(self.data_received[0]) == PacketType.VELOCITY:
-                (packet_type, px, py, pz) = struct.unpack("<ffff", self.data_received)
-                self.drone_argos._speed.x = px
-                self.drone_argos._speed.y = py
-                self.drone_argos._speed.z = pz
+                self.map_observation_accumulator.receive_position(x, y, z)
                 
             elif PacketType(self.data_received[0]) == PacketType.DISTANCE:
-                (packet_type, front, back, up, left, right, zrange, a, b) = struct.unpack("<hbhhhhhhb", self.data_received)
-                self.drone_argos.sensors.front = front
-                self.drone_argos.sensors.back = back
-                self.drone_argos.sensors.up = up
-                self.drone_argos.sensors.left = left
-                self.drone_argos.sensors.right = right
-                self.drone_argos.sensors.down = zrange
-                
+                (packet_type, front, back, up, left, right, zrange) = struct.unpack("<ihhhhhh", self.data_received)
+                self.map_observation_accumulator.receive_sensor_distances(front, back, up, left, right, zrange)
 
-    def set_interval(self, func, sec):
-        def func_wrapper():
-            self.set_interval(func, sec)
-            func()  
-        t = threading.Timer(sec, func_wrapper)
-        t.start()
-        return t
+            elif PacketType(self.data_received[0]) == PacketType.ORIENTATION:
+                (packet_type, pitch, roll, yaw) = struct.unpack("<ifff", self.data_received)
+                self.map_observation_accumulator.receive_sensor_orientations(yaw, pitch, roll)
+
+            elif PacketType(self.data_received[0]) == PacketType.VELOCITY:
+                (packet_type, x_speed, y_speed, z_speed) = struct.unpack("<ifff", self.data_received)
+                self.drone_argos._speed.x = x_speed
+                self.drone_argos._speed.y = y_speed
+                self.drone_argos._speed.z = z_speed
     
     def start_receive_data(self):
-        t2 = threading.Thread(target=self.receive_data, name="receive_data")
+        t2 = threading.Thread(target=self.receive_data, args=(), name="receive_data_{}".format(id))
         t2.start
     
     

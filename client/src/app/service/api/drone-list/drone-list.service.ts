@@ -32,8 +32,6 @@ export class DroneListService {
     for (let i = 0; i < droneData.length; i++) {
       // Parse the drone
       const currentId = droneData[i].id;
-      console.log("currentId" + currentId);
-      console.log("state : " + droneData[i].state);
       const updatedDrone = new Drone(
         droneData[i].id,
         droneData[i].state,

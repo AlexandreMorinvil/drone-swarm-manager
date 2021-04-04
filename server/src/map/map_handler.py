@@ -1,25 +1,31 @@
-from map.map import Map
+from map import Map
+import json
 import socketio
+from flask import Flask
+from flask_socketio import *
+
 from vec3 import Vec3
 from DBconnect import DatabaseConnector
 from datetime import datetime
+from data_accumulator import MapObservationAccumulator
 
 import sys
 import os
 
-sys.path.insert(1, os.path.abspath('../'))
+# sys.path.append(os.path.abspath('../'))
 
 # Using the singleton desing pattern
 class MapHandler:
+
+    # Initialize Socket to send data
+    app = Flask(__name__)
+    socketio = SocketIO(app ,cors_allowed_origins='*')
     class __OnlyOne:
         def __init__(self):
             self.db = DatabaseConnector()
             self.t = None
             self.current_map = None
-            self.points_in_making = {}
-            self.x_position = 0
-            self.y_position = 0
-            self.z_position = 0
+            self.is_consuming = True
 
         def initialize_map(self):
             now = datetime.now()
@@ -31,19 +37,12 @@ class MapHandler:
 
         def send_base_map(self):
             json_map = self.current_map.toJson()
-            socketio.emit('LIVE_BASE_MAP', json_map, broadcast=True)
+            MapHandler.socketio.emit('LIVE_BASE_MAP', json_map, broadcast=True)
 
-        def send_point(self, point):
-            socketio.socketio.emit('LIVE_MAP_NEW_POINT', point, broadcast=True)
-
-        def receive_position(self, id, x, y, z):
-            self.x_position = x
-            self.y_position = y
-            self.z_position = z
-
-            
-
-
+        def send_point(self, socketio_socket):
+            while self.is_consuming:
+                point = MapObservationAccumulator.provide_point()
+                socketio_socket.emit('LIVE_MAP_NEW_POINT', json.dumps(point.toJson()), broadcast=True)
 
     # Initialization of the singleton
     instance = None

@@ -9,8 +9,8 @@ const TOTAL_WIDTH: number = 700;
 const TOTAL_HEIGHT: number = 350;
 
 const BORDER_FACTOR: number = 0.1;
-const MIN_WIDTH: number = 100;
-const MIN_HEIGHT: number = 100;
+const MIN_WIDTH: number = 10;
+const MIN_HEIGHT: number = 10;
 
 const NUMBER_TICKS: number = 10;
 const GRID_OPACITY: number = 0.25;
@@ -203,24 +203,24 @@ export class MapComponent {
   }
 
   private computeGlobalDisplayRange() {
-    const avg_x = (this.max_x - this.min_x) / 2;
-    const avg_y = (this.max_y - this.min_y) / 2;
-
-    // Add border to the range
-    this.display_min_x = this.min_x - avg_x * BORDER_FACTOR;
-    this.display_max_x = this.max_x + avg_x * BORDER_FACTOR;
-    this.display_min_y = this.min_y - avg_y * BORDER_FACTOR;
-    this.display_max_y = this.max_y + avg_y * BORDER_FACTOR;
+    const avg_x = (this.max_x + this.min_x) / 2;
+    const avg_y = (this.max_y + this.min_y) / 2;
 
     const width = this.max_x - this.min_x;
     const height = this.max_y - this.min_y;
 
+    // Add border to the range
+    this.display_min_x = this.min_x - width / 2 * BORDER_FACTOR;
+    this.display_max_x = this.max_x + width / 2 * BORDER_FACTOR;
+    this.display_min_y = this.min_y - height / 2 * BORDER_FACTOR;
+    this.display_max_y = this.max_y + height / 2 * BORDER_FACTOR;
+
     // Readjust borders to the minimum accepted dimensions
-    if (this.max_x - this.min_x < MIN_WIDTH) {
+    if (width < MIN_WIDTH) {
       this.display_min_x = avg_x - MIN_WIDTH / 2;
       this.display_max_x = avg_x + MIN_WIDTH / 2;
     }
-    if (this.max_y - this.min_y < MIN_HEIGHT) {
+    if (height < MIN_HEIGHT) {
       this.display_min_y = avg_y - MIN_HEIGHT / 2;
       this.display_max_y = avg_y + MIN_HEIGHT / 2;
     }
@@ -248,7 +248,7 @@ export class MapComponent {
       .range([0, this.width]);
     this.yScale = d3
       .scaleLinear()
-      .domain([this.display_min_y, this.display_max_y])
+      .domain([this.display_max_y, this.display_min_y])
       .range([0, this.height]);
 
     // Redraw map
