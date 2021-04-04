@@ -47,13 +47,19 @@ bool isLedActivated = false;
 static xTimerHandle timer;
 static xTimerHandle timerAltitude;
 StateMode stateMode = kStandby;
+float newAltitudeZ = 0.0f;
 
+uint8_t getId() {
+  uint64_t address = configblockGetRadioAddress();
+  uint8_t my_id =(uint8_t)((address) & 0x00000000ff);
+  return my_id;
+}
 P2PPacket initializeP2PPacket() {
   static P2PPacket p_reply;
   p_reply.port=0x00;
-  uint64_t address = configblockGetRadioAddress();
-  uint8_t my_id =(uint8_t)((address) & 0x00000000ff);
-  p_reply.data[0]=my_id;
+  //uint64_t address = configblockGetRadioAddress();
+  //uint8_t my_id =(uint8_t)((address) & 0x00000000ff);
+  p_reply.data[0]=getId();
   return p_reply;
 }
 
@@ -142,16 +148,16 @@ void p2pcallbackHandler(P2PPacket *p) {
 }
 
 void p2pcallbackHandlerAltitude(P2PPacket *p) {
-  uint64_t address = configblockGetRadioAddress();
-  uint8_t my_id =(uint8_t)((address) & 0x00000000ff);
-  uint8_t id_received = p->data[0];
-  if (p->rssi < DISTANCE_AVOID_COLLISION && id_received < my_id) {
+  uint8_t my_id = getId();
+  uint8_t received_id = p->data[0];
+  newAltitudeZ = logGetFloat(logGetVarId("stateEstimate", "z"));
+
+  if (p->rssi < DISTANCE_AVOID_COLLISION && received_id < my_id) {
     float x = logGetFloat(logGetVarId("stateEstimate", "x"));
     float y = logGetFloat(logGetVarId("stateEstimate", "y"));
-    float z = logGetFloat(logGetVarId("stateEstimate", "z")) - 0.25f;
-    float cYaw = logGetFloat(logGetVarId("stateEstimate", "yaw"));
-    crtpCommanderHighLevelGoTo(x, y, z, cYaw, 1.0f, true);
-    
+    newAltitudeZ = logGetFloat(logGetVarId("stateEstimate", "z")) - 0.25f;
+    float yaw = logGetFloat(logGetVarId("stateEstimate", "yaw"));
+    crtpCommanderHighLevelGoTo(x, y, newAltitudeZ, yaw, 1.0f, true);  
   }
 }
 
@@ -178,7 +184,6 @@ void appMain()
   ledseqRegisterSequence(&seq_lock);
 
   p2pRegisterCB(p2pcallbackHandler);
-
   timer = xTimerCreate("SendInfos", M2T(500), pdTRUE, NULL, sendInfos);
   xTimerStart(timer, 500);
   sendInfos();
@@ -225,10 +230,11 @@ void appMain()
         }
         
         posTemp = GoInSpecifiedDirection(ReturningSide(sensorValues, computeAngleToFollow()));
-        crtpCommanderHighLevelGoTo(posTemp->x, posTemp->y, posTemp->z, yaw, 1.0, true);
-        if (CriticalProximity(sensorValues) == kDefault) {
-          crtpCommanderHighLevelLandYaw(abs(posTemp->x - posTemp->y), 1.0, computeAngleToFollow());
-        } 
+        if (logGetFloat(logGetVarId("stateEstimate", "z")) < 0.2f) {
+          newAltitudeZ = 0.1f;
+        }
+        crtpCommanderHighLevelGoTo(posTemp->x, posTemp->y, newAltitudeZ, yaw, 1.0, true);
+        
         break;
       case kLanding:
         if (logGetFloat(logGetVarId("stateEstimate", "z")) > 0.2f) {
