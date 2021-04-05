@@ -39,6 +39,7 @@ export class MapComponent {
   gAxis: d3.Selection<HTMLElement>;
   clipPath: d3.Selection<HTMLElement>;
   gWall: d3.Selection<HTMLElement>;
+  gDrone: d3.Selection<HTMLElement>;
 
   zoom: any;
   xScale: any;
@@ -47,6 +48,7 @@ export class MapComponent {
   yAxis: any;
 
   wallPoints: Vec3[] = [];
+  dronePoints: Vec3[] = [];
 
   valueToIncrease: number = 0;
 
@@ -108,11 +110,17 @@ export class MapComponent {
     this.drawWalls();
   }
 
+  updateDronePositions(dronePositions: Vec3[]): void {
+    this.dronePoints = dronePositions;
+    this.drawDrones();
+  }
+
   private setPlot(isFirstTime = false): void {
     this.initSvg(isFirstTime);
     this.updateAxisRange(true);
     this.drawAxis();
     this.drawWalls();
+    this.drawDrones();
   }
 
   private initSvg(isFirstTime = false): void {
@@ -167,6 +175,26 @@ export class MapComponent {
         "clip-path",
         "url(#clip)"
       );
+
+      this.gWall = this.gMain
+      .append("g")
+      .attr("id", "wall-points")
+      .attr(
+        "transform",
+        "translate(" + this.margin.left + "," + this.margin.top + ")",
+        "clip-path",
+        "url(#clip)"
+      );
+
+      this.gDrone = this.gMain
+        .append("g")
+        .attr("id", "drone-points")
+        .attr(
+          "transform",
+          "translate(" + this.margin.left + "," + this.margin.top + ")",
+          "clip-path",
+          "url(#clip)"
+        );
   }
 
   private deleteMap(): void {
@@ -175,6 +203,11 @@ export class MapComponent {
 
   private erasePlot(): void {
     this.chart.selectAll("#wall-points > *").remove();
+    this.eraseDrones();
+  }
+
+  private eraseDrones(): void {
+    this.chart.selectAll("#drone-points > *").remove();
   }
 
   private computeGlobalDataRange() {
@@ -245,6 +278,7 @@ export class MapComponent {
     this.drawAxis();
     this.erasePlot();
     this.drawWalls();
+    this.drawDrones();
   }
 
   private drawAxis(): void {
@@ -280,5 +314,18 @@ export class MapComponent {
       .attr("cy", (d) => this.yScale(d.y))
       .attr("r", 1.5)
       .style("fill", "#69b3a2");
+  }
+
+  private drawDrones(): void {
+    this.eraseDrones();
+    this.gDrone
+      .selectAll("circle")
+      .data(this.dronePoints)
+      .enter()
+      .append("circle")
+      .attr("cx", (d) => this.xScale(d.x))
+      .attr("cy", (d) => this.yScale(d.y))
+      .attr("r", 2)
+      .style("fill", "#1111ff");
   }
 }
