@@ -26,6 +26,7 @@ class MapHandler:
             self.t = None
             self.current_map = None
             self.is_consuming = True
+            self.__databasePoint = []
 
         def initialize_map(self):
             now = datetime.now()
@@ -42,7 +43,16 @@ class MapHandler:
         def send_point(self, socketio_socket):
             while self.is_consuming:
                 point = MapObservationAccumulator.provide_point()
+                self.__databasePoint.append(point)
                 socketio_socket.emit('LIVE_MAP_NEW_POINT', json.dumps(point.toJson()), broadcast=True)
+                self.save_point()
+                
+        def save_point(self):
+            if self.current_map == None:
+                self.initialize_map()
+            if len(self.__databasePoint) >= 20 :
+                self.db.update_map(self.current_map.id, self.__databasePoint)
+                self.__databasePoint = []
 
     # Initialization of the singleton
     instance = None

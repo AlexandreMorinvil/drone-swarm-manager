@@ -139,18 +139,7 @@ def set_interval(func, sec):
 if __name__ == '__main__':
     #t2 = threading.Thread(target=socks[1].receive_data, name='receive_data')
     #t2.start()
-    db = DatabaseConnector()
-    db.delete_all_table()
-    db.create_table()
-    maphandler = MapHandler()
     
-    maphandler.initialize_map()
-    maphandler.initialize_map()
-    maphandler.initialize_map()
-    for i in range(60):
-        point = Vec3(i,i,i)
-        maphandler.current_map.addPoint(point)  
-    db.show_content_map(maphandler.current_map.id) 
 
     set_interval(sendPosition, 1)
     set_interval(send_data, 1)
