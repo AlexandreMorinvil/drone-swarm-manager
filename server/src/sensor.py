@@ -1,6 +1,7 @@
 from math import pi, sin, cos
 from vec3 import Vec3
 
+DOWN_THRESHOLD = 100
 
 class Sensor:
 
@@ -13,7 +14,9 @@ class Sensor:
     def __init__(self, front=0, back=0, down=0, left=0, right=0, up=0, yaw=0, pitch=0, roll=0):
         self.set_sensor_ranges(front, back, down, left, right, up)
         self.set_sensor_orientations(yaw, pitch, roll)
-        self.DISTANCE_FACTOR = 0.01
+        
+        self.DISTANCE_FACTOR = 0.001 # For real drone
+        # self.DISTANCE_FACTOR = 0.01 
 
     def set_sensor_ranges(self, front=0, back=0, down=0, left=0, right=0, up=0):
         self.front = front
@@ -31,7 +34,7 @@ class Sensor:
     # returns coordinates of collision in the 3D landmark where (0,0,0) is the location of the drone (translated space)
     # spherical coordinates (angles and distances) -> vec3 (x,y,z)
     def getEdgeFront(self) -> Vec3:
-        if self.front < 0:
+        if self.front < 0 or self.down < DOWN_THRESHOLD:
             return None
 
         coord = Vec3(0, 0, 0)
@@ -41,7 +44,7 @@ class Sensor:
         return coord.mul(self.DISTANCE_FACTOR)
 
     def getEdgeLeft(self) -> Vec3:
-        if self.left < 0:
+        if self.left < 0 or self.down < DOWN_THRESHOLD:
             return None
 
         coord = Vec3(0, 0, 0)
@@ -51,7 +54,7 @@ class Sensor:
         return coord.mul(self.DISTANCE_FACTOR)
 
     def getEdgeRight(self) -> Vec3:
-        if self.right < 0:
+        if self.right < 0 or self.down < DOWN_THRESHOLD:
             return None
 
         coord = Vec3(0, 0, 0)
@@ -61,7 +64,7 @@ class Sensor:
         return coord.mul(self.DISTANCE_FACTOR)
 
     def getEdgeBack(self) -> Vec3:
-        if self.back < 0:
+        if self.back < 0 or self.down < DOWN_THRESHOLD:
             return None
 
         coord = Vec3(0, 0, 0)

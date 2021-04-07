@@ -25,10 +25,12 @@
 #define DEBUG_MODULE "HELLOWORLD"
 
 typedef enum {
-    tx,
-    position,
-    velocity,
-    distance
+    tx = 0,
+    position = 1,
+    attitude = 2,
+    velocity = 3,
+    distance = 4,
+    orientation = 5
 } PacketType;
 
 typedef enum {
@@ -47,9 +49,9 @@ typedef struct packetRX {
 
 typedef struct PacketTX {
   PacketType packetType;
-  bool isLedActivated;
+  StateMode stateMode;
   float vbat;
-  uint8_t rssiToBase;
+  bool isLedActivated;
 } __attribute__((packed)) PacketTX;
 
 typedef struct PacketPosition {
@@ -57,7 +59,6 @@ typedef struct PacketPosition {
   float x;
   float y;
   float z;
-  float yaw;
 } __attribute__((packed)) PacketPosition;
 
 typedef struct PacketVelocity {
@@ -77,6 +78,16 @@ typedef struct PacketDistance {
   uint16_t zrange;
 } __attribute__((packed)) PacketDistance;
 
+typedef struct PacketOrientation {
+    PacketType packetType;
+    float pitch;
+    float roll;
+    float yaw;
+} __attribute__((packed)) PacketOrientation;
+
+
+
 Vector3* objective;
 
 #endif
+

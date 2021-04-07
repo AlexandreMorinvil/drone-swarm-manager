@@ -86,22 +86,21 @@ void setObjective(float x, float y, float z) {
   objective->z = z;
 }
 
-
 void sendInfos() {
   struct PacketTX packetTX;
   struct PacketDistance packetDistance;
   struct PacketPosition packetPosition;
   struct PacketVelocity packetVelocity;
+  struct PacketOrientation packetOrientation;
 
   packetTX.isLedActivated = isLedActivated;
   packetTX.vbat = logGetFloat(logGetVarId("pm", "vbat"));
-  packetTX.rssiToBase = logGetInt(logGetVarId("radio", "rssi"));
+  packetTX.stateMode = stateMode;
   packetTX.packetType = tx;
 
   packetPosition.x = logGetFloat(logGetVarId("stateEstimate", "x"));
   packetPosition.y = logGetFloat(logGetVarId("stateEstimate", "y"));
   packetPosition.z = logGetFloat(logGetVarId("stateEstimate", "z"));
-  packetPosition.yaw = logGetFloat(logGetVarId("stabilizer", "yaw"));
   packetPosition.packetType = position;
 
   packetVelocity.px = logGetFloat(logGetVarId("kalman", "varPX"));
@@ -117,11 +116,17 @@ void sendInfos() {
   packetDistance.zrange = logGetUint(logGetVarId("range", "zrange"));
   packetDistance.packetType = distance;
 
+  packetOrientation.yaw = logGetFloat(logGetVarId("stabilizer", "yaw"));
+  packetOrientation.pitch = 0.0f;
+  packetOrientation.roll = 0.0f;
+  packetOrientation.packetType = orientation;
+
   if (crtpIsConnected()) {
     appchannelSendPacket(&packetTX, sizeof(packetTX));
     appchannelSendPacket(&packetDistance, sizeof(packetDistance));
     appchannelSendPacket(&packetPosition, sizeof(packetPosition));
     appchannelSendPacket(&packetVelocity, sizeof(packetVelocity));
+    appchannelSendPacket(&packetOrientation, sizeof(packetOrientation));
   }
 
   // Send info to other robots
@@ -226,8 +231,8 @@ void switchState() {
       case kStandby:
         break;
       case kTakeOff:
-        crtpCommanderHighLevelTakeoff(0.2, 1.5);
-        if (logGetFloat(logGetVarId("stateEstimate", "z")) > 0.2f) {
+        crtpCommanderHighLevelTakeoff(0.3, 1.5);
+        if (logGetFloat(logGetVarId("stateEstimate", "z")) > 0.3f) {
           stateMode = kFlying;
         }
         break;
@@ -238,41 +243,23 @@ void switchState() {
           yaw = 0.0f;
         }
         Vector3 vec3 = GoInSpecifiedDirection(FreeSide(sensorValues));
-        /*if (FreeSide(sensorValues) == kDefault || FreeSide(sensorValues) == kFront) {
-          vec3.x = 0.0;
-          vec3.y = 0.0;
-        }*/
-        setHoverSetpoint(&setpoint, vec3.x, vec3.y, 0.2, yaw, modeVelocity);
+        setHoverSetpoint(&setpoint, vec3.x, vec3.y, 0.3, yaw, modeVelocity);
         commanderSetSetpoint(&setpoint, 1);
         yaw = 0.0f;
-        // setHoverSetpoint(&setpoint, vec3.x, vec3.y, 0.3, yaw);
-        // commanderSetSetpoint(&setpoint, 1);
-        // crtpCommanderHighLevelTakeoffYaw(0.3, 1.5, 1.0);
-        // crtpCommanderHighLevelGoTo(vec3.x, vec3.y, 0.0, yaw, 1.0, true);
         break;
       case kReturnToBase:
-        /*if (sensorValues[3] > 700 
-          && ((yawRead < (angleToFollow - 5 ))
-          || (yawRead > (angleToFollow + 5 )))) {
-          yaw = angleToFollow;
-          setHoverSetpoint(&setpoint, 0.0, 0.0, 0.3, yaw, modeAbs);
-        }*/
         yaw = angleToFollow;
-        //   setHoverSetpoint(&setpoint, 0.5, 0.0, 0.3, yaw, modeAbs);
         vec3 = GoInSpecifiedDirection(
           ReturningSide(sensorValues, computeAngleToFollow()));
-        setHoverSetpoint(&setpoint, vec3.x, vec3.y, 0.2, 0.0, modeAbs);
+        setHoverSetpoint(&setpoint, vec3.x, vec3.y, 0.3, 0.0, modeAbs);
         commanderSetSetpoint(&setpoint, 1);
-        // if (logGetFloat(logGetVarId("stateEstimate", "z")) < 0.2f) {
-        //  newAltitudeZ = 0.1f;
-        //}
         break;
       case kEmergency:
         memset(&setpoint, 0, sizeof(setpoint_t));
         commanderSetSetpoint(&setpoint, 1);
         break;
       case kLanding:
-        if (logGetFloat(logGetVarId("stateEstimate", "z")) > 0.2f) {
+        if (logGetFloat(logGetVarId("stateEstimate", "z")) > 0.3f) {
           crtpCommanderHighLevelLand(0.0f, 2.0f); 
         }
         break;
@@ -290,8 +277,8 @@ void appMain()
   ledseqRegisterSequence(&seq_lock);
 
   p2pRegisterCB(p2pcallbackHandler);
-  timer = xTimerCreate("SendInfos", M2T(500), pdTRUE, NULL, sendInfos);
-  xTimerStart(timer, 500);
+  timer = xTimerCreate("SendInfos", M2T(100), pdTRUE, NULL, sendInfos);
+  xTimerStart(timer, 100);
   sendInfos();
   timerSwitchState = xTimerCreate("switchState", M2T(100), pdTRUE, NULL, switchState);
   xTimerStart(timerSwitchState, 100);

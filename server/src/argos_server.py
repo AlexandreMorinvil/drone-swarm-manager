@@ -40,7 +40,7 @@ class ArgosServer() :
         self.logger.info('Create drone argos in server')
 
         # Initialize the live map handler
-        self.map_observation_accumulator = MapObservationAccumulator()
+        # self.map_observation_accumulator = MapObservationAccumulator()
 
     def waiting_connection(self):
         # wait for a connection
