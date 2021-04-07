@@ -11,13 +11,22 @@ import struct
 import cflib
 from cflib.crazyflie import Crazyflie
 
+import sys
+import os
+
+# Add paths toward dependecies in different subdirectories
+sys.path.append(os.path.abspath('./map'))
+from data_accumulator import MapObservationAccumulator
+
 logging.basicConfig(level=logging.ERROR)
 
 class PacketType(Enum):
     TX = 0
     POSITION = 1
-    VELOCITY = 2
-    DISTANCE = 3
+    ATTITUDE = 2
+    VELOCITY = 3
+    DISTANCE = 4
+    ORIENTATION = 5
 
 class StateMode(Enum):
     STANDBY = 0
@@ -61,6 +70,9 @@ class Drone :
 
         self.sensors = Sensor()
 
+        # Initialize the live map handler
+        self.map_observation_accumulator = MapObservationAccumulator()
+
         print('Connecting to %s' % link_uri)
 
     def _connected(self, link_uri):
@@ -84,20 +96,52 @@ class Drone :
         self._isConnected = False
         print('Disconnected from %s' % link_uri)
 
-    def _app_packet_received(self, data):
-        if data[0] == PacketType.TX.value:
-            (packet_type, is_led_activated, vbattery, rssi) = struct.unpack("<bbfb", data)
+    def _app_packet_received(self, data_received):
+        #data_received += bytearray(16 - len(data_received)) 
+        if data_received[0] == PacketType.TX.value:
+            (packet_type, state, vbattery, is_led_activated) = struct.unpack("<bbfb", data_received)
+            self._state = state
             self._vbat = vbattery
-            print(f"ID : {self._cf.link_uri} | Battery Voltage : {vbattery} | RSSI : {rssi}")
-        elif data[0] == PacketType.POSITION.value:
-            (packet_type, x, y, z, yaw) = struct.unpack("<bffff", data)
-            print(f"ID : {self._cf.link_uri} | Position : {x}, {y}, {z} | Yaw : {yaw}")
-        elif data[0] == PacketType.VELOCITY.value:
-            (packet_type, px, py, pz) = struct.unpack("<bfff", data)
-            print(f"ID : {self._cf.link_uri} | Velocity : {px}, {py}, {pz}")
-        elif data[0] == PacketType.DISTANCE.value:
-            (packet_type, front, back, up, left, right, zrange) = struct.unpack("<bhhhhhh", data)
-            print(f"ID : {self._cf.link_uri} | Front : {front} | Back : {back} | Up : {up} | Left : {left} | Right : {right} | Zrange : {zrange}")
+            self.led = is_led_activated
+        
+        elif data_received[0] == PacketType.POSITION.value:
+            (packet_type, x, y, z) = struct.unpack("<bfff", data_received)
+            self.currentPos.x = x
+            self.currentPos.y = y
+            self.currentPos.z = z
+            print(f"x : {x}, y : {y}, z : {z}")
+            self.map_observation_accumulator.receive_position(x, y, z)
+         
+        elif data_received[0] == PacketType.DISTANCE.value:
+            (packet_type, front, back, up, left, right, zrange) = struct.unpack("<bhhhhhh", data_received)
+            print(f"front : {front}, down : {zrange}")
+            self.map_observation_accumulator.receive_sensor_distances(front, back, up, left, right, zrange)
+        
+        elif data_received[0] == PacketType.ORIENTATION.value:
+            (packet_type, pitch, roll, yaw) = struct.unpack("<bfff", data_received)
+            print(f"yaw : {yaw}")
+            self.map_observation_accumulator.receive_sensor_orientations(yaw*(3.14/180), pitch, roll)
+        
+        elif data_received[0] == PacketType.VELOCITY.value:
+            (packet_type, x_speed, y_speed, z_speed) = struct.unpack("<bfff", data_received)
+            self._speed.x = x_speed
+            self._speed.y = y_speed
+            self._speed.z = z_speed
+
+        # if data[0] == PacketType.TX.value:
+        #     (packet_type, is_led_activated, vbattery, rssi) = struct.unpack("<bbfb", data)
+        #     self._vbat = vbattery
+        #     print(f"ID : {self._cf.link_uri} | Battery Voltage : {vbattery} | RSSI : {rssi}")
+        # elif data[0] == PacketType.POSITION.value:
+        #     (packet_type, x, y, z, yaw) = struct.unpack("<bffff", data)
+        #     print(f"ID : {self._cf.link_uri} | Position : {x}, {y}, {z} | Yaw : {yaw}")
+        # elif data[0] == PacketType.VELOCITY.value:
+        #     (packet_type, px, py, pz) = struct.unpack("<bfff", data)
+        #     print(f"ID : {self._cf.link_uri} | Velocity : {px}, {py}, {pz}")
+        # elif data[0] == PacketType.DISTANCE.value:
+        #     (packet_type, front, back, up, left, right, zrange) = struct.unpack("<bhhhhhh", data)
+        #     print(f"ID : {self._cf.link_uri} | Front : {front} | Back : {back} | Up : {up} | Left : {left} | Right : {right} | Zrange : {zrange}")
+
 
     def send_data(self, data):
         self._cf.appchannel.send_packet(data)
