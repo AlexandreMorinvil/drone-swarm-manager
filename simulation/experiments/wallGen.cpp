@@ -64,7 +64,7 @@ void WriteContents(string const& filename,vector<string> const& lines){
 
 int main() {
     srand(time(NULL));
-    const string filename  = "demo_pdr.argos";
+    const string filename  = "sim-alfred.argos";
     const string startLine = "    <!-- walls insertion starts here -->";
     const string stopline  = "    <!-- walls insertion ends here -->";
     vector<string> content;

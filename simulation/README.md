@@ -6,7 +6,7 @@
 2. Run x11docker client with        $`x11docker --hostdisplay --hostnet --user=RETAIN -- --privileged simulation-argos`
 4. Open the container with          $`docker exec -it $(docker ps -qf "name=simulation-argos") /bin/bash`
 5. Generate random walls (optional) $` cd /root/simulation/experiments && ./randomWalls.out`
-6. Start simulation with            $`$ cd /root/simulation && argos3 -c experiments/demo_pdr.argos`
+6. Start simulation with            $`$ cd /root/simulation && argos3 -c experiments/sim-alfred.argos`
 
 
 ## Launch using shell scripts (will generate random walls each time): 
