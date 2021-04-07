@@ -38,18 +38,9 @@ socketio = SocketIO(app ,cors_allowed_origins='*')
 
 default_port = 5015
 
-# Select mode in commande line
-parser =  argparse.ArgumentParser()
-parser.add_argument('mode', default='realtime', choices=['simulation', 'realtime'], help='Type simulation for simulation mode and type realtime for real time mode')
-args = parser.parse_args()
+# Select mode
+mode = Mode.REAL_TIME
 
-if (args.mode == 'simulation'):
-    mode = Mode.SIMULATION
-    print('mode simulation')
-elif (args.mode == 'realtime'):
-    mode = Mode.REAL_TIME
-    print('mode real time')
-    
 # Initialize the low-level drivers (don't list the debug drivers)
 cflib.crtp.init_drivers(enable_debug_driver=False)
 # Scan for Crazyflies and use the first one found
@@ -57,9 +48,8 @@ print('Scanning interfaces for Crazyflies...')
 available = cflib.crtp.scan_interfaces()
 print('Crazyflies found:')
 
-if (mode == Mode.REAL):
-    logger.info('Mode real time')
-    drones = [Drone("radio://0/80/250K",Vec3(0,0,0),0), Drone("radio://0/72/250K",Vec3(0,0,0),1)]
+if (mode == Mode.REAL_TIME):
+    drones = [Drone("radio://0/72/250K",Vec3(0,0,0),0), Drone("radio://0/80/250K",Vec3(0,0,0),1), Drone("radio://0/80/250K",Vec3(0,0,0),2), Drone("radio://0/80/250K",Vec3(0,0,0),4)]
 else:
     logger.info('Mode simulation')
     drones = []
@@ -72,64 +62,36 @@ def createDrones(numberOfDrone):
         t = threading.Thread(target=socks[i].waiting_connection, name='waiting_connection')
         t.start()
 
-        if mode == Mode.SIMULATION:
-            drones.append(socks[i].drone_argos)
-            logger.info('Connection to port {}'.format(default_port + i))
-
-def deleteDrones():
-    for i in socks:
-        if hasattr(i, "connection"):
-            i.connection.close()
-        i.sock.shutdown(2)
-        i.sock.close()
-        del i
-    drones.clear()
-    socks.clear()
-
-
-
-@socketio.on('SET_MODE')
-def setMode(data):
-    deleteDrones()
-    mode = data['mode_chosen']
-    numberOfDrone = data['number_of_drone']
-    dronesAreCreated = False
-    while not dronesAreCreated:
-        try:
-            createDrones(int(numberOfDrone))
-            dronesAreCreated = True
-        except:
-            deleteDrones()
-            dronesAreCreated = False
-    call(['./start-simulation.sh', '{}'.format(numberOfDrone)])
-
-@socketio.on('TOGGLE_LED')
-def ledToggler(data):
-    print(data['id'])
-    drones[data['id']].toggleLED()
-    print("LED TOGGLER")
-    logger.info('ledTogger function executed with data {}'.format(data['id']))
-
 @socketio.on('TAKEOFF')
 def takeOff(data):
+    led = False
+    packet = struct.pack("<bi", led, StateMode.TAKE_OFF.value)
     if (data['id'] == -2):
-        for i in socks:
-            i.send_data(StateMode.TAKE_OFF.value, "<i")
-            logger.info('Take off of {}'.format(i))
+        for i in drones:
+            i.send_data(packet)
     else:
-        socks[data['id']].send_data(StateMode.TAKE_OFF.value, "<i")
-        logger.info('Take off of {}'.format(socks[data['id']]))
-     
+        drones[data['id']].send_data(packet)
+
+@socketio.on('EMERGENCY_LANDING')
+def takeOff(data):
+    led = False
+    packet = struct.pack("<bi", led, StateMode.EMERGENCY.value)
+    if (data['id'] == -2):
+        for i in drones:
+            i.send_data(packet)
+    else:
+        drones[data['id']].send_data(packet)
+    
 @socketio.on('RETURN_BASE')
 def returnToBase(data):
+    led = False
+    packet = struct.pack("<bi", led, StateMode.RETURN_TO_BASE.value)
     if (data['id'] == -2):
-        for i in socks:
-            i.send_data(StateMode.RETURN_TO_BASE.value, "<i")
-            logger.info('Return to base of {}'.format(i))
+        for i in drones:
+            i.send_data(packet)
     else:
-        socks[data['id']].send_data(StateMode.RETURN_TO_BASE.value, "<i")
-        logger.info('Return to base of {}'.format(socks[data['id']]))
-    
+        drones[data['id']].send_data(packet)
+
 def sendPosition():
     position_json = json.dumps({"x": socks[0].drone_argos.currentPos.x, "y": socks[0].drone_argos.currentPos.y, "z": socks[0].drone_argos.currentPos.z})
     socketio.emit('POSITION', position_json)

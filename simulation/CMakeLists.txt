@@ -30,10 +30,10 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${ARGOS_PREFIX}/share/argos3/cmake)
 include(ARGoSCheckQTOpenGL)
 
 # Look for the (optional) galib library
-find_package(GALIB)
-if(GALIB_FOUND)
-  include_directories(${GALIB_INCLUDE_DIRS})
-endif(GALIB_FOUND)
+#find_package(GALIB)
+#if(GALIB_FOUND)
+ # include_directories(${GALIB_INCLUDE_DIRS})
+#endif(GALIB_FOUND)
 
 # Find Lua
 find_package(Lua53 REQUIRED)
@@ -51,9 +51,9 @@ add_subdirectory(controllers)
 
 # include_directories(googletest/include)
 
-# add_executable(movingtest test/controllers/demo_pdr/movingtest.cpp)
-# add_executable(sensorstest test/controllers/demo_pdr/sensorstest.cpp)
-# target_link_libraries(movingtest PRIVATE gtest)
-# target_link_libraries(sensorstest PRIVATE gtest)
-# target_link_libraries(movingtest PRIVATE gmock)
-# target_link_libraries(sensorstest PRIVATE gmock)
+add_executable(movingtest test/controllers/sim-alfred/movingtest.cpp)
+add_executable(sensorstest test/controllers/sim-alfred/sensorstest.cpp)
+target_link_libraries(movingtest PRIVATE gtest)
+target_link_libraries(sensorstest PRIVATE gtest)
+target_link_libraries(movingtest PRIVATE gmock)
+target_link_libraries(sensorstest PRIVATE gmock)

@@ -1,4 +1,4 @@
-#include "controllers/demo_pdr/radio.h"
+#include "controllers/sim-alfred/radio.h"
 
 CRadio::CRadio() {
     isConnected = false;

@@ -24,7 +24,7 @@
   <controllers>
 
     <demo_pdr_controller id="ssc"
-                                 library="build/controllers/demo_pdr/libdemo_pdr">
+                                 library="build/controllers/sim-alfred/libsim-alfred">
       <actuators>
         <range_and_bearing  implementation="default" />
         <quadrotor_position implementation="default" />

@@ -24,70 +24,14 @@
  *
  */
 
-#include "app.h"
-#include "app_channel.h"
-#include "ledseq.h"
-#include "log.h"
-#include "crtp.h"
-#include "radiolink.h"
-#include "configblock.h"
-#include <string.h>
-#include <stdio.h>
-#include <stdint.h>
-#include "FreeRTOS.h"
-#include "timers.h"
-#include "estimator_kalman.h"
-#include "param.h"
-
-#include "debug.h"
+#include "alfred.h"
 
 #define NON_BLOCKING 0
 #define DEBUG_MODULE "HELLOWORLD"
+#define PI_OVER_8 0.4
 
 
-typedef enum {
-    tx,
-    position,
-    velocity,
-    distance
-} PacketType;
 
-struct packetRX {
-  bool ledActivation;
-} __attribute__((packed));
-
-struct PacketTX {
-  PacketType packetType;
-  bool isLedActivated;
-  float vbat;
-  uint8_t rssiToBase;
-} __attribute__((packed));
-
-struct PacketPosition {
-  PacketType packetType;
-  float x;
-  float y;
-  float z;
-} __attribute__((packed));
-
-struct PacketVelocity {
-  PacketType packetType;
-  float px;
-  float py;
-  float pz;
-} __attribute__((packed));
-
-struct PacketDistance {
-  PacketType packetType;
-  uint16_t front;
-  uint16_t back;
-  uint16_t up;
-  uint16_t left;
-  uint16_t right;
-  uint16_t zrange;
-} __attribute__((packed));
-
-bool isLedActivated = false;
 ledseqStep_t seq_lock_def[] = {
   { true, LEDSEQ_WAITMS(1000)},
   {    0, LEDSEQ_LOOP},
@@ -98,8 +42,9 @@ ledseqContext_t seq_lock = {
   .led = LED_BLUE_L,
 };
 
-
+bool isLedActivated = false;
 static xTimerHandle timer;
+StateMode stateMode = kStandby;
 
 P2PPacket initializeP2PPacket() {
   static P2PPacket p_reply;
@@ -120,6 +65,7 @@ void processRXPacketReceived(struct packetRX rxPacket){
     isLedActivated = false;
     ledseqStop(&seq_lock);
   }
+  stateMode = rxPacket.stateMode;
 }
 
 
@@ -178,6 +124,22 @@ void p2pcallbackHandler(P2PPacket *p) {
   }
 }
 
+float computeAngleToFollow() {
+  float posX = logGetFloat(logGetVarId("stateEstimate", "x");
+  float posY = logGetFloat(logGetVarId("stateEstimate", "y");
+  float xdiff = objective->x - posX);
+  float xdiff = objective->y - posY);
+
+  if (abs(xdiff) < 0.5 && abs(ydiff) < 0.5) {
+    stateMode = kLanding;
+  }
+  float length = sqrt(pow(xdiff, 2) + pow(ydiff, 2));
+  if (ydiff < 0) {
+      return (- atan(xdiff/ydiff) + PI_VALUE);
+  }
+  return (- atan(xdiff/ydiff));
+}
+
 void appMain()
 {
   vTaskDelay(M2T(3000));
@@ -190,9 +152,46 @@ void appMain()
   xTimerStart(timer, 500);
   sendInfos();
 
-  while(1) {
+  float yaw = 0.0;
+  uint16_t leftDistance = logGetUint(logGetVarId("range", "left"));
+  uint16_t backDistance = logGetUint(logGetVarId("range", "back"));
+  uint16_t rightDistance = logGetUint(logGetVarId("range", "right"));
+  uint16_t frontDistance = logGetUint(logGetVarId("range", "front"));
+  float sensorValues[4] =
+    {leftDistance, backDistance, rightDistance, frontDistance};
+
+
+  while (1) {
     if (appchannelReceivePacket(&rxPacket, sizeof(rxPacket), NON_BLOCKING)) {
       processRXPacketReceived(rxPacket);
+    }
+    switch (stateMode) {
+      case kStandby:
+        break;
+      case kTakeOff:
+        crtpCommanderHighLevelTakeoff(5.0, 1.0);
+        stateMode = kFlying;
+        break;
+      case kFlying:
+        if (frontDistance < 130) {
+          yaw = PI_OVER_8;
+        }
+        Vector3* vec3 = GoInSpecifiedDirection(FreeSide(sensorValues));
+        crtpCommanderHighLevelGoTo(vec3->x, vec3->y, vec3->z, yaw, 1.0, true);
+        break;
+      case kReturnToBase:
+        Vector3* vec3 = GoInSpecifiedDirection(ReturningSide(sensorValues, computeAngleToFollow());
+        crtpCommanderHighLevelGoTo(vec3->x, vec3->y, vec3->z, yaw, 1.0, true);
+        if (CriticalProximity(sensorValues) == kDefault) {
+          crtpCommanderHighLevelLandYaw(abs(vec3->x - vec3->y), 1.0, computeAngleToFollow())
+        }
+        
+        break;
+      case kLanding:
+        
+        break;
+      default:
+        break;
     }
   }
 }

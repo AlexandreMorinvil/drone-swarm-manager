@@ -22,10 +22,12 @@ class PacketType(Enum):
 class StateMode(Enum):
     STANDBY = 0
     TAKE_OFF = 1
-    RETURN_TO_BASE = 2
-    LANDING = 3
-    FAIL = 4
-    UPDATE = 5
+    FLYING = 2
+    RETURN_TO_BASE = 3
+    LANDING = 4
+    EMERGENCY = 5
+    FAIL = 6
+    UPDATE = 7
 
 class Drone :
 
@@ -88,8 +90,8 @@ class Drone :
             self._vbat = vbattery
             print(f"ID : {self._cf.link_uri} | Battery Voltage : {vbattery} | RSSI : {rssi}")
         elif data[0] == PacketType.POSITION.value:
-            (packet_type, x, y, z) = struct.unpack("<bfff", data)
-            print(f"ID : {self._cf.link_uri} | Position : {x}, {y}, {z}")
+            (packet_type, x, y, z, yaw) = struct.unpack("<bffff", data)
+            print(f"ID : {self._cf.link_uri} | Position : {x}, {y}, {z} | Yaw : {yaw}")
         elif data[0] == PacketType.VELOCITY.value:
             (packet_type, px, py, pz) = struct.unpack("<bfff", data)
             print(f"ID : {self._cf.link_uri} | Velocity : {px}, {py}, {pz}")
@@ -97,9 +99,7 @@ class Drone :
             (packet_type, front, back, up, left, right, zrange) = struct.unpack("<bhhhhhh", data)
             print(f"ID : {self._cf.link_uri} | Front : {front} | Back : {back} | Up : {up} | Left : {left} | Right : {right} | Zrange : {zrange}")
 
-    def toggleLED(self):
-        self.led = not self.led
-        data = struct.pack("<b", self.led)
+    def send_data(self, data):
         self._cf.appchannel.send_packet(data)
 
     def getIsConnected(self):

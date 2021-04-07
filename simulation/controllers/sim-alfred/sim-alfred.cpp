@@ -8,7 +8,7 @@
 #include <math.h>
 
 /* Include the controller definition */
-#include "demo_pdr.h"
+#include "sim-alfred.h"
 /* Function definitions for XML parsing */
 #include <argos3/core/utility/configuration/argos_configuration.h>
 /* 2D vector definition */
@@ -17,7 +17,6 @@
 #include <argos3/core/utility/logging/argos_log.h>
 #include <argos3/core/simulator/entity/embodied_entity.h>
 #include<argos3/plugins/simulator/entities/box_entity.h>
-
 
 
 
@@ -62,7 +61,7 @@ CDemoPdr::CDemoPdr() : m_pcDistance(NULL),
 /****************************************/
 
 
-void CDemoPdr::Init(TConfigurationNode &t_node) {
+void CSimAlfred::Init(TConfigurationNode &t_node) {
       m_pcRABSens =
          GetSensor<CCI_RangeAndBearingSensor>("range_and_bearing");
       m_pcRABAct =
@@ -168,11 +167,10 @@ void CDemoPdr::ControlStep() {
             return;
             break;
          case kTakeOff:
-            // if (sBatRead.AvailableCharge < 0.3) {
-            //   stateMode = kReturnToBase;
-            //}
-            // Check for collision avoidance
-            checkForCollisionAvoidance();
+         {
+            if (sBatRead.AvailableCharge < 0.3) {
+               stateMode = kReturnToBase;
+            }
             if (m_uiCurrentStep < 20) {  // decolage
                cPos.SetZ(cPos.GetZ() + 0.25f);
                m_pcPropellers->SetAbsolutePosition(cPos);
@@ -180,23 +178,34 @@ void CDemoPdr::ControlStep() {
                if (sensorValues[3] < 130 && sensorValues[3] != -2.0) {
                   m_pcPropellers->SetRelativeYaw(CRadians::PI_OVER_FOUR/2);
                }
-               m_pcPropellers->SetRelativePosition(
-                  *cMoving->GoInSpecifiedDirection(
-                     cSensors->FreeSide(sensorValues)));
+               CVector3* vector = cMoving->GoInSpecifiedDirection(
+                     cSensors->FreeSide(sensorValues));
+               vector->SetZ(cP2P->GetAltitudeToAvoidCollision(cPos, idRobot));
+               // Prevent robot from touching ground
+               if (cPos.GetZ() < 0.2) {
+                  vector->SetZ(0.1);
+               }
+               m_pcPropellers->SetRelativePosition(*vector);
             }
             break;
+         }
          case kReturnToBase:
-            checkForCollisionAvoidance();
-            m_pcPropellers->SetRelativePosition(
-               *cMoving->GoInSpecifiedDirection(
-                  cSensors->ReturningSide(sensorValues,
-                     computeAngleToFollow())));
-
-            if (cSensors->CriticalProximity(sensorValues) == kDefault) {
+         {
+            if (sensorValues[3] > 130 || sensorValues[3] == -2.0) {
                m_pcPropellers->SetAbsoluteYaw(
-                     (*new CRadians(computeAngleToFollow())));
+                  *new CRadians(computeAngleToFollow()));
             }
+            computeAngleToFollow();
+            CVector3* vector = cMoving->GoInSpecifiedDirection(
+               cSensors->ReturningSide(sensorValues, computeAngleToFollow()));
+            vector->SetZ(cP2P->GetAltitudeToAvoidCollision(cPos, idRobot));
+            // Prevent robot from touching ground
+            if (cPos.GetZ() < 0.2) {
+               vector->SetZ(0.1);
+            }
+            m_pcPropellers->SetRelativePosition(*vector);
             break;
+         }
          case kLanding:
             if (cPos.GetZ() > 0.2
              && cTimer->GetTimer(TimerType::kLandingTimer) < 0) {
@@ -214,7 +223,7 @@ void CDemoPdr::ControlStep() {
 /****************************************/
 /****************************************/
 
-void CDemoPdr::Reset() {
+void CSimAlfred::Reset() {
       m_uiCurrentStep = 0;
 }
 
@@ -231,5 +240,5 @@ void CDemoPdr::Reset() {
  * class to instantiate.
  * See also the XML configuration files for an example of how this is used.
  */
-REGISTER_CONTROLLER(CDemoPdr, "demo_pdr_controller")
+REGISTER_CONTROLLER(CSimAlfred, "demo_pdr_controller")
 
