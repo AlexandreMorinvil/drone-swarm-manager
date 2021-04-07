@@ -104,7 +104,9 @@ void CDemoPdr::Init(TConfigurationNode &t_node) {
 /****************************************/
 
 void CDemoPdr::ControlStep() {
-      cRadio->connectToServer(idRobot);
+      if (!cRadio->connectToServer(idRobot)) {
+         return;
+      }
 
       // Update metrics
       // Orientation

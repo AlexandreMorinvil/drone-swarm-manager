@@ -1,6 +1,12 @@
 import { Injectable } from "@angular/core";
 import { io, Socket } from "socket.io-client/build/index";
 import { Drone } from "@app/class/drone";
+
+export enum ServerMode {
+  REAL = 0,
+  SIMULATION = 1,
+}
+
 @Injectable({
   providedIn: "root",
 })
@@ -58,6 +64,12 @@ export class DroneListService {
   
   public get isConnected() : boolean {
     return this.socket.connected;
+  }
+
+  public sendModeToServer(modeSelected: ServerMode, numberOfDrone: Number) {
+    this.socket.emit("SET_MODE", {
+        mode_chosen: modeSelected,
+        number_of_drone: numberOfDrone });
   }
   
 }

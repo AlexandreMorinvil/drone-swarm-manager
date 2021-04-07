@@ -4,12 +4,13 @@ import struct
 from vec3 import Vec3
 from enum import Enum
 from drone import Drone
+from setup_logging import LogsConfig
 
 import sys
 import os
 
 # Add paths toward dependecies in different subdirectories
-sys.path.append(os.path.abspath('./src/map'))
+sys.path.append(os.path.abspath('./map'))
 from data_accumulator import MapObservationAccumulator
 
 class PacketType(Enum):
@@ -30,19 +31,24 @@ class ArgosServer() :
 
         # listen for incoming connections (server mode) with one connection at a time
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        #self.sock.setsockopt( socket.SOL_SOCKET, socket.SO_REUSEADDR, 1 )
         self.sock.bind(('localhost', port))
         self.sock.listen()
+
+        self.logsConfig = LogsConfig()
+        self.logger = self.logsConfig.logger('Argos_server')
+        self.logger.info('Create drone argos in server')
 
         # Initialize the live map handler
         self.map_observation_accumulator = MapObservationAccumulator()
 
     def waiting_connection(self):
         # wait for a connection
-        print ('waiting for a connection')
+        self.logger.info('waiting for a connection')
         self.connection, self.client_address = self.sock.accept()
 
         # show who connected to us
-        print ('connection from', self.client_address)
+        self.logger.info('connection from {}'.format(self.client_address))
         self.receive_data()
 
     def send_data(self, packet, format_packer):
@@ -50,7 +56,7 @@ class ArgosServer() :
         self.connection.send(data)
         
     def receive_data(self):
-        print('entree receive_data')
+        self.logger.info('Receive data from argos id s{}'.format(id))
         while True:
             self.connection.settimeout(5.0)
             self.data_received = self.connection.recv(16)   

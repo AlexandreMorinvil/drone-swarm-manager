@@ -4,16 +4,16 @@ CRadio::CRadio() {
     isConnected = false;
 }
 
-void CRadio::connectToServer(int idRobot) {
+bool CRadio::connectToServer(int idRobot) {
     if (isConnected) {
-        return;
+        return true;
     }
     sock = 0;
     isConnected = true;
 
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
         printf("\n Socket creation error \n");
-        return;
+        return false;
     }
 
     serv_addr.sin_family = AF_INET;
@@ -22,12 +22,15 @@ void CRadio::connectToServer(int idRobot) {
     // Convert IPv4 and IPv6 addresses from text to binary form
     if (inet_pton(AF_INET, "127.0.0.1", &serv_addr.sin_addr) <= 0) {
         printf("\nInvalid address/ Address not supported \n");
-        return;
+        return false;
     }
 
     if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
         printf("\nConnection Failed \n");
+        isConnected = false;
     }
+
+    return isConnected;
 }
 
 void CRadio::sendTelemetry(CVector3 pos, StateMode stateMode, float vBat, float rangeValues[], float orientation[], float speed[]) {
