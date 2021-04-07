@@ -26,9 +26,12 @@
 
 #include "alfred.h"
 
+#include "commander.h"
+
 #define NON_BLOCKING 0
 #define DEBUG_MODULE "HELLOWORLD"
 #define PI_OVER_8 0.4
+#define PI_OVER_4 0.8
 #define DISTANCE_AVOID_COLLISION 200
 
 
@@ -45,6 +48,7 @@ ledseqContext_t seq_lock = {
 
 bool isLedActivated = false;
 static xTimerHandle timer;
+static xTimerHandle timerSwitchState;
 static xTimerHandle timerAltitude;
 StateMode stateMode = kStandby;
 float newAltitudeZ = 0.0f;
@@ -97,7 +101,7 @@ void sendInfos() {
   packetPosition.x = logGetFloat(logGetVarId("stateEstimate", "x"));
   packetPosition.y = logGetFloat(logGetVarId("stateEstimate", "y"));
   packetPosition.z = logGetFloat(logGetVarId("stateEstimate", "z"));
-  packetPosition.yaw = logGetFloat(logGetVarId("stateEstimate", "yaw"));
+  packetPosition.yaw = logGetFloat(logGetVarId("stabilizer", "yaw"));
   packetPosition.packetType = position;
 
   packetVelocity.px = logGetFloat(logGetVarId("kalman", "varPX"));
@@ -156,85 +160,116 @@ void p2pcallbackHandlerAltitude(P2PPacket *p) {
     float x = logGetFloat(logGetVarId("stateEstimate", "x"));
     float y = logGetFloat(logGetVarId("stateEstimate", "y"));
     newAltitudeZ = logGetFloat(logGetVarId("stateEstimate", "z")) - 0.25f;
-    float yaw = logGetFloat(logGetVarId("stateEstimate", "yaw"));
+    float yaw = logGetFloat(logGetVarId("stabilizer", "yaw"));
     crtpCommanderHighLevelGoTo(x, y, newAltitudeZ, yaw, 1.0f, true);  
   }
 }
 
 float computeAngleToFollow() {
-  float posX = logGetFloat(logGetVarId("stateEstimate", "x"));
-  float posY = logGetFloat(logGetVarId("stateEstimate", "y"));
+  float posX = logGetFloat(logGetVarId("stateEstimate", "x")) * 100.0f;
+  float posY = logGetFloat(logGetVarId("stateEstimate", "y")) * 100.0f;
   float xdiff = objective->x - posX;
   float ydiff = objective->y - posY;
 
-  if (abs(xdiff) < 0.5 && abs(ydiff) < 0.5) {
-    stateMode = kLanding;
-  }
-  if (ydiff < 0) {
-      return (- atan(xdiff/ydiff) + PI_VALUE);
-  }
-  return (- atan(xdiff/ydiff));
-}
-
-void appMain()
-{
-  vTaskDelay(M2T(3000));
-  struct packetRX rxPacket;
-  
-  ledseqRegisterSequence(&seq_lock);
-
-  p2pRegisterCB(p2pcallbackHandler);
-  timer = xTimerCreate("SendInfos", M2T(500), pdTRUE, NULL, sendInfos);
-  xTimerStart(timer, 500);
-  sendInfos();
-
-  p2pRegisterCB(p2pcallbackHandlerAltitude);
-  timerAltitude = xTimerCreate("sendAltitude", M2T(100), pdTRUE, NULL, sendAltitude);
-  xTimerStart(timerAltitude, 100);
-  sendAltitude();
-
-  Vector3* posTemp;
-  setObjective(0.0f, 0.0f, 0.0f); // Temporaire
+  //if (abs(xdiff) < 0.5 && abs(ydiff) < 0.5) {
+  //  stateMode = kLanding;
+  //}
 
   float yaw = 0.0;
+
+  if (ydiff < 0) {
+    yaw = atan(ydiff/xdiff) + PI_VALUE/2;
+  } else {
+    yaw = atan(xdiff/ydiff);
+  }
+  if (xdiff < 0) {
+    yaw = - yaw;
+  }
+  return yaw;
+}
+
+static void setHoverSetpoint(setpoint_t *setpoint, float vx, float vy, float z, float yawrate, enum mode_e modeYaw)
+{
+  setpoint->mode.z = modeAbs;
+  setpoint->position.z = z;
+
+  setpoint->mode.yaw = modeYaw;
+  if (modeYaw == modeAbs) {
+    setpoint->attitude.yaw = yawrate;
+  } else if (modeYaw == modeVelocity) {
+    setpoint->attitudeRate.yaw = yawrate;
+  }
+
+  setpoint->mode.x = modeVelocity;
+  setpoint->mode.y = modeVelocity;
+  setpoint->velocity.x = vx;
+  setpoint->velocity.y = vy;
+
+  setpoint->velocity_body = true;
+}
+
+static setpoint_t setpoint;
+float yaw = 0.0;
+
+
+void switchState() {
   uint16_t leftDistance = logGetUint(logGetVarId("range", "left"));
   uint16_t backDistance = logGetUint(logGetVarId("range", "back"));
   uint16_t rightDistance = logGetUint(logGetVarId("range", "right"));
   uint16_t frontDistance = logGetUint(logGetVarId("range", "front"));
+  // float yawRead = logGetFloat(logGetVarId("stabilizer", "yaw"));
   float sensorValues[4] =
     {leftDistance, backDistance, rightDistance, frontDistance};
+  float angleToFollow = computeAngleToFollow() * (180.0f/3.14f);
 
-
-  while (1) {
-    if (appchannelReceivePacket(&rxPacket, sizeof(rxPacket), NON_BLOCKING)) {
-      processRXPacketReceived(rxPacket);
-    }
-    switch (stateMode) {
+  switch (stateMode) {
       case kStandby:
         break;
       case kTakeOff:
-        crtpCommanderHighLevelTakeoff(5.0, 1.0);
-        stateMode = kFlying;
+        crtpCommanderHighLevelTakeoff(0.2, 1.5);
+        if (logGetFloat(logGetVarId("stateEstimate", "z")) > 0.2f) {
+          stateMode = kFlying;
+        }
         break;
       case kFlying:
-        if (frontDistance < 130) {
-          yaw = logGetFloat(logGetVarId("stateEstimate", "yaw")) + (float)PI_OVER_8;
-          crtpCommanderHighLevelLandYaw(0.5f, 2.0f, yaw); // valeurs arbitraires: 0.5f et 2.0
+        if (sensorValues[3] < 700) {
+          yaw = 100.0f;
+        } else {
+          yaw = 0.0f;
         }
-        Vector3* vec3 = GoInSpecifiedDirection(FreeSide(sensorValues));
-        crtpCommanderHighLevelGoTo(vec3->x, vec3->y, vec3->z, yaw, 1.0, true);
+        Vector3 vec3 = GoInSpecifiedDirection(FreeSide(sensorValues));
+        /*if (FreeSide(sensorValues) == kDefault || FreeSide(sensorValues) == kFront) {
+          vec3.x = 0.0;
+          vec3.y = 0.0;
+        }*/
+        setHoverSetpoint(&setpoint, vec3.x, vec3.y, 0.2, yaw, modeVelocity);
+        commanderSetSetpoint(&setpoint, 1);
+        yaw = 0.0f;
+        // setHoverSetpoint(&setpoint, vec3.x, vec3.y, 0.3, yaw);
+        // commanderSetSetpoint(&setpoint, 1);
+        // crtpCommanderHighLevelTakeoffYaw(0.3, 1.5, 1.0);
+        // crtpCommanderHighLevelGoTo(vec3.x, vec3.y, 0.0, yaw, 1.0, true);
         break;
       case kReturnToBase:
-        if (frontDistance > 130) {
-          crtpCommanderHighLevelLandYaw(1.0f, 1.0f, computeAngleToFollow());          
-        }
-        
-        posTemp = GoInSpecifiedDirection(ReturningSide(sensorValues, computeAngleToFollow()));
-        if (logGetFloat(logGetVarId("stateEstimate", "z")) < 0.2f) {
-          newAltitudeZ = 0.1f;
-        }
-        crtpCommanderHighLevelGoTo(posTemp->x, posTemp->y, newAltitudeZ, yaw, 1.0, true);
-        
+        /*if (sensorValues[3] > 700 
+          && ((yawRead < (angleToFollow - 5 ))
+          || (yawRead > (angleToFollow + 5 )))) {
+          yaw = angleToFollow;
+          setHoverSetpoint(&setpoint, 0.0, 0.0, 0.3, yaw, modeAbs);
+        }*/
+        yaw = angleToFollow;
+        //   setHoverSetpoint(&setpoint, 0.5, 0.0, 0.3, yaw, modeAbs);
+        vec3 = GoInSpecifiedDirection(
+          ReturningSide(sensorValues, computeAngleToFollow()));
+        setHoverSetpoint(&setpoint, vec3.x, vec3.y, 0.2, 0.0, modeAbs);
+        commanderSetSetpoint(&setpoint, 1);
+        // if (logGetFloat(logGetVarId("stateEstimate", "z")) < 0.2f) {
+        //  newAltitudeZ = 0.1f;
+        //}
+        break;
+      case kEmergency:
+        memset(&setpoint, 0, sizeof(setpoint_t));
+        commanderSetSetpoint(&setpoint, 1);
         break;
       case kLanding:
         if (logGetFloat(logGetVarId("stateEstimate", "z")) > 0.2f) {
@@ -244,5 +279,39 @@ void appMain()
       default:
         break;
     }
+}
+
+void appMain()
+{
+  
+  vTaskDelay(M2T(3000));
+  struct packetRX rxPacket;
+  
+  ledseqRegisterSequence(&seq_lock);
+
+  p2pRegisterCB(p2pcallbackHandler);
+  timer = xTimerCreate("SendInfos", M2T(500), pdTRUE, NULL, sendInfos);
+  xTimerStart(timer, 500);
+  sendInfos();
+  timerSwitchState = xTimerCreate("switchState", M2T(100), pdTRUE, NULL, switchState);
+  xTimerStart(timerSwitchState, 100);
+  switchState();
+  paramSetInt(paramGetVarId("commander", "enHighLevel"), 1);
+
+  p2pRegisterCB(p2pcallbackHandlerAltitude);
+  timerAltitude = xTimerCreate("sendAltitude", M2T(100), pdTRUE, NULL, sendAltitude);
+  xTimerStart(timerAltitude, 100);
+  sendAltitude();
+
+  // Vector3* posTemp;
+  setObjective(0.0f, 0.0f, 0.0f); // Temporaire
+ 
+
+  while (1) {
+
+    if (appchannelReceivePacket(&rxPacket, sizeof(rxPacket), NON_BLOCKING)) {
+      processRXPacketReceived(rxPacket);
+    }
+    
   }
 }

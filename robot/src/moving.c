@@ -1,7 +1,7 @@
 #include "moving.h"
 
 
-Vector3* GoInSpecifiedDirection(SensorSide freeSide) {
+Vector3 GoInSpecifiedDirection(SensorSide freeSide) {
     float xVector = 0.0;
     float yVector = 0.0;
     switch (freeSide) {
@@ -25,9 +25,9 @@ Vector3* GoInSpecifiedDirection(SensorSide freeSide) {
         default:
             break;
     }
-    Vector3 *pos =  malloc(sizeof(Vector3));
-    pos->x = xVector;
-    pos->y = yVector;
-    pos->z = 0;
+    struct Vector3 pos ;
+    pos.x = xVector;
+    pos.y = yVector;
+    pos.z = 0;
     return pos;
 }

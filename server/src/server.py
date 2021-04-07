@@ -24,7 +24,7 @@ socketio = SocketIO(app ,cors_allowed_origins='*')
 default_port = 5015
 
 # Select mode
-mode = Mode.SIMULATION
+mode = Mode.REAL_TIME
 
 # Initialize the low-level drivers (don't list the debug drivers)
 cflib.crtp.init_drivers(enable_debug_driver=False)
@@ -34,7 +34,7 @@ available = cflib.crtp.scan_interfaces()
 print('Crazyflies found:')
 
 if (mode == Mode.REAL_TIME):
-    drones = [Drone("radio://0/80/250K",Vec3(0,0,0),0), Drone("radio://0/72/250K",Vec3(0,0,0),1), Drone("radio://0/72/250K",Vec3(0,0,0),2), Drone("radio://0/72/250K",Vec3(0,0,0),4)]
+    drones = [Drone("radio://0/72/250K",Vec3(0,0,0),0), Drone("radio://0/80/250K",Vec3(0,0,0),1), Drone("radio://0/80/250K",Vec3(0,0,0),2), Drone("radio://0/80/250K",Vec3(0,0,0),4)]
 else:
     drones = []
 
@@ -51,28 +51,35 @@ for i in range(4):
 def setMode(mode_choosen):
     mode = mode_choosen
 
-
-@socketio.on('TOGGLE_LED')
-def ledToggler(data):
-    print(data['id'])
-    drones[data['id']].toggleLED()
-    print("LED TOGGLER")
-
 @socketio.on('TAKEOFF')
 def takeOff(data):
+    led = False
+    packet = struct.pack("<bi", led, StateMode.TAKE_OFF.value)
     if (data['id'] == -2):
-        for i in range(4):
-            socks[i].send_data(StateMode.TAKE_OFF.value, "<i")
+        for i in drones:
+            i.send_data(packet)
     else:
-        socks[data['id']].send_data(StateMode.TAKE_OFF.value, "<i")
+        drones[data['id']].send_data(packet)
+
+@socketio.on('EMERGENCY_LANDING')
+def takeOff(data):
+    led = False
+    packet = struct.pack("<bi", led, StateMode.EMERGENCY.value)
+    if (data['id'] == -2):
+        for i in drones:
+            i.send_data(packet)
+    else:
+        drones[data['id']].send_data(packet)
     
 @socketio.on('RETURN_BASE')
 def returnToBase(data):
+    led = False
+    packet = struct.pack("<bi", led, StateMode.RETURN_TO_BASE.value)
     if (data['id'] == -2):
-        for i in range(4):
-            socks[i].send_data(StateMode.RETURN_TO_BASE.value, "<i")
+        for i in drones:
+            i.send_data(packet)
     else:
-        socks[data['id']].send_data(StateMode.RETURN_TO_BASE.value, "<i")
+        drones[data['id']].send_data(packet)
 
 def sendPosition():
     position_json = json.dumps({"x": socks[0].drone_argos.currentPos.x, "y": socks[0].drone_argos.currentPos.y, "z": socks[0].drone_argos.currentPos.z})
