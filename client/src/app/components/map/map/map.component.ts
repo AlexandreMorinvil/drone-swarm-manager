@@ -3,14 +3,12 @@ import { Vec3 } from "@app/class/vec3";
 import { io, Socket } from "socket.io-client/build/index";
 
 import * as d3 from "d3";
+import { LiveMapService } from "@app/service/map/live-map.service";
 
-
-const TOTAL_WIDTH: number = 700;
-const TOTAL_HEIGHT: number = 350;
 
 const BORDER_FACTOR: number = 0.1;
-const MIN_WIDTH: number = 10;
-const MIN_HEIGHT: number = 10;
+const MIN_WIDTH: number = 100;
+const MIN_HEIGHT: number = 100;
 
 const NUMBER_TICKS: number = 10;
 const GRID_OPACITY: number = 0.25;
@@ -23,8 +21,8 @@ const GRID_OPACITY: number = 0.25;
 export class MapComponent {
   private socket: Socket;
 
-  currentRate = 8;
-  title = "D3 Barchart with Angular 10";
+  //currentRate = 8;
+
   width: number = 0;
   height: number = 0;
   margin = { top: 30, right: 30, bottom: 30, left: 30 };
@@ -45,7 +43,7 @@ export class MapComponent {
   clipPath: d3.Selection<HTMLElement>;
   gWall: d3.Selection<HTMLElement>;
 
-  zoom: any;
+  //zoom: any;
   xScale: any;
   yScale: any;
   xAxis: any;
@@ -55,18 +53,12 @@ export class MapComponent {
 
   valueToIncrease: number = 0;
 
-  constructor() {
-    this.width = TOTAL_WIDTH - this.margin.left - this.margin.right;
-    this.height = TOTAL_HEIGHT - this.margin.top - this.margin.bottom;
-
-    this.min_x = -MIN_WIDTH / 2;
-    this.max_x = MIN_WIDTH / 2;
-    this.min_y = -MIN_HEIGHT / 2;
-    this.max_y = MIN_HEIGHT / 2;
-
+  constructor(public liveMapService: LiveMapService) {
+    this.liveMapService.mapId = "#map";
     this.socket = io("127.0.0.1:5000");
     this.socket.on("MAP_POINTS",(data) => {
-      this.receiveSelectMapPoints(data)
+      const points = JSON.parse(data);
+      this.receiveSelectedMapPoints(points);
     });
 
     /*const interval: ReturnType<typeof setTimeout> = setInterval(() => {
@@ -119,65 +111,13 @@ export class MapComponent {
   }
 
   private setPlot(isFirstTime = false): void {
-    this.initSvg(isFirstTime);
+    this.liveMapService.initSvg(isFirstTime);
     this.updateAxisRange(true);
     this.drawAxis();
     this.drawWalls();
   }
 
-  private initSvg(isFirstTime = false): void {
-    if (isFirstTime)
-      this.chart = d3
-        .select("#map")
-        .append("svg")
-        .attr("width", "100%")
-        .attr("height", "100%")
-        .attr("viewBox", [0, 0, TOTAL_WIDTH, TOTAL_HEIGHT])
-        .attr("fill", "white");
-
-    this.gAxis = this.chart
-      .append("g")
-      .attr("id", "map-axis")
-      .attr(
-        "transform",
-        "translate(" + this.margin.left + "," + this.margin.top + ")"
-      );
-
-    this.clipPath = this.chart
-      .append("defs")
-      .append("clipPath")
-      .attr("id", "clip");
-
-    this.clipPath
-      .append("svg:rect")
-      .attr("id", "clip-rect")
-      .attr("x", "0")
-      .attr("y", "0")
-      .attr("width", this.width)
-      .attr("height", this.height)
-      .attr(
-        "transform",
-        "translate(" + this.margin.left + "," + this.margin.top + ")"
-      );
-
-    this.gMain = this.chart
-      .append("g")
-      .attr("clip-path", "url(#clip)")
-      .attr("id", "map-main")
-      .attr("width", this.width)
-      .attr("height", this.height)
-      .attr("class", "main");
-
-    this.gWall = this.gMain
-      .append("g")
-      .attr("id", "wall-points")
-      .attr(
-        "transform",
-        "translate(" + this.margin.left + "," + this.margin.top + ")",
-        "clip-path",
-        "url(#clip)"
-      );
-  }
+  
 
   private deleteMap(): void {
     this.chart.selectAll("svg > *").remove();
@@ -203,24 +143,24 @@ export class MapComponent {
   }
 
   private computeGlobalDisplayRange() {
-    const avg_x = (this.max_x + this.min_x) / 2;
-    const avg_y = (this.max_y + this.min_y) / 2;
+    const avg_x = (this.max_x - this.min_x) / 2;
+    const avg_y = (this.max_y - this.min_y) / 2;
+
+    // Add border to the range
+    this.display_min_x = this.min_x - avg_x * BORDER_FACTOR;
+    this.display_max_x = this.max_x + avg_x * BORDER_FACTOR;
+    this.display_min_y = this.min_y - avg_y * BORDER_FACTOR;
+    this.display_max_y = this.max_y + avg_y * BORDER_FACTOR;
 
     const width = this.max_x - this.min_x;
     const height = this.max_y - this.min_y;
 
-    // Add border to the range
-    this.display_min_x = this.min_x - width / 2 * BORDER_FACTOR;
-    this.display_max_x = this.max_x + width / 2 * BORDER_FACTOR;
-    this.display_min_y = this.min_y - height / 2 * BORDER_FACTOR;
-    this.display_max_y = this.max_y + height / 2 * BORDER_FACTOR;
-
     // Readjust borders to the minimum accepted dimensions
-    if (width < MIN_WIDTH) {
+    if (this.max_x - this.min_x < MIN_WIDTH) {
       this.display_min_x = avg_x - MIN_WIDTH / 2;
       this.display_max_x = avg_x + MIN_WIDTH / 2;
     }
-    if (height < MIN_HEIGHT) {
+    if (this.max_y - this.min_y < MIN_HEIGHT) {
       this.display_min_y = avg_y - MIN_HEIGHT / 2;
       this.display_max_y = avg_y + MIN_HEIGHT / 2;
     }
@@ -248,7 +188,7 @@ export class MapComponent {
       .range([0, this.width]);
     this.yScale = d3
       .scaleLinear()
-      .domain([this.display_max_y, this.display_min_y])
+      .domain([this.display_min_y, this.display_max_y])
       .range([0, this.height]);
 
     // Redraw map
@@ -292,14 +232,12 @@ export class MapComponent {
       .style("fill", "#69b3a2");
   }
 
-  receiveSelectMapPoints(data:any): void{
+  receiveSelectedMapPoints(pointsData:any): void{
     let points = [];
-    const pointsData = JSON.parse(data);
     for(let i = 0; i < pointsData.length; i++){
       points.push(new Vec3(pointsData[i].x, pointsData[i].y, pointsData[i].z));
     }
     this.deleteMap();
     this.setBaseMap(points);
-
   }
 }
