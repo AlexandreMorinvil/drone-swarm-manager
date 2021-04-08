@@ -148,9 +148,9 @@ void CSimAlfred::ControlStep() {
                m_pcPropellers->SetAbsoluteYaw(
                   *new CRadians(computeAngleToFollow()));
             }
-            computeAngleToFollow();
             CVector3* vector = cMoving->GoInSpecifiedDirection(
                cSensors->ReturningSide(sensorValues, computeAngleToFollow()));
+
             vector->SetZ(cP2P->GetAltitudeToAvoidCollision(cPos, idRobot));
             // Prevent robot from touching ground
             if (cPos.GetZ() < 0.2) {

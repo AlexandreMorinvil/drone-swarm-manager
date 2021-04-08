@@ -2,36 +2,18 @@
 
 
 SensorSide* prioritise(float angle) {
-    SensorSide* retval = new SensorSide[4];
-    if (angle < 0) {
-        retval[1] = SensorSide::kBack;
-        retval[3] = SensorSide::kFront;
-        if (angle > - PI_DIVIDE_TWO - 0.1 && angle < - PI_DIVIDE_TWO + 0.1) {
-            retval[0] = SensorSide::kBack;
-            retval[2] = SensorSide::kFront;
-        } else if (angle < - PI_DIVIDE_TWO - 0.1) {
+    SensorSide* retval = new SensorSide[3];
+    retval[2] = SensorSide::kBack;
+    if (angle < - PI_DIVIDE_TWO ||angle > PI_DIVIDE_TWO) {
             retval[0] = SensorSide::kLeft;
-            retval[2] = SensorSide::kRight;
-        } else {
-            retval[0] = SensorSide::kRight;
-            retval[2] = SensorSide::kLeft;
-        }
+            retval[1] = SensorSide::kRight;
     } else {
-        retval[3] = SensorSide::kBack;
-        retval[1] = SensorSide::kFront;
-        if (angle > PI_DIVIDE_TWO - 0.1 && angle < PI_DIVIDE_TWO + 0.1) {
-            retval[0] = SensorSide::kFront;
-            retval[2] = SensorSide::kBack;
-        } else if (angle < PI_DIVIDE_TWO - 0.1) {
             retval[0] = SensorSide::kRight;
-            retval[2] = SensorSide::kLeft;
-        } else {
-            retval[0] = SensorSide::kLeft;
-            retval[2] = SensorSide::kRight;
-        }
+            retval[1] = SensorSide::kLeft;
     }
     return retval;
 }
+
 
 
 
