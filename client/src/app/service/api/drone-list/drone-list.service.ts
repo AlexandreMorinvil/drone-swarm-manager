@@ -10,6 +10,7 @@ export class DroneListService {
   private socket: Socket;
   droneId: number = 0;
   droneList: Drone[] = [];
+  firstIndex: number = 0;
 
   constructor() {
     this.socket = io("127.0.0.1:5000");
@@ -17,13 +18,12 @@ export class DroneListService {
 
   public receiveData(data) {
     const droneData = JSON.parse(data);
-    console.log("Received stuff");
     this.updateList(droneData);
   }
 
   public updateList(droneData: any): void {
 
-    const firstIndex = droneData[0].id;
+    this.firstIndex = droneData[0].id;
     for (let i = 0; i < droneData.length; i++) {
       // Parse the drone
       const currentId = droneData[i].id;
@@ -41,7 +41,7 @@ export class DroneListService {
       // If the drone order does not correspond, we add the drone in the right order
       else if (this.droneList[i].getDroneId() !== currentId) this.droneList.splice(i, 1, updatedDrone);
       // Otherwise, we update the drone
-      else this.droneList[currentId - firstIndex].updateDrone(updatedDrone);
+      else this.droneList[currentId - this.firstIndex].updateDrone(updatedDrone);
     }
 
 
@@ -55,7 +55,7 @@ export class DroneListService {
   }
 
   public getDrone(droneId: number) {
-    return this.droneList[droneId];
+    return this.droneList[droneId - this.firstIndex];
   }
 
   public get isConnected(): boolean {
