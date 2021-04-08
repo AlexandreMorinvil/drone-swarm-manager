@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { io, Socket } from "socket.io-client/build/index";
 import { Drone } from "@app/class/drone";
-import { ServerMode } from "@app/constants/serverMode"
+import { ServerMode } from "@app/constants/serverMode";
 
 @Injectable({
   providedIn: "root",
@@ -12,7 +12,7 @@ export class DroneListService {
   droneList: Drone[] = [];
 
   constructor() {
-    this.socket = io("127.0.0.1:5000")
+    this.socket = io("127.0.0.1:5000");
   }
 
   public receiveData(data) {
@@ -22,6 +22,8 @@ export class DroneListService {
   }
 
   public updateList(droneData: any): void {
+
+    const firstIndex = droneData[0].id;
     for (let i = 0; i < droneData.length; i++) {
       // Parse the drone
       const currentId = droneData[i].id;
@@ -39,8 +41,10 @@ export class DroneListService {
       // If the drone order does not correspond, we add the drone in the right order
       else if (this.droneList[i].getDroneId() !== currentId) this.droneList.splice(i, 1, updatedDrone);
       // Otherwise, we update the drone
-      else this.droneList[currentId].updateDrone(updatedDrone);
+      else this.droneList[currentId - firstIndex].updateDrone(updatedDrone);
     }
+
+
     if (this.droneList.length !== droneData.length) {
       this.droneList = this.droneList.slice(0, droneData.length);
     }
@@ -53,15 +57,15 @@ export class DroneListService {
   public getDrone(droneId: number) {
     return this.droneList[droneId];
   }
-  
-  public get isConnected() : boolean {
+
+  public get isConnected(): boolean {
     return this.socket.connected;
   }
 
   public sendModeToServer(modeSelected: ServerMode, numberOfDrone: Number) {
     this.socket.emit("SET_MODE", {
-        mode_chosen: modeSelected,
-        number_of_drone: numberOfDrone });
+      mode_chosen: modeSelected,
+      number_of_drone: numberOfDrone,
+    });
   }
-  
 }

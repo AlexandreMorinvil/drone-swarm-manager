@@ -177,8 +177,6 @@ if __name__ == '__main__':
     database_initializer = DatabaseConnector()
     database_initializer.create_table()
     
-
-    
     map_handler = MapHandler()
     thread_map_handler = threading.Thread(target=map_handler.send_point, args=(socketio,), name='send_new_points')
     thread_map_handler.start()
