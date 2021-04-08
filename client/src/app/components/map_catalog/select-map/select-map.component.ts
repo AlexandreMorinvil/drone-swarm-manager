@@ -2,6 +2,7 @@ import { NONE_TYPE } from "@angular/compiler";
 import { Component } from "@angular/core";
 import { Map } from "@app/class/map"
 import { MapCatalogService } from "@app/service/map-catalog/map-catalog.service";
+import { SocketService } from "@app/service/socket.service";
 
 
 
@@ -11,7 +12,7 @@ import { MapCatalogService } from "@app/service/map-catalog/map-catalog.service"
   styleUrls: ["./select-map.component.scss"],
 })
 export class SelectMapComponent{
-  constructor(public mapCatalogService: MapCatalogService){}
+  constructor(public mapCatalogService: MapCatalogService, public socketService: SocketService){}
 
   public get selectedMap(): Map {
     return this.mapCatalogService.selectedMap;
@@ -22,7 +23,7 @@ export class SelectMapComponent{
   }
 
   deleteMap(): void {
-    this.mapCatalogService.deleteSelectedMap(this.selectedMap.id);
+    this.socketService.deleteSelectedMap(this.selectedMap.id);
   }
   
 }

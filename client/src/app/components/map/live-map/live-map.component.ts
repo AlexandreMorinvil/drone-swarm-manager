@@ -1,5 +1,6 @@
 import { AfterViewInit, Component, ViewChild } from "@angular/core";
 import { Vec3 } from "@app/class/vec3";
+import { LiveMapService } from "@app/service/map/live-map.service";
 import { io, Socket } from "socket.io-client/build/index";
 
 @Component({
@@ -7,21 +8,17 @@ import { io, Socket } from "socket.io-client/build/index";
   templateUrl: "./live-map.component.html",
   styleUrls: ["./live-map.component.scss"],
 })
-export class LiveMapComponent implements AfterViewInit {
-  @ViewChild("liveMap") map;
+export class LiveMapComponent {
 
   private socket: Socket;
 
-  constructor() {
-    this.socket = io("127.0.0.1:5000");
-    this.socket.on("LIVE_MAP_NEW_POINT", (data) => {
-      const pointData: any = JSON.parse(data);
-      this.map.addWallPoint(new Vec3(pointData.x, pointData.y, pointData.z))
-    });
+  constructor(public liveMapService: LiveMapService) {
+    this.liveMapService.mapId = "#liveMap";
+
   }
 
-  ngAfterViewInit() {
-    console.log(this.map);
+  ngOnInit() {
+    this.liveMapService.setPlot(true);
   }
 
   setBaseMap(): void {
