@@ -71,5 +71,14 @@ export class DroneListService {
         mode_chosen: modeSelected,
         number_of_drone: numberOfDrone });
   }
+
+  public sendInitRealPositionToServer(droneId: number) {
+    console.log('id', this.droneList[droneId].getDroneId());
+    console.log('Position real', this.droneList[droneId].initRealPosition);
+    this.socket.emit('INIT_REAL_POS', {
+      droneId: droneId,
+      initRealPosition: this.droneList[droneId].initRealPosition
+    })
+  }
   
 }

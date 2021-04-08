@@ -24,6 +24,10 @@
       <mat-icon>lightbulb</mat-icon>
       Toggle LED
     </button>
+    <div>
+      <label for="drone">Initial real position :</label>
+      <input type="number" [(ngModel)]="drone.initRealPosition" (ngModelChange)="initRealPosChange()" name="initRealPosition">
+  </div>
   </div>
 
   <mat-divider></mat-divider>

@@ -132,20 +132,18 @@ def returnToBase(data):
 
 @socketio.on('INIT_REAL_POS')
 def retrieveInitRealPos(data):
+    print(data)
     
-
-
-
 
 def sendPosition():
     position_json = json.dumps({"x": socks[0].drone_argos.currentPos.x, "y": socks[0].drone_argos.currentPos.y, "z": socks[0].drone_argos.currentPos.z})
     socketio.emit('POSITION', position_json)
-    logger.info('send drones position')
+    logger.warning('send drones position')
 
 def send_data():
     data_to_send = json.dumps([drone.dump() for drone in drones])
     socketio.emit('drone_data', data_to_send, broadcast=True)
-    logger.info('send data to client')
+    logger.warning('send data to client')
 
 def set_interval(func, sec):
         def func_wrapper():
