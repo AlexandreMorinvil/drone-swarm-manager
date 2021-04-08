@@ -33,48 +33,40 @@ bool CRadio::connectToServer(int idRobot) {
     return isConnected;
 }
 
-void CRadio::sendTelemetry(CVector3 pos, StateMode stateMode, float vBat, float rangeValues[], float orientation[], float speed[]) {
-    // Unblock socket
     int flags = fcntl(sock, F_GETFL);
     fcntl(sock, F_SETFL, flags | O_NONBLOCK);
-
-    struct PacketTX packetTx;
-    packetTx.packetType = PacketType::tx;
-    packetTx.stateMode      = stateMode;
-    packetTx.vbat           = vBat;
-    packetTx.isLedActivated = true;
-    send(sock, &packetTx, sizeof(packetTx), 0 );
 
     struct PacketPosition packetPosition;
     packetPosition.x = pos.GetX();
     packetPosition.y = pos.GetY();
     packetPosition.z = pos.GetZ();
-    packetPosition.packetType = PacketType::position;
+    packetPosition.packetType = position;
     send(sock, &packetPosition, sizeof(packetPosition), 0 );
 
+    struct PacketVelocity packetVelocity;
+    packetVelocity.packetType = velocity;
+    /*packetVelocity.px = (posFinal.GetX() - posInitial.GetX());
+    packetVelocity.py = (posFinal.GetY() - posInitial.GetY());
+    packetVelocity.pz = (posFinal.GetZ() - posInitial.GetZ());*/
+    send(sock, &packetVelocity, sizeof(packetVelocity), 0 );
+
     struct PacketDistance packetDistance;
-    packetDistance.packetType = PacketType::distance;
-    packetDistance.front    = rangeValues[3];
-    packetDistance.left     = rangeValues[0];
-    packetDistance.right    = rangeValues[2];
-    packetDistance.up       = rangeValues[5];
-    packetDistance.back     = rangeValues[1];
-    packetDistance.zrange   = rangeValues[4];
+    packetDistance.packetType = distance;
+    packetDistance.front = 0;
+    packetDistance.left = 0;
+    packetDistance.right = 0;
+    packetDistance.up = 0;
+    packetDistance.back = 0;
+    packetDistance.zrange = 0;
     send(sock, &packetDistance, sizeof(packetDistance), 0 );
 
-    struct PacketOrientation packetOrientation;
-    packetOrientation.packetType = PacketType::orientation;
-    packetOrientation.roll  = orientation[2];
-    packetOrientation.pitch = orientation[1];
-    packetOrientation.yaw   = orientation[0];
-    send(sock, &packetOrientation, sizeof(packetOrientation), 0 );
-
-    struct PacketVelocity packetVelocity;
-    packetVelocity.packetType = PacketType::velocity;
-    packetVelocity.px = speed[0];
-    packetVelocity.py = speed[1];
-    packetVelocity.pz = speed[2];
-    send(sock, &packetVelocity, sizeof(packetVelocity), 0 );
+    struct PacketTX packetTx;
+    packetTx.packetType = tx;
+    packetTx.isLedActivated = true;
+    packetTx.vbat = vBat;
+    packetTx.stateMode = stateMode;
+    packetTx.rssiToBase = 0;
+    send(sock, &packetTx, sizeof(packetTx), 0 );
 }
 
 

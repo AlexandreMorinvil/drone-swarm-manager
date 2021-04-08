@@ -174,7 +174,7 @@
       <camera>
       <placements>
         <placement index="0" position="0,0,5"
-                   look_at="0,0,0" up="-1,180,0" 
+                   look_at="0,0,0" up="-1,0,0" 
                    lens_focal_length="20" />
         </placements>
       </camera>

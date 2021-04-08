@@ -34,12 +34,11 @@ typedef enum {
   } StateMode;
 
 typedef enum {
-    tx = 0,
-    position = 1,
-    attitude = 2,
-    velocity = 3,
-    distance = 4,
-    orientation = 5
+    tx,
+    position,
+    attitude,
+    velocity,
+    distance
 } PacketType;
 
 struct PacketPosition {
@@ -51,9 +50,10 @@ struct PacketPosition {
 
 struct PacketTX {
     PacketType packetType;
-    StateMode stateMode;
-    float vbat;
     bool isLedActivated;
+    float vbat;
+    StateMode stateMode;
+    uint8_t rssiToBase;
 } __attribute__((packed));
 
 struct PacketVelocity {
@@ -73,13 +73,6 @@ struct PacketDistance {
     uint16_t zrange;
 } __attribute__((packed));
 
-struct PacketOrientation {
-    PacketType packetType;
-    float pitch;
-    float roll;
-    float yaw;
-} __attribute__((packed));
-
 
 class CRadio {
  public:
@@ -89,7 +82,7 @@ class CRadio {
 
       bool connectToServer(int idRobot);
 
-      void sendTelemetry(CVector3 pos, StateMode stateMode, float vBat, float rangeValues[], float orientationValues[], float speed[]);
+      void sendTelemetry(CVector3 pos, StateMode stateMode, float vBat);
 
       StateMode* ReceiveData();
 

@@ -1,5 +1,6 @@
 import { Component } from "@angular/core";
 import { Drone } from "@app/class/drone";
+import { DroneListService } from "@app/service/api/drone-list/drone-list.service";
 import { SelectedDroneService } from "@app/service/selecte-drone/selected-drone.service";
 @Component({
   selector: "app-drone-selected-board",
@@ -7,7 +8,7 @@ import { SelectedDroneService } from "@app/service/selecte-drone/selected-drone.
   styleUrls: ["./drone-selected-board.component.scss"],
 })
 export class DroneSelectedBoardComponent {
-  constructor(public selectedDroneService: SelectedDroneService) {}
+  constructor(public selectedDroneService: SelectedDroneService, public droneListService: DroneListService) {}
 
   sendToggleLedRequest(): void {
     this.selectedDroneService.sendToogleLedRequest();
@@ -17,10 +18,17 @@ export class DroneSelectedBoardComponent {
     this.selectedDroneService.sendTakeOffRequest();
   }
   sendReturnToBaseRequest(): void {
+    console.log(this.selectedDroneService.drone.initRealPosition);
     this.selectedDroneService.sendReturnToBaseRequest();
   }
 
   public get drone(): Drone {
     return this.selectedDroneService.drone;
   }
+
+  public initRealPosChange() {
+    
+    this.droneListService.sendInitRealPositionToServer(this.drone.getDroneId());
+  }
+
 }

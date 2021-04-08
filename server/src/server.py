@@ -6,8 +6,8 @@ from drone import *
 import threading
 import sys
 import argparse
-
-from flask import Flask, jsonify
+from subprocess import call
+from flask import Flask, jsonify, render_template
 from flask_socketio import *
 import cflib
 from cflib.crazyflie import Crazyflie
@@ -55,20 +55,57 @@ else:
     drones = []
     
 socks = []
-
 def createDrones(numberOfDrone):
     for i in range(numberOfDrone):
         socks.append(ArgosServer(i, default_port + i))
         t = threading.Thread(target=socks[i].waiting_connection, name='waiting_connection')
         t.start()
 
+        if mode == Mode.SIMULATION:
+            drones.append(socks[i].drone_argos)
+            logger.info('Connection to port {}'.format(default_port + i))
+
+def deleteDrones():
+    for i in socks:
+        if hasattr(i, "connection"):
+            i.connection.close()
+        i.sock.shutdown(2)
+        i.sock.close()
+        del i
+    drones.clear()
+    socks.clear()
+
+@socketio.on('SET_MODE')
+def setMode(data):
+    deleteDrones()
+    mode = data['mode_chosen']
+    numberOfDrone = data['number_of_drone']
+    dronesAreCreated = False
+    while not dronesAreCreated:
+        try:
+            createDrones(int(numberOfDrone))
+            dronesAreCreated = True
+        except:
+            deleteDrones()
+            dronesAreCreated = False
+    call(['./start-simulation.sh', '{}'.format(numberOfDrone)])
+
+@socketio.on('TOGGLE_LED')
+def ledToggler(data):
+    print(data['id'])
+    drones[data['id']].toggleLED()
+    print("LED TOGGLER")
+    logger.info('ledTogger function executed with data {}'.format(data['id']))
+
 @socketio.on('TAKEOFF')
 def takeOff(data):
     led = False
     packet = struct.pack("<bi", led, StateMode.TAKE_OFF.value)
     if (data['id'] == -2):
-        for i in drones:
-            i.send_data(packet)
+        for i in socks:
+            i.send_data(StateMode.TAKE_OFF.value, "<i")
+            logger.info('Take off of {}'.format(i))
+
     else:
         drones[data['id']].send_data(packet)
 
@@ -87,10 +124,18 @@ def returnToBase(data):
     led = False
     packet = struct.pack("<bi", led, StateMode.RETURN_TO_BASE.value)
     if (data['id'] == -2):
-        for i in drones:
-            i.send_data(packet)
+        for i in socks:
+            i.send_data(StateMode.RETURN_TO_BASE.value, "<i")
+            logger.info('Return to base of {}'.format(socks[i]))
     else:
         drones[data['id']].send_data(packet)
+
+@socketio.on('INIT_REAL_POS')
+def retrieveInitRealPos(data):
+    
+
+
+
 
 def sendPosition():
     position_json = json.dumps({"x": socks[0].drone_argos.currentPos.x, "y": socks[0].drone_argos.currentPos.y, "z": socks[0].drone_argos.currentPos.z})
@@ -111,14 +156,9 @@ def set_interval(func, sec):
         return t
 
 if __name__ == '__main__':
+    set_interval(sendPosition, 1)
     createDrones(4)
-
-    # Map generation thread
-    map_handler = MapHandler()
-    thread_map_handler = threading.Thread(target=map_handler.send_point, args=(socketio,), name='send_new_points')
-    thread_map_handler.start()
-
-    set_interval(send_data, 1)
+    #set_interval(send_data, 1)
     app.run()
     while True:
         for i in range(numberOfDrone):

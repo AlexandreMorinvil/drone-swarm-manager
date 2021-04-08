@@ -1,43 +1,21 @@
-#include <stdio.h> 
-#include <sys/socket.h> 
-#include <arpa/inet.h> 
-#include <unistd.h> 
-#include <string.h>
-#include <fcntl.h>
-#include <regex>
-#include <math.h>
-
-/* Include the controller definition */
 #include "sim-alfred.h"
-/* Function definitions for XML parsing */
-#include <argos3/core/utility/configuration/argos_configuration.h>
-/* 2D vector definition */
-#include <argos3/core/utility/math/vector2.h>
-/* Logging */
-#include <argos3/core/utility/logging/argos_log.h>
-#include <argos3/core/simulator/entity/embodied_entity.h>
-#include<argos3/plugins/simulator/entities/box_entity.h>
-
 
 
 /****************************************/
 /****************************************/
 
 
-void CDemoPdr::checkForCollisionAvoidance() {
-      if (cTimer->GetTimer(TimerType::kAvoidTimer) < 0) {
-         m_pcPropellers->SetAbsolutePosition(
-            *cP2P->GetNewVectorToAvoidCollision(cPos, idRobot));
+void CSimAlfred::setPosVelocity() {
+      if (m_uiCurrentStep % 10 == 0 && m_uiCurrentStep != 0) {
+         posInitial = cPos;
       }
-
-      // Prevent robot from touching ground
-      if (cPos.GetZ() < 0.2) {
-         CVector3* vector = new CVector3(cPos.GetX(), cPos.GetY(), 0.2);
-         m_pcPropellers->SetRelativePosition(*vector);
+      if (m_uiCurrentStep % 10 == 9) {
+         posFinal = cPos;
       }
 }
 
-float CDemoPdr::computeAngleToFollow() {
+
+float CSimAlfred::computeAngleToFollow() {
       float xdiff = objective.GetX() - cPos.GetX();
       float ydiff = objective.GetY() - cPos.GetY();
 
@@ -51,7 +29,8 @@ float CDemoPdr::computeAngleToFollow() {
       return (- atan(xdiff/ydiff));
 }
 
-CDemoPdr::CDemoPdr() : m_pcDistance(NULL),
+
+CSimAlfred::CSimAlfred() : m_pcDistance(NULL),
                        m_pcPropellers(NULL),
                        m_pcPos(NULL),
                        m_uiCurrentStep(0) {}
@@ -102,63 +81,37 @@ void CSimAlfred::Init(TConfigurationNode &t_node) {
 /****************************************/
 /****************************************/
 
-void CDemoPdr::ControlStep() {
+void CSimAlfred::ControlStep() {
       if (!cRadio->connectToServer(idRobot)) {
          return;
       }
 
       // Update metrics
-      // Orientation
-      CRadians yawAngle = CRadians(0.0f);
-      CRadians pitchAngle = CRadians(0.0f);
-      CRadians rollAngle = CRadians(0.0f);
-      m_pcPos->GetReading().Orientation.ToEulerAngles(yawAngle, pitchAngle, rollAngle);
-      float orientationValues[3];
-      orientationValues[0] = yawAngle.GetValue()  + M_PI/2;
-      orientationValues[1] = pitchAngle.GetValue();
-      orientationValues[2] = rollAngle.GetValue();
-
-      // Battery
+      CRadians* currentAngle = new CRadians(0.1f);
+      CRadians *useless = new CRadians(0.1f);
+      m_pcPos->GetReading()
+        .Orientation.ToEulerAngles(*currentAngle, *useless, *useless);
       const CCI_BatterySensor::SReading& sBatRead = m_pcBattery->GetReading();
-
-      // Position
-      previousPos = cPos;
       cPos = m_pcPos->GetReading().Position;
       cP2P->sendPacketToOtherRobots(cPos.GetZ(), idRobot);
+      setPosVelocity();
+      cRadio->sendTelemetry(cPos, stateMode, sBatRead.AvailableCharge);
 
-      // Speed
-      float speedValues[3];
-      speedValues[0] = (cPos.GetX() - previousPos.GetX()) / SECONDS_PER_STEP;
-      speedValues[1] = (cPos.GetY() - previousPos.GetY()) / SECONDS_PER_STEP;
-      speedValues[2] = (cPos.GetZ() - previousPos.GetZ()) / SECONDS_PER_STEP;
-
-      // Range distances
-      // [ leftDist, backDist, rightDist, frontDist, downDistance, upDistance ]
-      CCI_CrazyflieDistanceScannerSensor::TReadingsMap sDistRead = m_pcDistance->GetReadingsMap();
+      CCI_CrazyflieDistanceScannerSensor::TReadingsMap sDistRead =
+        m_pcDistance->GetReadingsMap();
       auto iterDistRead = sDistRead.begin();
-      float sensorValues[6];
-      sensorValues[1] = (iterDistRead++)->second;  // Back
-      sensorValues[2] = (iterDistRead++)->second;  // Right
-      sensorValues[3] = (iterDistRead++)->second;  // Front
-      sensorValues[0] = (iterDistRead++)->second;  // Left
-      sensorValues[4] = cPos.GetZ();               // Height
-      sensorValues[5] = ROOF_HEIGHT - cPos.GetZ(); // Roof distance
-
-      if (GetId() == "s0") {
-         // LOG << "FRONT_SENSOR " << sensorValues[3] << std::endl;
-         // LOG << "POSITION : " << cPos.GetX() << " ; " << cPos.GetY() << " ; " << cPos.GetZ() << std::endl;
-         LOG << "YAW" << orientationValues[0] << std::endl;
-      }
-
-      cRadio->sendTelemetry(cPos, stateMode, sBatRead.AvailableCharge, sensorValues, orientationValues, speedValues);
+      float sensorValues[4];
+      // {leftDist, backDist, rightDist, frontDist};
+      sensorValues[1] = (iterDistRead++)->second;
+      sensorValues[2] = (iterDistRead++)->second;
+      sensorValues[3] = (iterDistRead++)->second;
+      sensorValues[0] = (iterDistRead++)->second;
 
       // Update StateMode received from ground station
       StateMode* stateModeReceived = cRadio->ReceiveData();
       if (stateModeReceived) {
          stateMode = *stateModeReceived;
       }
-
-      // LOG << "stateMode : " << stateMode << std::endl;
 
       cTimer->CountOneCycle();
 
