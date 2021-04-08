@@ -1,22 +1,4 @@
-#include <stdio.h> 
-#include <sys/socket.h> 
-#include <arpa/inet.h> 
-#include <unistd.h> 
-#include <string.h>
-#include <fcntl.h>
-#include <regex>
-
-/* Include the controller definition */
 #include "sim-alfred.h"
-/* Function definitions for XML parsing */
-#include <argos3/core/utility/configuration/argos_configuration.h>
-/* 2D vector definition */
-#include <argos3/core/utility/math/vector2.h>
-/* Logging */
-#include <argos3/core/utility/logging/argos_log.h>
-#include <argos3/core/simulator/entity/embodied_entity.h>
-#include<argos3/plugins/simulator/entities/box_entity.h>
-
 
 
 /****************************************/
@@ -100,7 +82,9 @@ void CSimAlfred::Init(TConfigurationNode &t_node) {
 /****************************************/
 
 void CSimAlfred::ControlStep() {
-      cRadio->connectToServer(idRobot);
+      if (!cRadio->connectToServer(idRobot)) {
+         return;
+      }
 
       // Update metrics
       CRadians* currentAngle = new CRadians(0.1f);
@@ -128,8 +112,6 @@ void CSimAlfred::ControlStep() {
       if (stateModeReceived) {
          stateMode = *stateModeReceived;
       }
-
-      LOG << "stateMode : " << stateMode << std::endl;
 
       cTimer->CountOneCycle();
 
