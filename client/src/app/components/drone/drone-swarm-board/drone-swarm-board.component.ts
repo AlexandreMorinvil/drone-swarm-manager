@@ -1,5 +1,5 @@
 import { Component } from "@angular/core";
-import { DroneControlService } from "@app/service/api/drone-control/drone-control.service";
+import { SocketService } from "@app/service/socket.service";
 import { ALL_DRONE_INDEX } from "@app/class/drone";
 
 @Component({
@@ -9,17 +9,17 @@ import { ALL_DRONE_INDEX } from "@app/class/drone";
 })
 export class DroneSwarmBoardComponent {
 
-  constructor(public droneControlService: DroneControlService) {
+  constructor(public socketService: SocketService) {
   }
 
   sendSwarmToggleLedRequest(): void {
-    this.droneControlService.sendToogleLedRequest(ALL_DRONE_INDEX);
+    this.socketService.sendToogleLedRequest(ALL_DRONE_INDEX);
   }
 
   sendSwarmTakeOffRequest(): void {
-    this.droneControlService.sendTakeOffRequest(ALL_DRONE_INDEX);
+    this.socketService.sendTakeOffRequest(ALL_DRONE_INDEX);
   }
   sendSwarmReturnToBaseRequest(): void {
-    this.droneControlService.sendReturnToBaseRequest(ALL_DRONE_INDEX);
+    this.socketService.sendReturnToBaseRequest(ALL_DRONE_INDEX);
   }
 }

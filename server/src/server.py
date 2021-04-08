@@ -15,6 +15,17 @@ from argos_server import ArgosServer
 import threading
 from enum import Enum
 from threading import *
+from DBconnect import DatabaseConnector
+from map_catalog import MapCatalog
+from map_handler import MapHandler
+
+import logging
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
+
+# Add paths toward dependecies in different subdirectories
+sys.path.append(os.path.abspath('./src/map'))
+from map_handler import MapHandler
 from setup_logging import LogsConfig
 
 class Mode(Enum):
@@ -115,15 +126,36 @@ def returnToBase(data):
     if (data['id'] == -2):
         for i in socks:
             i.send_data(StateMode.RETURN_TO_BASE.value, "<i")
-            logger.info('Return to base of {}'.format(socks[i]))
+            logger.info('Return to base of {}'.format(i))
     else:
         socks[data['id']].send_data(StateMode.RETURN_TO_BASE.value, "<i")
         logger.info('Return to base of {}'.format(socks[data['id']]))
-    
-def sendPosition():
-    position_json = json.dumps({"x": socks[0].drone_argos.currentPos.x, "y": socks[0].drone_argos.currentPos.y, "z": socks[0].drone_argos.currentPos.z})
-    socketio.emit('POSITION', position_json)
-    logger.info('send drones position')
+
+@socketio.on('MAP_CATALOG')
+def getMapList():
+    map_catalog = MapCatalog()
+    maps = map_catalog.get_map_list()
+    map_list = json.dumps([map_catalog.map_list_to_Json(map) for map in maps])
+    socketio.emit('MAP_LIST', map_list)
+
+@socketio.on('END_MISSION')
+def endOfMission(data):
+    mapHandler = MapHandler()
+    mapHandler.current_map.end_mission()
+
+@socketio.on('SELECT_MAP')
+def getMapPoints(data):
+    map_catalog = MapCatalog()
+    map_points_json = map_catalog.get_select_map(data['id'])
+    socketio.emit('MAP_POINTS', map_points_json)
+
+@socketio.on("DELETE_MAP")
+def deleteMap(data):
+    map_catalog = MapCatalog()
+    map_catalog.delete_map(data['id'])
+    maps = map_catalog.get_map_list()
+    map_list = json.dumps([map_catalog.map_list_to_Json(map) for map in maps])
+    socketio.emit('MAP_LIST', map_list)
 
 def send_data():
     data_to_send = json.dumps([drone.dump() for drone in drones])
@@ -131,17 +163,26 @@ def send_data():
     logger.info('send data to client')
 
 def set_interval(func, sec):
-        def func_wrapper():
-            set_interval(func, sec)
-            func()  
-        t = threading.Timer(sec, func_wrapper)
-        t.start()
-        return t
+    def func_wrapper():
+        set_interval(func, sec) 
+        func()  
+    t = threading.Timer(sec, func_wrapper)
+    t.start()
+    return t
 
 if __name__ == '__main__':
-    set_interval(sendPosition, 1)
+    #t2 = threading.Thread(target=socks[1].receive_data, name='receive_data')
+    #t2.start()
+
+    database_initializer = DatabaseConnector()
+    database_initializer.create_table()
+    
+    map_handler = MapHandler()
+    thread_map_handler = threading.Thread(target=map_handler.send_point, args=(socketio,), name='send_new_points')
+    thread_map_handler.start()
+        
     createDrones(4)
-    #set_interval(send_data, 1)
+    set_interval(send_data, 1)
     app.run()
     while True:
         for i in range(numberOfDrone):

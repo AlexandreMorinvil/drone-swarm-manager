@@ -1,6 +1,7 @@
 import { Component } from "@angular/core";
 import { FormControl, Validators } from "@angular/forms";
-import { DroneListService, ServerMode } from "@app/service/api/drone-list/drone-list.service"
+import { DroneListService } from "@app/service/api/drone-list/drone-list.service";
+import { ServerMode } from "@app/constants/serverMode";
 
 @Component({
   selector: "app-home-page",

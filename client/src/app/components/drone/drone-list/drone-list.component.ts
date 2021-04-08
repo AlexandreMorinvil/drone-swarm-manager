@@ -12,7 +12,7 @@ import { SelectedDroneService } from "@app/service/selecte-drone/selected-drone.
 })
 export class DroneListComponent {
   @ViewChild("droneId") droneId: MatSelectionList;
-
+   
   previousSelectedId: number = UNSET_DRONE_INDEX;
 
   constructor(
@@ -44,4 +44,6 @@ export class DroneListComponent {
   public get droneNumber(): number {
     return this.droneListService.getDroneNumber();
   }
+
+  
 }

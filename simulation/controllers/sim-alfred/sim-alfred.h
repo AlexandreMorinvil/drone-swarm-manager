@@ -123,6 +123,7 @@ class CSimAlfred : public CCI_Controller {
     StateMode stateMode;
     CVector3 objective;
 
+   CVector3 previousPos;
     CVector3 cPos;
 
     int idRobot;

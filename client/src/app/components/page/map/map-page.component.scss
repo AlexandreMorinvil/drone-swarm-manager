@@ -1,0 +1,18 @@
+
+.page-container {
+  display: grid;
+  grid-template-columns: 350px 7.5fr;
+  grid-template-areas: "map-list map-area";
+  height: 100%;
+}
+
+.map-list {
+    grid-area: "map-list";
+    background-color: lightgrey;
+    border-right: #bdbdbd solid 1px;
+}
+
+.map-area {
+  grid-area: "map-area";
+  background-color: rgb(238, 233, 247);
+}

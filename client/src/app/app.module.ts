@@ -14,9 +14,12 @@ import { MapPageComponent } from "./components/page/map/map-page.component";
 import { DroneListComponent } from "./components/drone/drone-list/drone-list.component";
 import { DroneSelectedBoardComponent } from "./components/drone/drone-selected-board/drone-selected-board.component";
 import { DroneSwarmBoardComponent } from "./components/drone/drone-swarm-board/drone-swarm-board.component";
-import { MapComponent } from "./components/map/map/map.component";
+import { LiveMapComponent } from "./components/map/live-map/live-map.component";
+import { MapComponent } from "@app/components/map_catalog/map/map.components";
 import { MapGeneratedBoardComponent } from "./components/map/map-generated-board/map-generated-board.component";
 import { NavigationBarComponent } from "./components/navigation-bar/navigation-bar.component";
+import { MapListComponent } from "./components/map_catalog/map-list/map-list.component"
+import { SelectMapComponent } from "./components/map_catalog/select-map/select-map.component"
 
 //Service
 import { DroneListService } from "./service/api/drone-list/drone-list.service";
@@ -46,9 +49,12 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
     DroneListComponent,
     DroneSelectedBoardComponent,
     DroneSwarmBoardComponent,
+    LiveMapComponent,
     MapComponent,
     MapGeneratedBoardComponent,
     NavigationBarComponent,
+    MapListComponent,
+    SelectMapComponent,
   ],
   imports: [
     BrowserModule,
