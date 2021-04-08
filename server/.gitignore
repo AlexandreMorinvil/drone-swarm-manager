@@ -5,3 +5,6 @@ __pycache__
 # Exclusion des fichiers des IDE
 .idea/
 .vscode/
+
+# Eclude databse files
+*.db

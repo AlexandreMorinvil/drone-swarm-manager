@@ -139,6 +139,9 @@ def set_interval(func, sec):
 if __name__ == '__main__':
     #t2 = threading.Thread(target=socks[1].receive_data, name='receive_data')
     #t2.start()
+
+    database_initializer = DatabaseConnector()
+    database_initializer.create_table()
     
 
     set_interval(sendPosition, 1)

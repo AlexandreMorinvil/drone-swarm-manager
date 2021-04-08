@@ -10,7 +10,7 @@ import sys
 import os
 
 # Add paths toward dependecies in different subdirectories
-sys.path.append(os.path.abspath('./src/map'))
+sys.path.append(os.path.abspath('./map'))
 from data_accumulator import MapObservationAccumulator
 
 class PacketType(Enum):
