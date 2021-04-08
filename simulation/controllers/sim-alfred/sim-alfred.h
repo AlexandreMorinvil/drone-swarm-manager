@@ -33,11 +33,11 @@
 /* Definitions for random number generation */
 #include <argos3/core/utility/math/rng.h>
 
-#include "controllers/demo_pdr/moving.h"
-#include "controllers/demo_pdr/sensors.h"
-#include "controllers/demo_pdr/p2p.h"
-#include "controllers/demo_pdr/radio.h"
-#include "controllers/demo_pdr/timer.h"
+#include "controllers/sim-alfred/moving.h"
+#include "controllers/sim-alfred/sensors.h"
+#include "controllers/sim-alfred/p2p.h"
+#include "controllers/sim-alfred/radio.h"
+#include "controllers/sim-alfred/timer.h"
 
 /*
  * All the ARGoS stuff in the 'argos' namespace.
@@ -48,12 +48,12 @@ using namespace argos;
 /*
  * A controller is simply an implementation of the CCI_Controller class.
  */
-class CDemoPdr : public CCI_Controller {
+class CSimAlfred : public CCI_Controller {
  public:
     /* Class constructor. */
-    CDemoPdr();
+    CSimAlfred();
     /* Class destructor. */
-    virtual ~CDemoPdr() {}
+    virtual ~CSimAlfred() {}
 
     /*
     * This function initializes the controller.
@@ -127,8 +127,6 @@ class CDemoPdr : public CCI_Controller {
     CVector3 cPos;
 
     int idRobot;
-
-    void checkForCollisionAvoidance();
 };
 
 #endif

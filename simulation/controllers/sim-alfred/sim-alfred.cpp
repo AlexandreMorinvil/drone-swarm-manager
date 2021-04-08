@@ -1,44 +1,21 @@
-#include <stdio.h> 
-#include <sys/socket.h> 
-#include <arpa/inet.h> 
-#include <unistd.h> 
-#include <string.h>
-#include <fcntl.h>
-#include <regex>
-#include <math.h>
-
-/* Include the controller definition */
-#include "demo_pdr.h"
-/* Function definitions for XML parsing */
-#include <argos3/core/utility/configuration/argos_configuration.h>
-/* 2D vector definition */
-#include <argos3/core/utility/math/vector2.h>
-/* Logging */
-#include <argos3/core/utility/logging/argos_log.h>
-#include <argos3/core/simulator/entity/embodied_entity.h>
-#include<argos3/plugins/simulator/entities/box_entity.h>
-
-
+#include "sim-alfred.h"
 
 
 /****************************************/
 /****************************************/
 
 
-void CDemoPdr::checkForCollisionAvoidance() {
-      if (cTimer->GetTimer(TimerType::kAvoidTimer) < 0) {
-         m_pcPropellers->SetAbsolutePosition(
-            *cP2P->GetNewVectorToAvoidCollision(cPos, idRobot));
+void CSimAlfred::setPosVelocity() {
+      if (m_uiCurrentStep % 10 == 0 && m_uiCurrentStep != 0) {
+         posInitial = cPos;
       }
-
-      // Prevent robot from touching ground
-      if (cPos.GetZ() < 0.2) {
-         CVector3* vector = new CVector3(cPos.GetX(), cPos.GetY(), 0.2);
-         m_pcPropellers->SetRelativePosition(*vector);
+      if (m_uiCurrentStep % 10 == 9) {
+         posFinal = cPos;
       }
 }
 
-float CDemoPdr::computeAngleToFollow() {
+
+float CSimAlfred::computeAngleToFollow() {
       float xdiff = objective.GetX() - cPos.GetX();
       float ydiff = objective.GetY() - cPos.GetY();
 
@@ -52,7 +29,8 @@ float CDemoPdr::computeAngleToFollow() {
       return (- atan(xdiff/ydiff));
 }
 
-CDemoPdr::CDemoPdr() : m_pcDistance(NULL),
+
+CSimAlfred::CSimAlfred() : m_pcDistance(NULL),
                        m_pcPropellers(NULL),
                        m_pcPos(NULL),
                        m_uiCurrentStep(0) {}
@@ -62,7 +40,7 @@ CDemoPdr::CDemoPdr() : m_pcDistance(NULL),
 /****************************************/
 
 
-void CDemoPdr::Init(TConfigurationNode &t_node) {
+void CSimAlfred::Init(TConfigurationNode &t_node) {
       m_pcRABSens =
          GetSensor<CCI_RangeAndBearingSensor>("range_and_bearing");
       m_pcRABAct =
@@ -103,8 +81,10 @@ void CDemoPdr::Init(TConfigurationNode &t_node) {
 /****************************************/
 /****************************************/
 
-void CDemoPdr::ControlStep() {
-      cRadio->connectToServer(idRobot);
+void CSimAlfred::ControlStep() {
+      if (!cRadio->connectToServer(idRobot)) {
+         return;
+      }
 
       // Update metrics
       // Orientation
@@ -143,12 +123,6 @@ void CDemoPdr::ControlStep() {
       sensorValues[4] = cPos.GetZ();               // Height
       sensorValues[5] = ROOF_HEIGHT - cPos.GetZ(); // Roof distance
 
-      if (GetId() == "s0") {
-         // LOG << "FRONT_SENSOR " << sensorValues[3] << std::endl;
-         // LOG << "POSITION : " << cPos.GetX() << " ; " << cPos.GetY() << " ; " << cPos.GetZ() << std::endl;
-         LOG << "YAW" << orientationValues[0] << std::endl;
-      }
-
       cRadio->sendTelemetry(cPos, stateMode, sBatRead.AvailableCharge, sensorValues, orientationValues, speedValues);
 
       // Update StateMode received from ground station
@@ -157,8 +131,6 @@ void CDemoPdr::ControlStep() {
          stateMode = *stateModeReceived;
       }
 
-      // LOG << "stateMode : " << stateMode << std::endl;
-
       cTimer->CountOneCycle();
 
       switch (stateMode) {
@@ -166,11 +138,10 @@ void CDemoPdr::ControlStep() {
             return;
             break;
          case kTakeOff:
-            // if (sBatRead.AvailableCharge < 0.3) {
-            //   stateMode = kReturnToBase;
-            //}
-            // Check for collision avoidance
-            checkForCollisionAvoidance();
+         {
+            if (sBatRead.AvailableCharge < 0.3) {
+               stateMode = kReturnToBase;
+            }
             if (m_uiCurrentStep < 20) {  // decolage
                cPos.SetZ(cPos.GetZ() + 0.25f);
                m_pcPropellers->SetAbsolutePosition(cPos);
@@ -178,23 +149,34 @@ void CDemoPdr::ControlStep() {
                if (sensorValues[3] < 130 && sensorValues[3] != -2.0) {
                   m_pcPropellers->SetRelativeYaw(CRadians::PI_OVER_FOUR/2);
                }
-               m_pcPropellers->SetRelativePosition(
-                  *cMoving->GoInSpecifiedDirection(
-                     cSensors->FreeSide(sensorValues)));
+               CVector3* vector = cMoving->GoInSpecifiedDirection(
+                     cSensors->FreeSide(sensorValues));
+               vector->SetZ(cP2P->GetAltitudeToAvoidCollision(cPos, idRobot));
+               // Prevent robot from touching ground
+               if (cPos.GetZ() < 0.2) {
+                  vector->SetZ(0.1);
+               }
+               m_pcPropellers->SetRelativePosition(*vector);
             }
             break;
+         }
          case kReturnToBase:
-            checkForCollisionAvoidance();
-            m_pcPropellers->SetRelativePosition(
-               *cMoving->GoInSpecifiedDirection(
-                  cSensors->ReturningSide(sensorValues,
-                     computeAngleToFollow())));
-
-            if (cSensors->CriticalProximity(sensorValues) == kDefault) {
+         {
+            if (sensorValues[3] > 130 || sensorValues[3] == -2.0) {
                m_pcPropellers->SetAbsoluteYaw(
-                     (*new CRadians(computeAngleToFollow())));
+                  *new CRadians(computeAngleToFollow()));
             }
+            computeAngleToFollow();
+            CVector3* vector = cMoving->GoInSpecifiedDirection(
+               cSensors->ReturningSide(sensorValues, computeAngleToFollow()));
+            vector->SetZ(cP2P->GetAltitudeToAvoidCollision(cPos, idRobot));
+            // Prevent robot from touching ground
+            if (cPos.GetZ() < 0.2) {
+               vector->SetZ(0.1);
+            }
+            m_pcPropellers->SetRelativePosition(*vector);
             break;
+         }
          case kLanding:
             if (cPos.GetZ() > 0.2
              && cTimer->GetTimer(TimerType::kLandingTimer) < 0) {
@@ -212,7 +194,7 @@ void CDemoPdr::ControlStep() {
 /****************************************/
 /****************************************/
 
-void CDemoPdr::Reset() {
+void CSimAlfred::Reset() {
       m_uiCurrentStep = 0;
 }
 
@@ -229,5 +211,5 @@ void CDemoPdr::Reset() {
  * class to instantiate.
  * See also the XML configuration files for an example of how this is used.
  */
-REGISTER_CONTROLLER(CDemoPdr, "demo_pdr_controller")
+REGISTER_CONTROLLER(CSimAlfred, "demo_pdr_controller")
 

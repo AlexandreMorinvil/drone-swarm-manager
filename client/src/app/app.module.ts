@@ -33,6 +33,11 @@ import { MatSidenavModule } from "@angular/material/sidenav";
 import { MatToolbarModule } from "@angular/material/toolbar";
 import { MatGridListModule } from "@angular/material/grid-list";
 import { MatCardModule } from "@angular/material/card";
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatRadioModule } from '@angular/material/radio';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+
 
 @NgModule({
   declarations: [
@@ -65,6 +70,11 @@ import { MatCardModule } from "@angular/material/card";
     MatToolbarModule,
     MatGridListModule,
     MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatRadioModule,
+    FormsModule,
+    ReactiveFormsModule,
   ],
   providers: [DroneListService],
   bootstrap: [AppComponent],

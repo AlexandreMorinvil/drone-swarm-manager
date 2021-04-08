@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { io, Socket } from "socket.io-client/build/index";
-import { Drone, DroneState } from "@app/class/drone";
-import { SocketService } from "@app/service/socket.service";
+import { Drone } from "@app/class/drone";
+import { ServerMode } from "@app/constants/serverMode"
 
 @Injectable({
   providedIn: "root",
@@ -17,6 +17,7 @@ export class DroneListService {
 
   public receiveData(data) {
     const droneData = JSON.parse(data);
+    console.log("Received stuff");
     this.updateList(droneData);
   }
 
@@ -57,5 +58,10 @@ export class DroneListService {
     return this.socket.connected;
   }
 
+  public sendModeToServer(modeSelected: ServerMode, numberOfDrone: Number) {
+    this.socket.emit("SET_MODE", {
+        mode_chosen: modeSelected,
+        number_of_drone: numberOfDrone });
+  }
   
 }

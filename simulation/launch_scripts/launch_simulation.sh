@@ -4,7 +4,7 @@
 cd /root/simulation
 cd ./experiments
 ./wallGen.out
-cd /root/simulation/cmake
+cd /root/simulation/build
 cmake ..
 make
-cd /root/simulation && argos3 -c experiments/demo_pdr.argos
+cd /root/simulation && argos3 -c experiments/sim-alfred.argos

@@ -4,6 +4,7 @@ import { MapCatalogService } from "./map-catalog/map-catalog.service";
 import { DroneListService } from "./api/drone-list/drone-list.service";
 import { LiveMapService } from "./map/live-map.service";
 import { Vec3 } from "@app/class/vec3";
+import { ServerMode } from "@app/constants/serverMode"
 @Injectable({
   providedIn: 'root'
   })
@@ -32,6 +33,12 @@ import { Vec3 } from "@app/class/vec3";
         this.liveMapService.addWallPoint(new Vec3(pointData.x, pointData.y, pointData.z))
       });
   
+    }
+
+    public sendModeToServer(modeSelected: ServerMode, numberOfDrone: Number) {
+      this.socket.emit("SET_MODE", {
+          mode_chosen: modeSelected,
+          number_of_drone: numberOfDrone });
     }
 
     public getMapList() {
