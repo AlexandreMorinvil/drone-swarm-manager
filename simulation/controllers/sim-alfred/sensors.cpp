@@ -56,6 +56,7 @@ SensorSide CSensors::ReturningSide(float sensorValues[4], float angle) {
     SensorSide closeSens = CriticalProximity(sensorValues);
     if (closeSens == SensorSide::kDefault) return closeSens;
     SensorSide* prioList = prioritise(angle);
+    
     for (unsigned i =0 ; i < 2; ++i) {
         int index = static_cast<int>(prioList[i]);
         if (sensorValues[index] > CRITICAL_VALUE ||

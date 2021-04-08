@@ -147,6 +147,8 @@ void CSimAlfred::ControlStep() {
             if (sensorValues[3] > 130 || sensorValues[3] == -2.0) {
                m_pcPropellers->SetAbsoluteYaw(
                   *new CRadians(computeAngleToFollow()));
+            }else {
+               m_pcPropellers->SetRelativeYaw(CRadians::PI_OVER_FOUR/2);
             }
             CVector3* vector = cMoving->GoInSpecifiedDirection(
                cSensors->ReturningSide(sensorValues, computeAngleToFollow()));
