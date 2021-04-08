@@ -1,12 +1,12 @@
 #ifndef SENSOR_H
 #define SENSOR_H
 
-#define CRITICAL_VALUE 300.0f
+#define CRITICAL_VALUE 400.0f
 #define PI_VALUE 3.14
 #define PI_DIVIDE_TWO 1.52
 #define PI_DIVIDE_FOUR 0.8f
 #define SPEED_SRAIGHT 0.6
-#define SPEED_SIDE 0.6
+#define SPEED_SIDE 0.7
 #define MAGIC 0.0
 
 #include<stdio.h>

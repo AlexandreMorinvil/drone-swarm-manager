@@ -50,6 +50,7 @@ bool isLedActivated = false;
 static xTimerHandle timer;
 static xTimerHandle timerSwitchState;
 static xTimerHandle timerAltitude;
+static xTimerHandle timerReturnToBase;
 StateMode stateMode = kStandby;
 float newAltitudeZ = 0.0f;
 
@@ -177,12 +178,12 @@ float computeAngleToFollow() {
 
   float yaw = 0.0;
 
-  if (ydiff < 0) {
-    yaw = atan(ydiff/xdiff) + PI_VALUE/2;
-  } else {
-    yaw = atan(xdiff/ydiff);
-  }
   if (xdiff < 0) {
+    yaw = PI_VALUE - atan(ydiff/xdiff);
+  } else {
+    yaw = atan(ydiff/xdiff);
+  }
+  if (ydiff < 0) {
     yaw = - yaw;
   }
   return yaw;
@@ -211,6 +212,10 @@ static void setHoverSetpoint(setpoint_t *setpoint, float vx, float vy, float z, 
 static setpoint_t setpoint;
 float yaw = 0.0;
 
+void returnToBase() {
+  
+}
+
 
 void switchState() {
   uint16_t leftDistance = logGetUint(logGetVarId("range", "left"));
@@ -226,8 +231,8 @@ void switchState() {
       case kStandby:
         break;
       case kTakeOff:
-        crtpCommanderHighLevelTakeoff(0.2, 1.5);
-        if (logGetFloat(logGetVarId("stateEstimate", "z")) > 0.2f) {
+        crtpCommanderHighLevelTakeoff(0.3, 1.5);
+        if (logGetFloat(logGetVarId("stateEstimate", "z")) > 0.3f) {
           stateMode = kFlying;
         }
         break;
@@ -242,7 +247,7 @@ void switchState() {
           vec3.x = 0.0;
           vec3.y = 0.0;
         }*/
-        setHoverSetpoint(&setpoint, vec3.x, vec3.y, 0.2, yaw, modeVelocity);
+        setHoverSetpoint(&setpoint, vec3.x, vec3.y, 0.3, yaw, modeVelocity);
         commanderSetSetpoint(&setpoint, 1);
         yaw = 0.0f;
         // setHoverSetpoint(&setpoint, vec3.x, vec3.y, 0.3, yaw);
@@ -251,18 +256,23 @@ void switchState() {
         // crtpCommanderHighLevelGoTo(vec3.x, vec3.y, 0.0, yaw, 1.0, true);
         break;
       case kReturnToBase:
+
+        yaw = angleToFollow;
+        vec3 = GoInSpecifiedDirection(
+        ReturningSide(sensorValues, angleToFollow));
+        setHoverSetpoint(&setpoint, vec3.x, vec3.y, 0.3, yaw, modeAbs);
+        commanderSetSetpoint(&setpoint, 1);
+
         /*if (sensorValues[3] > 700 
-          && ((yawRead < (angleToFollow - 5 ))
-          || (yawRead > (angleToFollow + 5 )))) {
+          && ((yawRead < (angleToFollow - 20 ))
+          || (yawRead > (angleToFollow + 20 )))) {
           yaw = angleToFollow;
           setHoverSetpoint(&setpoint, 0.0, 0.0, 0.3, yaw, modeAbs);
+          commanderSetSetpoint(&setpoint, 1);
         }*/
-        yaw = angleToFollow;
+        //yaw = angleToFollow;
         //   setHoverSetpoint(&setpoint, 0.5, 0.0, 0.3, yaw, modeAbs);
-        vec3 = GoInSpecifiedDirection(
-          ReturningSide(sensorValues, computeAngleToFollow()));
-        setHoverSetpoint(&setpoint, vec3.x, vec3.y, 0.2, 0.0, modeAbs);
-        commanderSetSetpoint(&setpoint, 1);
+        
         // if (logGetFloat(logGetVarId("stateEstimate", "z")) < 0.2f) {
         //  newAltitudeZ = 0.1f;
         //}
@@ -300,6 +310,10 @@ void appMain()
 
   p2pRegisterCB(p2pcallbackHandlerAltitude);
   timerAltitude = xTimerCreate("sendAltitude", M2T(100), pdTRUE, NULL, sendAltitude);
+  xTimerStart(timerAltitude, 100);
+  sendAltitude();
+
+  timerReturnToBase = xTimerCreate("sendAltitude", M2T(100), pdTRUE, NULL, sendAltitude);
   xTimerStart(timerAltitude, 100);
   sendAltitude();
 

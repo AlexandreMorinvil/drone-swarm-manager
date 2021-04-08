@@ -4,29 +4,17 @@
 SensorSide* prioritise(float angle) {
     SensorSide sensor[4];
     SensorSide* retval = malloc(sizeof(sensor));
-    if (angle < 0) {
-        retval[1] = kBack;
-        retval[3] = kFront;
-        if (angle < - (float)PI_DIVIDE_TWO) {
+    retval[2] = kBack;
+    if (angle < - (float)PI_DIVIDE_TWO ||angle > (float)PI_DIVIDE_TWO) {
             retval[0] = kLeft;
-            retval[2] = kRight;
-        } else {
-            retval[0] = kRight;
-            retval[2] = kLeft;
-        }
+            retval[1] = kRight;
     } else {
-        retval[3] = kBack;
-        retval[1] = kFront;
-        if (angle < (float)PI_DIVIDE_TWO) {
             retval[0] = kRight;
-            retval[2] = kLeft;
-        } else {
-            retval[0] = kLeft;
-            retval[2] = kRight;
-        }
+            retval[1] = kLeft;
     }
     return retval;
 }
+
 
 
 SensorSide FreeSide(float sensorValues[4]) {
@@ -67,7 +55,7 @@ SensorSide ReturningSide(float sensorValues[4], float angle) {
     SensorSide closeSens = CriticalProximity(sensorValues);
     if (closeSens == kDefault) return closeSens;
     SensorSide* prioList = prioritise(angle);
-    for (unsigned i =0 ; i < 4; ++i) {
+    for (unsigned i =0 ; i < 2; ++i) {
         int index = (int)(prioList[i]);
         if (sensorValues[index] > 2* CRITICAL_VALUE ||
             sensorValues[index] == -2)
