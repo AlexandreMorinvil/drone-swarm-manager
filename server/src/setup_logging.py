@@ -21,7 +21,7 @@ class LogsConfig:
                     'file_handler': {'class': 'logging.handlers.RotatingFileHandler',
                                     'formatter': 'verbose',
                                     'level': logging.DEBUG,
-                                    'filename': '../src/logs/server.log',
+                                    'filename': '../logs/server.log',
                                     'maxBytes': 524128800,
                                     'backupCount': 7},
                     
