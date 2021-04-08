@@ -18,6 +18,7 @@ export class LiveMapComponent {
   }
 
   ngOnInit() {
+    this.liveMapService.deleteMap();
     this.liveMapService.setPlot(true);
   }
 

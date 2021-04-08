@@ -126,7 +126,7 @@ def returnToBase(data):
     if (data['id'] == -2):
         for i in socks:
             i.send_data(StateMode.RETURN_TO_BASE.value, "<i")
-            logger.info('Return to base of {}'.format(socks[i]))
+            logger.info('Return to base of {}'.format(i))
     else:
         socks[data['id']].send_data(StateMode.RETURN_TO_BASE.value, "<i")
         logger.info('Return to base of {}'.format(socks[data['id']]))

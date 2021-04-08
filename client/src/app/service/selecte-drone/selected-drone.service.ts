@@ -28,6 +28,7 @@ export class SelectedDroneService {
     this.droneId = this.drone.droneId;
     if (this.droneId !== UNSET_DRONE_INDEX) {
       callback.call(this.socketService, this.droneId);
+      console.log("call back");
       return true;
     } else {
       this.unsetSelectedDrone();
@@ -36,6 +37,7 @@ export class SelectedDroneService {
   }
 
   setSelectedDrone(droneId: number): boolean {
+    console.log(droneId);
     this.previousDroneId = this.droneId;
     this.droneId = droneId;
     return this.validateDroneAvailability(() => {});
