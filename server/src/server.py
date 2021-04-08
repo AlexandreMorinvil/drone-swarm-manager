@@ -6,7 +6,7 @@ from drone import *
 import threading
 import sys
 import argparse
-
+from subprocess import call
 from flask import Flask, jsonify, render_template
 from flask_socketio import *
 import cflib
@@ -57,17 +57,40 @@ else:
     drones = []
     
 socks = []
-for i in range(4):
-    socks.append(ArgosServer(i, default_port + i))
-    t = threading.Thread(target=socks[i].waiting_connection, name='waiting_connection')
-    t.start()
+def createDrones(numberOfDrone):
+    for i in range(numberOfDrone):
+        socks.append(ArgosServer(i, default_port + i))
+        t = threading.Thread(target=socks[i].waiting_connection, name='waiting_connection')
+        t.start()
 
-    if mode == Mode.SIMULATION:
-        drones.append(socks[i].drone_argos)
-        logger.info('Connection to port {}'.format(default_port + i))
-        
-def setMode(mode_choosen):
-    mode = mode_choosen
+        if mode == Mode.SIMULATION:
+            drones.append(socks[i].drone_argos)
+            logger.info('Connection to port {}'.format(default_port + i))
+
+def deleteDrones():
+    for i in socks:
+        if hasattr(i, "connection"):
+            i.connection.close()
+        i.sock.shutdown(2)
+        i.sock.close()
+        del i
+    drones.clear()
+    socks.clear()
+
+@socketio.on('SET_MODE')
+def setMode(data):
+    deleteDrones()
+    mode = data['mode_chosen']
+    numberOfDrone = data['number_of_drone']
+    dronesAreCreated = False
+    while not dronesAreCreated:
+        try:
+            createDrones(int(numberOfDrone))
+            dronesAreCreated = True
+        except:
+            deleteDrones()
+            dronesAreCreated = False
+    call(['./start-simulation.sh', '{}'.format(numberOfDrone)])
 
 @socketio.on('TOGGLE_LED')
 def ledToggler(data):
@@ -79,9 +102,10 @@ def ledToggler(data):
 @socketio.on('TAKEOFF')
 def takeOff(data):
     if (data['id'] == -2):
-        for i in range(4):
-            socks[i].send_data(StateMode.TAKE_OFF.value, "<i")
-            logger.info('Take off of {}'.format(socks[i]))
+        for i in socks:
+            i.send_data(StateMode.TAKE_OFF.value, "<i")
+            logger.info('Take off of {}'.format(i))
+
     else:
         socks[data['id']].send_data(StateMode.TAKE_OFF.value, "<i")
         logger.info('Take off of {}'.format(socks[data['id']]))
@@ -89,8 +113,8 @@ def takeOff(data):
 @socketio.on('RETURN_BASE')
 def returnToBase(data):
     if (data['id'] == -2):
-        for i in range(4):
-            socks[i].send_data(StateMode.RETURN_TO_BASE.value, "<i")
+        for i in socks:
+            i.send_data(StateMode.RETURN_TO_BASE.value, "<i")
             logger.info('Return to base of {}'.format(socks[i]))
     else:
         socks[data['id']].send_data(StateMode.RETURN_TO_BASE.value, "<i")
@@ -116,9 +140,10 @@ def set_interval(func, sec):
 
 if __name__ == '__main__':
     set_interval(sendPosition, 1)
-    set_interval(send_data, 1)
+    createDrones(4)
+    #set_interval(send_data, 1)
     app.run()
     while True:
-        for i in range(4):
+        for i in range(numberOfDrone):
             if (socks[i].data_received != None):
                 socks[i].start_receive_data()
