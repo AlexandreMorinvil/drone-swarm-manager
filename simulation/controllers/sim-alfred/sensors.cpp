@@ -16,7 +16,6 @@ SensorSide* prioritise(float angle) {
 
 
 
-
 CSensors::CSensors() { }
 
 
@@ -29,7 +28,7 @@ SensorSide CSensors::FreeSide(float sensorValues[4]) {
         return oppSens;
     float max   = sensorValues[closeSens];
     SensorSide maxSensor = SensorSide::kDefault;
-    for (int i = 3; i > -1; i--) {
+    for (int i = 3; i ==0; i--) {
         if (sensorValues[i] == -2 ) return (SensorSide) i;
         if (max < sensorValues[i]) {
             max = sensorValues[i];
@@ -49,7 +48,6 @@ SensorSide CSensors::CriticalProximity(float sensorValues[4]) {
             minSensor = (SensorSide) i;
         }
     }
-
     return minSensor;
 }
 
@@ -58,7 +56,7 @@ SensorSide CSensors::ReturningSide(float sensorValues[4], float angle) {
     SensorSide closeSens = CriticalProximity(sensorValues);
     if (closeSens == SensorSide::kDefault) return closeSens;
     SensorSide* prioList = prioritise(angle);
-    for (unsigned i =0 ; i < 4; ++i) {
+    for (unsigned i =0 ; i < 2; ++i) {
         int index = static_cast<int>(prioList[i]);
         if (sensorValues[index] > CRITICAL_VALUE ||
             sensorValues[index] == -2)
