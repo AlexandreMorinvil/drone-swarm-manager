@@ -8,3 +8,6 @@ __pycache__
 
 # Eclude databse files
 *.db
+
+# Exclude the log files
+*.log
