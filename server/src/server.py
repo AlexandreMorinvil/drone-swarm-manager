@@ -157,11 +157,6 @@ def deleteMap(data):
     map_list = json.dumps([map_catalog.map_list_to_Json(map) for map in maps])
     socketio.emit('MAP_LIST', map_list)
 
-def sendPosition():
-    position_json = json.dumps({"x": socks[0].drone_argos.currentPos.x, "y": socks[0].drone_argos.currentPos.y, "z": socks[0].drone_argos.currentPos.z})
-    socketio.emit('POSITION', position_json)
-    logger.info('send drones position')
-
 def send_data():
     data_to_send = json.dumps([drone.dump() for drone in drones])
     socketio.emit('drone_data', data_to_send, broadcast=True)
@@ -188,9 +183,8 @@ if __name__ == '__main__':
     thread_map_handler = threading.Thread(target=map_handler.send_point, args=(socketio,), name='send_new_points')
     thread_map_handler.start()
         
-    set_interval(sendPosition, 1)
     createDrones(4)
-    #set_interval(send_data, 1)
+    set_interval(send_data, 1)
     app.run()
     while True:
         for i in range(numberOfDrone):
