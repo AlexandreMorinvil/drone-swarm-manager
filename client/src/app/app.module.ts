@@ -35,6 +35,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatRadioModule } from '@angular/material/radio';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { InitRealPosComponent } from './components/init-real-pos/init-real-pos.component';
+import { MatDialogModule } from '@angular/material/dialog';
+
 
 
 @NgModule({
@@ -55,6 +57,7 @@ import { InitRealPosComponent } from './components/init-real-pos/init-real-pos.c
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
+    MatDialogModule,
     AppRoutingModule,
     RouterModule,
     MatDividerModule,

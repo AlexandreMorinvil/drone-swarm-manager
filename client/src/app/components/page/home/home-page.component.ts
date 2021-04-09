@@ -1,8 +1,10 @@
 import { Component, ViewChild } from "@angular/core";
 import { FormControl, Validators } from "@angular/forms";
-import { DroneListService, ServerMode } from "@app/service/api/drone-list/drone-list.service"
+import { DroneListService, ServerMode } from "@app/service/api/drone-list/drone-list.service";
 import { MatSidenav } from "@angular/material/sidenav";
 import { Drone } from "@app/class/drone";
+import { MatDialog } from "@angular/material/dialog";
+import {InitRealPosComponent} from "@app/components/init-real-pos/init-real-pos.component";
 
 @Component({
   selector: "app-home-page",
@@ -16,7 +18,7 @@ export class HomePageComponent {
   modeSelected: ServerMode = ServerMode.REAL;
   numberOfDrone = new FormControl(1, Validators.min(1));
 
-  constructor(public droneListService: DroneListService) { }
+  constructor(public droneListService: DroneListService, public dialog: MatDialog) { }
   
   sendModeToServer() {
     this.droneListService.sendModeToServer(this.modeSelected, this.numberOfDrone.value);

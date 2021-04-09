@@ -1,5 +1,7 @@
-import { Component, ViewChild } from "@angular/core";
+import { Component, OnInit, ViewChild } from "@angular/core";
 import { MatSidenav } from "@angular/material/sidenav";
+import { MatDialog } from '@angular/material/dialog';
+import { DroneListService } from "@app/service/api/drone-list/drone-list.service"
 
 @Component({
   selector: "app-control-page",
@@ -8,8 +10,16 @@ import { MatSidenav } from "@angular/material/sidenav";
 })
 export class ControlPageComponent {
   @ViewChild("droneSelectedBoard") board: MatSidenav;
+  isNewSimulation: boolean = true;
 
-  constructor() {}
+  constructor(public dialog: MatDialog, public droneListService: DroneListService) {}
+
+  /*ngOnInit(): void {
+    if(this.droneListService.mode == ServerMode.REAL ){
+      console.log("open dialog");
+      this.dialog.open(InitRealPosComponent);
+    }
+  }*/
 
   toogleSelectedDroneBoard(isNewSelection: boolean = true): void {
     if (!this.board) return;

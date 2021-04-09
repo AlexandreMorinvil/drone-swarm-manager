@@ -1,6 +1,8 @@
 import { Injectable } from "@angular/core";
 import { io, Socket } from "socket.io-client/build/index";
 import { Drone } from "@app/class/drone";
+import {InitRealPosComponent} from "@app/components/init-real-pos/init-real-pos.component";
+import { MatDialog } from "@angular/material/dialog";
 
 export enum ServerMode {
   REAL = 0,
@@ -14,8 +16,9 @@ export class DroneListService {
   private socket: Socket;
   droneId: number = 0;
   droneList: Drone[] = [];
+  mode: ServerMode = ServerMode.REAL;
 
-  constructor() {
+  constructor(public dialog: MatDialog) {
     this.initSocket();
   }
 
@@ -69,6 +72,11 @@ export class DroneListService {
   }
 
   public sendModeToServer(modeSelected: ServerMode, numberOfDrone: Number) {
+    console.log(modeSelected);
+    if(modeSelected == ServerMode.REAL){
+      console.log('dialog open');
+      this.dialog.open(InitRealPosComponent);
+    }
     this.socket.emit("SET_MODE", {
         mode_chosen: modeSelected,
         number_of_drone: numberOfDrone });
