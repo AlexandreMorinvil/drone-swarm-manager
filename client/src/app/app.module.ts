@@ -8,21 +8,18 @@ import { AppRoutingModule } from "./app-routing.module";
 import { AppComponent } from "./components/app/app.component";
 import { ControlPageComponent } from "./components/page/control/control-page.component";
 import { HomePageComponent } from "./components/page/home/home-page.component";
-import { MapPageComponent } from "./components/page/map/map-page.component";
+import { MapCatalogPageComponent } from "./components/page/map-catalog/map-catalog-page.component";
 
 // Components
 import { DroneListComponent } from "./components/drone/drone-list/drone-list.component";
 import { DroneSelectedBoardComponent } from "./components/drone/drone-selected-board/drone-selected-board.component";
 import { DroneSwarmBoardComponent } from "./components/drone/drone-swarm-board/drone-swarm-board.component";
 import { LiveMapComponent } from "./components/map/live-map/live-map.component";
-import { MapComponent } from "@app/components/map_catalog/map/map.components";
 import { MapGeneratedBoardComponent } from "./components/map/map-generated-board/map-generated-board.component";
 import { NavigationBarComponent } from "./components/navigation-bar/navigation-bar.component";
-import { MapListComponent } from "./components/map_catalog/map-list/map-list.component"
-import { SelectMapComponent } from "./components/map_catalog/select-map/select-map.component"
-
-//Service
-import { DroneListService } from "./service/api/drone-list/drone-list.service";
+import { MapComponent } from "./components/map/map/map.component";
+import { MapListComponent } from "./components/map-catalog/map-list/map-list.component";
+import { SelectMapComponent } from "./components/map-catalog/select-map/select-map.component";
 
 //angular/materials
 import { MatDividerModule } from "@angular/material/divider";
@@ -44,7 +41,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
     AppComponent,
     ControlPageComponent,
     HomePageComponent,
-    MapPageComponent,
+    MapCatalogPageComponent,
     MapGeneratedBoardComponent,
     DroneListComponent,
     DroneSelectedBoardComponent,
@@ -76,7 +73,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
     FormsModule,
     ReactiveFormsModule,
   ],
-  providers: [DroneListService],
+  providers: [],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

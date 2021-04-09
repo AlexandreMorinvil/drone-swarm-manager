@@ -12,14 +12,8 @@ export class ControlPageComponent {
   constructor() {}
 
   toogleSelectedDroneBoard(isNewSelection: boolean = true): void {
-    if (!this.board) {
-      console.log("no board");
-      return;
-    }
-    if (isNewSelection){
-      this.board.open();
-      console.log("board open")
-    } 
+    if (!this.board) return;
+    if (isNewSelection) this.board.open();
     else this.board.toggle();
   }
 }
