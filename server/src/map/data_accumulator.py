@@ -19,10 +19,10 @@ class MapObservationAccumulator:
     consume_lock = Lock()
 
     # Using the singleton desing pattern
-    def __init__(self):
+    def __init__(self, isInSimulation):
         # Data structures used to generate the points
         self.position = Vec3()
-        self.sensor = Sensor()
+        self.sensor = Sensor(isInSimulation)
 
         # Track the value updates
         self.got_new_positions = False

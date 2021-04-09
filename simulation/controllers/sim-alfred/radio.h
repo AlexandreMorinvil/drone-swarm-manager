@@ -27,11 +27,16 @@ using std::smatch;
 using argos::CVector3;
 
 typedef enum {
-    kStandby,
-    kTakeOff,
-    kReturnToBase,
-    kLanding
+    kStandby = 0,
+    kTakeOff = 1,
+    kFlying = 2,
+    kReturnToBase = 3,
+    kLanding = 4,
+    kEmergency = 5,
+    kFail = 6,
+    kUpdate = 7
   } StateMode;
+
 
 typedef enum {
     tx = 0,

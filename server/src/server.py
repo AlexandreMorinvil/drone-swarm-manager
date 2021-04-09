@@ -2,7 +2,6 @@ import logging
 import socketio
 import json
 from vec3 import Vec3
-from drone import *
 import threading
 import sys
 import argparse
@@ -11,7 +10,9 @@ from flask import Flask, jsonify, render_template
 from flask_socketio import *
 import cflib
 from cflib.crazyflie import Crazyflie
-from argos_server import ArgosServer
+from drone_real import DroneReal
+from drone_simulation import DroneSimulation
+from drone_interface import StateMode
 import threading
 from enum import Enum
 from threading import *
@@ -29,7 +30,7 @@ from map_handler import MapHandler
 from setup_logging import LogsConfig
 
 class Mode(Enum):
-    REAL_TIME = 0
+    REAL = 0
     SIMULATION = 1
 
 logsConfig = LogsConfig()
@@ -42,15 +43,15 @@ default_port = 5015
 
 # Select mode in commande line
 parser =  argparse.ArgumentParser()
-parser.add_argument('mode', default='realtime', choices=['simulation', 'realtime'], help='Type simulation for simulation mode and type realtime for real time mode')
+parser.add_argument('mode', default='real', choices=['simulation', 'real'], help='Type simulation to launch simulation mode and type real to run server with real drones')
 args = parser.parse_args()
 
 if (args.mode == 'simulation'):
     mode = Mode.SIMULATION
     print('mode simulation')
-elif (args.mode == 'realtime'):
-    mode = Mode.REAL_TIME
-    print('mode real time')
+elif (args.mode == 'real'):
+    mode = Mode.REAL
+    print('mode real')
     
 # Initialize the low-level drivers (don't list the debug drivers)
 cflib.crtp.init_drivers(enable_debug_driver=False)
@@ -59,34 +60,33 @@ print('Scanning interfaces for Crazyflies...')
 available = cflib.crtp.scan_interfaces()
 print('Crazyflies found:')
 
-if (mode == Mode.REAL_TIME):
-    logger.info('Mode real time')
-    drones = [Drone("radio://0/80/250K",Vec3(0,0,0),0), Drone("radio://0/72/250K",Vec3(0,0,0),1), Drone("radio://0/72/250K",Vec3(0,0,0),2), Drone("radio://0/72/250K",Vec3(0,0,0),4)]
+if (mode == Mode.REAL):
+    logger.info('Mode time')
+    drones = []
     
 else:
     logger.info('Mode simulation')
     drones = []
     
-socks = []
 def createDrones(numberOfDrone):
     for i in range(numberOfDrone):
-        socks.append(ArgosServer(i, default_port + i))
-        t = threading.Thread(target=socks[i].waiting_connection, name='waiting_connection')
-        t.start()
-
-        if mode == Mode.SIMULATION:
-            drones.append(socks[i].drone_argos)
+        if mode == Mode.REAL:
+            drones.append(DroneReal("80"))
+        else:
+            drones.append(DroneSimulation(default_port + i))
+            t = threading.Thread(target=drones[i].waiting_connection, name='waiting_connection')
+            t.start()
             logger.info('Connection to port {}'.format(default_port + i))
+            
 
 def deleteDrones():
-    for i in socks:
+    for i in drones:
         if hasattr(i, "connection"):
             i.connection.close()
         i.sock.shutdown(2)
         i.sock.close()
         del i
     drones.clear()
-    socks.clear()
 
 @socketio.on('SET_MODE')
 def setMode(data):
@@ -113,22 +113,33 @@ def ledToggler(data):
 @socketio.on('TAKEOFF')
 def takeOff(data):
     if (data['id'] == -2):
-        for i in socks:
+        for i in drones:
             i.send_data(StateMode.TAKE_OFF.value, "<i")
             logger.info('Take off of {}'.format(i))
 
     else:
-        socks[data['id']].send_data(StateMode.TAKE_OFF.value, "<i")
+        drones[data['id']].send_data(StateMode.TAKE_OFF.value, "<i")
         logger.info('Take off of {}'.format(socks[data['id']]))
+
+@socketio.on('EMERGENCY_LANDING')
+def takeOff(data):
+    if (data['id'] == -2):
+        for i in drones:
+            i.send_data(StateMode.EMERGENCY.value, "<i")
+            logger.info('Emergency landing of {}'.format(i))
+    else:
+        drones[data['id']].send_data(StateMode.TAKE_OFF.value, "<i")
+        logger.info('Emergency landing  {}'.format(socks[data['id']]))
+
      
 @socketio.on('RETURN_BASE')
 def returnToBase(data):
     if (data['id'] == -2):
-        for i in socks:
+        for i in drones:
             i.send_data(StateMode.RETURN_TO_BASE.value, "<i")
             logger.info('Return to base of {}'.format(i))
     else:
-        socks[data['id']].send_data(StateMode.RETURN_TO_BASE.value, "<i")
+        drones[data['id']].send_data(StateMode.RETURN_TO_BASE.value, "<i")
         logger.info('Return to base of {}'.format(socks[data['id']]))
 
 @socketio.on('MAP_CATALOG')
@@ -181,10 +192,11 @@ if __name__ == '__main__':
     thread_map_handler = threading.Thread(target=map_handler.send_point, args=(socketio,), name='send_new_points')
     thread_map_handler.start()
         
-    createDrones(4)
+    createDrones(2)
     set_interval(send_data, 1)
     app.run()
     while True:
-        for i in range(numberOfDrone):
-            if (socks[i].data_received != None):
-                socks[i].start_receive_data()
+        if mode == Mode.SIMULATION:
+            for i in range(numberOfDrone):
+                if (drones[i].data_received != None):
+                    drones[i].start_receive_data()
