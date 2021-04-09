@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, Output, EventEmitter} from '@angular/core';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import { Drone } from '@app/class/drone';
 import { HomePageComponent } from '../page/home/home-page.component';
@@ -11,6 +11,7 @@ import { HomePageComponent } from '../page/home/home-page.component';
 export class InitRealPosComponent implements OnInit {
   drones: Drone[]= [];
   @Input() numberOfDrones: number;
+  @Output() dronesList: EventEmitter<Drone[]> = new EventEmitter<Drone[]>();
 
   constructor(public homepageComponent: HomePageComponent) { }
 
@@ -20,6 +21,10 @@ export class InitRealPosComponent implements OnInit {
   ngOnChanges(): void {
     this.clearDronesList();
     this.createListDrone(this.numberOfDrones);
+  }
+
+  public sendDronesList(): void {
+    this.dronesList.emit(this.drones);
   }
 
   public addDrone(id: number): void {
@@ -34,6 +39,12 @@ export class InitRealPosComponent implements OnInit {
 
   public clearDronesList(): void {
     this.drones = [];
+  }
+
+  public closeSidenav(): void {
+    this.sendDronesList();
+    this.homepageComponent.closeSidenav();
+
   }
 
 }
