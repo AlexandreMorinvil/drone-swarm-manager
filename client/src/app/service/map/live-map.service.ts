@@ -8,27 +8,39 @@ import { SocketService } from "../socket.service";
 })
 export class LiveMapService {
 
-  mustResetMap: boolean = true;
+  mustResetRender: boolean = true;
 
   wallPointsToAdd: Vec3[] = [];
   wallPoints: Vec3[] = [];
   dronePoints: Vec3[] = [];
 
   constructor(public socketService: SocketService) {
-    this.socketService.addEventHandler("LIVE_MAP_NEW_POINT", this.receivePoint);
-    this.socketService.addEventHandler("LIVE_MAP_BASE_MAP", this.receiveBaseMap);
+    this.socketService.addEventHandler("LIVE_MAP_NEW_POINT", (data) => { this.receivePoint(data) } );
+    this.socketService.addEventHandler("LIVE_MAP_BASE_MAP", (data) => { this.receiveBaseMap(data) });
+  }
+
+  getMustResetMap(): boolean {
+    if(this.mustResetRender) {
+      this.mustResetRender = false;
+      return true;  
+    }
+    else return false;
+  }
+
+  hasNewPoint(): boolean {
+    return this.wallPointsToAdd.length > 0;
   }
 
   givePointsToRender(): Vec3[] {
     const pointsToGive = this.wallPointsToAdd;
     this.wallPointsToAdd = [];
-    this.wallPoints.concat(pointsToGive);
+    this.wallPoints.push(...pointsToGive);
     return pointsToGive
   }
 
   private receivePoint(data): void {
     const pointData: any = JSON.parse(data);
-    this.wallPoints.push(new Vec3(pointData.x, pointData.y, pointData.z))
+    this.wallPointsToAdd.push(new Vec3(pointData.x, pointData.y, pointData.z))
   }
 
   private receiveBaseMap(data): void {
@@ -37,6 +49,6 @@ export class LiveMapService {
     for (let point of pointsData)
       baseMap.push(new Vec3(point.x, point.y, point.z))
     this.wallPointsToAdd = baseMap;
-    this.mustResetMap = true;
+    this.mustResetRender = true;
   }
 }

@@ -60,17 +60,6 @@ export class MapComponent {
     this.max_x = MIN_WIDTH / 2;
     this.min_y = -MIN_HEIGHT / 2;
     this.max_y = MIN_HEIGHT / 2;
-
-    // const interval: ReturnType<typeof setTimeout> = setInterval(() => {
-    //   this.addWallPoint(
-    //     new Vec3(this.valueToIncrease, this.valueToIncrease / 2, 0)
-    //   );
-    //   this.valueToIncrease += 1;
-    // }, 10);
-
-    // setTimeout(() => {
-    //   clearInterval(interval);
-    // }, 13000);
   }
 
   ngOnInit() {
@@ -87,25 +76,31 @@ export class MapComponent {
     this.resetMap(false);
   }
 
-  addWallPoint(point: Vec3): void {
+  addWallPoint(points: Vec3[]): void {
     let hasBordersChanged: Boolean = false;
-    if (point.x > this.max_x) {
-      this.max_x = point.x;
+
+    const xMinAdded:number = d3.min(points, (d: Vec3) => d.x);
+    const xMaxAdded:number = d3.max(points, (d: Vec3) => d.x);
+    const yMinAdded:number = d3.min(points, (d: Vec3) => d.y);
+    const yMaxAdded:number = d3.max(points, (d: Vec3) => d.y);
+
+    if (xMaxAdded > this.max_x) {
+      this.max_x = xMaxAdded;
       hasBordersChanged = true;
     }
-    if (point.x < this.min_x) {
-      this.min_x = point.x;
+    if (xMinAdded < this.min_x) {
+      this.min_x = xMinAdded;
       hasBordersChanged = true;
     }
-    if (point.y > this.max_y) {
-      this.max_y = point.y;
+    if (yMaxAdded > this.max_y) {
+      this.max_y = yMaxAdded;
       hasBordersChanged = true;
     }
-    if (point.y < this.min_y) {
-      this.min_y = point.y;
+    if (yMinAdded < this.min_y) {
+      this.min_y = yMinAdded;
       hasBordersChanged = true;
     }
-    this.wallPoints.push(point);
+    this.wallPoints.push(...points);
     if (hasBordersChanged) this.updateAxisRange();
     this.drawWalls();
   }
@@ -204,7 +199,7 @@ export class MapComponent {
     this.isFirstTime = true;
   }
 
-  private erasePlot(): void {
+  erasePlot(): void {
     this.chart.selectAll("#wall-points > *").remove();
     this.eraseDrones();
   }
