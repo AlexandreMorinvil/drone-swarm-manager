@@ -74,4 +74,8 @@ import { ServerMode } from "@app/constants/serverMode"
         console.log('position' + position);
       });
     }
+
+    public sendEmergencyLandingRequest(droneId: number): void {
+      this.socket.emit("EMERGENCY_LANDING", { id: droneId });
+    }  
   }
