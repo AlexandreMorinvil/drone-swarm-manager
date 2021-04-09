@@ -1,4 +1,5 @@
 import { Component } from "@angular/core";
+import { LiveMapService } from "@app/service/map/live-map.service";
 
 @Component({
   selector: "app-map-generated-board",
@@ -6,4 +7,12 @@ import { Component } from "@angular/core";
   styleUrls: ["./map-generated-board.component.scss"],
 })
 export class MapGeneratedBoardComponent {
+  constructor(public liveMapService: LiveMapService) {
+  }
+
+  setBaseMap(): void {
+    return;
+  }
+
+  addCoord(): void {}
 }

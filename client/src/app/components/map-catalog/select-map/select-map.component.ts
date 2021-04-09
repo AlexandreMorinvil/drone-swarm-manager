@@ -15,15 +15,17 @@ export class SelectMapComponent{
   constructor(public mapCatalogService: MapCatalogService, public socketService: SocketService){}
 
   public get selectedMap(): Map {
-    return this.mapCatalogService.selectedMap;
+    // return this.mapCatalogService.selectedMap;
+    return new Map(1, "2", "3");
   }
 
   public get isMapSelected(): Boolean {
-    return this.selectedMap.id != -1;
+    // return this.selectedMap.id != -1;
+    return true;
   }
 
   deleteMap(): void {
-    this.socketService.deleteSelectedMap(this.selectedMap.id);
+    // this.socketService.deleteSelectedMap(this.selectedMap.id);
   }
   
 }

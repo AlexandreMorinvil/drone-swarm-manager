@@ -13,26 +13,25 @@ import { ServerMode } from "@app/constants/serverMode"
     private socket: Socket;
     inMission: boolean = false;
     
-    constructor(public mapCatalogService: MapCatalogService, public dronelistService: DroneListService, public liveMapService: LiveMapService) {
+    constructor(public mapCatalogService: MapCatalogService, public dronelistService: DroneListService) {
       this.initSocket();
+    }
+
+    addEventHandler(eventName: string, callbackFunction: (data: any) => void) {
+      this.socket.on(eventName, callbackFunction);
     }
   
     public initSocket(){
       this.socket = io("127.0.0.1:5000");
       
-      this.socket.on('MAP_POINTS',(data) => {
-        const points = JSON.parse(data);
-        this.mapCatalogService.receiveSelectedMapPoints(points);
-      });
-      this.socket.on("MAP_LIST", (data) => {
-        this.mapCatalogService.receiveMap(data);           
-      });
+      // this.socket.on('MAP_POINTS',(data) => {
+      //   const points = JSON.parse(data);
+      //   this.mapCatalogService.receiveSelectedMapPoints(points);
+      // });
+      // this.socket.on("MAP_LIST", (data) => {
+      //   this.mapCatalogService.receiveMap(data);           
+      // });
       this.socket.on("drone_data", (data: any) => this.dronelistService.receiveData(data));
-      this.socket.on("LIVE_MAP_NEW_POINT", (data) => {
-        const pointData: any = JSON.parse(data);
-        this.liveMapService.addWallPoint(new Vec3(pointData.x, pointData.y, pointData.z))
-      });
-  
     }
 
     public sendModeToServer(modeSelected: ServerMode, numberOfDrone: Number) {

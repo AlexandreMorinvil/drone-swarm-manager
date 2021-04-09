@@ -16,7 +16,8 @@ export class MapListComponent {
   constructor(public mapCatalogService : MapCatalogService, public socketService: SocketService){
   }
   public get maps(): Map[] {
-    return this.mapCatalogService.map_list;
+    // return this.mapCatalogService.map_list;
+    return [];
   }
 
   getMapSelected(id:Number):void {
