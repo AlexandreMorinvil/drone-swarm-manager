@@ -1,5 +1,6 @@
-import { Component, OnInit, ViewChild } from "@angular/core";
+import { AfterViewInit, Component, OnInit, ViewChild } from "@angular/core";
 import { MatSidenav } from "@angular/material/sidenav";
+import { MapComponent } from "@app/components/map/map/map.component";
 import { MapCatalogService } from "@app/service/map-catalog/map-catalog.service";
 import { SocketService } from "@app/service/socket.service";
 
@@ -8,14 +9,23 @@ import { SocketService } from "@app/service/socket.service";
   templateUrl: "./map-catalog-page.component.html",
   styleUrls: ["./map-catalog-page.component.scss", "../page.component.scss"],
 })
-export class MapCatalogPageComponent implements OnInit{
-  constructor(public socketService : SocketService){
+export class MapCatalogPageComponent implements OnInit {
+  @ViewChild("selectedMap") map: MapComponent;
 
-  }
-  ngOnInit(){
+  constructor(public socketService: SocketService) {}
+
+  ngOnInit() {
     this.socketService.getMapList();
   }
 
-
-
+  ngAfterViewInit() {
+    // Active probing to initilize the map when the child component is ready
+    const interval: ReturnType<typeof setInterval> = setInterval(() => {
+      if (this.map) {
+        this.map.deleteMap();
+        this.map.setPlot(true);
+        clearInterval(interval);
+      }
+    }, 100);
+  }
 }

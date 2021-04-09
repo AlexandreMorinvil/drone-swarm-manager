@@ -48,6 +48,8 @@ export class MapComponent {
   wallPoints: Vec3[] = [];
   dronePoints: Vec3[] = [];
 
+  isFirstTime: Boolean = true;
+
   valueToIncrease: number = 0;
 
   constructor() {
@@ -113,7 +115,7 @@ export class MapComponent {
     this.drawDrones();
   }
 
-  private setPlot(isFirstTime = false): void {
+  setPlot(isFirstTime = false): void {
     this.initSvg(isFirstTime);
     this.updateAxisRange(true);
     this.drawAxis();
@@ -122,7 +124,7 @@ export class MapComponent {
   }
 
   private initSvg(isFirstTime = false): void {
-    if (isFirstTime)
+    if (isFirstTime) {
       this.chart = d3
         .select("#map")
         .append("svg")
@@ -130,6 +132,8 @@ export class MapComponent {
         .attr("height", "100%")
         .attr("viewBox", [0, 0, TOTAL_WIDTH, TOTAL_HEIGHT])
         .attr("fill", "white");
+      this.isFirstTime = false;
+    }
 
     this.gAxis = this.chart
       .append("g")
@@ -195,8 +199,9 @@ export class MapComponent {
         );
   }
 
-  private deleteMap(): void {
-    this.chart.selectAll("#map > *").remove();
+  deleteMap(): void {
+    d3.select("#map").selectAll("*").remove();
+    this.isFirstTime = true;
   }
 
   private erasePlot(): void {
