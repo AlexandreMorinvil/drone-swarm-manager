@@ -18,11 +18,13 @@ enum DroneState {
 
 export class Drone {
   droneId: number;
+  initRealPos: Vec3;
   private state: DroneState;
   private batteryLevel: number;
   private isConnected: Boolean;
   private currentPosition: Vec3;
   private currentSpeed: Vec3;
+
 
   constructor(
     droneId: number = UNSET_DRONE_INDEX,
@@ -38,6 +40,7 @@ export class Drone {
     this.isConnected = isConnected;
     this.currentPosition = currentPosition;
     this.currentSpeed = currentSpeed;
+    this.initRealPos = new Vec3(0, 0, 0);
   }
 
   updateDrone(updatedDrone: Drone): void {

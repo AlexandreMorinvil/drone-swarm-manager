@@ -34,6 +34,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatRadioModule } from '@angular/material/radio';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { InitRealPosComponent } from './components/init-real-pos/init-real-pos.component';
 
 
 @NgModule({
@@ -49,6 +50,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
     MapComponent,
     MapGeneratedBoardComponent,
     NavigationBarComponent,
+    InitRealPosComponent,
   ],
   imports: [
     BrowserModule,

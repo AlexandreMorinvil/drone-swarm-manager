@@ -1,0 +1,11 @@
+<div *ngIf="drones.length">
+    <div *ngFor="let item of drones; let i = index">
+        <p>Drone {{i}}</p>
+        <input type="number" [(ngModel)]="drones[i].initRealPos.x">
+        <input type="number" [(ngModel)]="drones[i].initRealPos.y"> 
+    </div>
+</div>
+<button (click)="this.homepageComponent.closeSidenav()">valider</button>
+
+
+

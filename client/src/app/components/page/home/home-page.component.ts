@@ -1,6 +1,7 @@
-import { Component } from "@angular/core";
+import { Component, ViewChild } from "@angular/core";
 import { FormControl, Validators } from "@angular/forms";
 import { DroneListService, ServerMode } from "@app/service/api/drone-list/drone-list.service"
+import { MatSidenav } from "@angular/material/sidenav";
 
 @Component({
   selector: "app-home-page",
@@ -8,6 +9,7 @@ import { DroneListService, ServerMode } from "@app/service/api/drone-list/drone-
   styleUrls: ["./home-page.component.scss", "../page.component.scss"],
 })
 export class HomePageComponent {
+  @ViewChild("initRealPos") sidenav: MatSidenav;
 
   modeSelected: ServerMode = ServerMode.REAL;
   numberOfDrone = new FormControl(1, Validators.min(1));
@@ -16,6 +18,16 @@ export class HomePageComponent {
   
   sendModeToServer() {
     this.droneListService.sendModeToServer(this.modeSelected, this.numberOfDrone.value);
+  }
+
+  openSidenav(): void {
+    if(this.numberOfDrone.value !== 0 || this.numberOfDrone.value !== null){
+        this.sidenav.open();
+    }
+  }
+
+  closeSidenav(): void {
+    this.sidenav.close();
   }
 
 }

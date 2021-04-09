@@ -1,23 +1,31 @@
-<div class="page-container page-layout">
-  <h1 class="title">Polytechnique Swarm Space Explorators</h1>
+<mat-sidenav-container>
+  <mat-sidenav #initRealPos class="init-real-pos" mode="over" position="end">
+    <app-init-real-pos [numberOfDrones]="numberOfDrone.value"></app-init-real-pos>
+  </mat-sidenav>
+  <mat-sidenav-content class="home">
+    <div class="page-container page-layout">
+      <h1 class="title">Polytechnique Swarm Space Explorators</h1>
+    
+      <form class="example-form">
+      <mat-form-field appearance="fill">
+        <mat-label>Number of drones</mat-label>
+        <input matInput type="number" name="numberOfDrone" [formControl]="numberOfDrone" min="3" required (ngModelChange)="openSidenav()">
+      </mat-form-field>
+      </form>
+    
+      <mat-radio-group aria-label="Mode" [(ngModel)]="modeSelected">
+        <mat-radio-button value="ServerMode.SIMULATION">Simulation</mat-radio-button>
+        <mat-radio-button value="ServerMode.REAL">Real</mat-radio-button>
+      </mat-radio-group>
+      
+      
+      <button mat-button routerLink="/control" routerLinkActive="active" (click)="sendModeToServer()">
+        Control Page
+      </button>
+      <button mat-button  routerLink="/map" routerLinkActive="active">
+        Consult Maps
+      </button>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>
 
-  <form class="example-form">
-  <mat-form-field appearance="fill">
-    <mat-label>Number of drones</mat-label>
-    <input matInput type="number" name="numberOfDrone" [formControl]="numberOfDrone" min="1" required>
-  </mat-form-field>
-</form>
-
-  <mat-radio-group aria-label="Mode" [(ngModel)]="modeSelected">
-    <mat-radio-button value="ServerMode.SIMULATION">Simulation</mat-radio-button>
-    <mat-radio-button value="ServerMode.REAL">Real</mat-radio-button>
-  </mat-radio-group>
-  
-  
-  <button mat-button routerLink="/control" routerLinkActive="active" (click)="sendModeToServer()">
-    Control Page
-  </button>
-  <button mat-button  routerLink="/map" routerLinkActive="active">
-    Consult Maps
-  </button>
-</div>
