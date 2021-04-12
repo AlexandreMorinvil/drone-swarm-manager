@@ -1,0 +1,10 @@
+version: "2"
+services:
+  client:
+    container_name: client
+    build: client
+    ports:
+      - 8080:4200
+    environment:
+      - NODE_ENV=production
+      - VIRTUAL_PORT=4200
