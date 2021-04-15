@@ -13,15 +13,13 @@ import { SocketService } from "@app/service/socket.service";
 })
 export class MapListComponent { 
   points : Vec3[] = []
-  constructor(public mapCatalogService : MapCatalogService, public socketService: SocketService){
+  constructor(public mapCatalogService : MapCatalogService){
   }
   public get maps(): Map[] {
-    // return this.mapCatalogService.map_list;
-    return [];
+    return this.mapCatalogService.mapList;
   }
 
   getMapSelected(id:Number):void {
-    this.socketService.getSelectedMap(id);
+    this.mapCatalogService.getSelectedMap(id);
   }
-
 }

@@ -12,10 +12,10 @@ import { SocketService } from "@app/service/socket.service";
 export class MapCatalogPageComponent implements OnInit, AfterViewInit {
   @ViewChild("selectedMap") map: MapComponent;
 
-  constructor(public socketService: SocketService) {}
+  constructor(public mapCatalogService: MapCatalogService) {}
 
-  ngOnInit() {
-    this.socketService.getMapList();
+  ngOnInit(): void {
+    this.mapCatalogService.getMapList();
   }
 
   ngAfterViewInit() {
@@ -27,5 +27,10 @@ export class MapCatalogPageComponent implements OnInit, AfterViewInit {
         clearInterval(interval);
       }
     }, 100);
+
+    this.mapCatalogService.selectedMapSource.subscribe((selectedMap) => {
+      this.map.erasePlot();
+      this.map.setBaseMap(selectedMap.points);
+    });
   }
 }

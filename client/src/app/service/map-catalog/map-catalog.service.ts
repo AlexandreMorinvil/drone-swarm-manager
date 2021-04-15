@@ -1,42 +1,62 @@
 import { Injectable } from "@angular/core";
-import {Map} from "@app/class/map";
-import { LiveMapService } from "../map/live-map.service";
+import { Map, UNSET_MAP_INDEX } from "@app/class/map";
 import { Vec3 } from "@app/class/vec3";
-
-
-
+import { BehaviorSubject, Observable } from "rxjs";
+import { SocketService } from "../socket.service";
 
 @Injectable({
-    providedIn: "root",
-  })
-  export class MapCatalogService {
-    // map_list: Map[] = [];
-    // isNewSelection: boolean = false;
-    // selectedMap: Map = {id:-1, name:"", date:""};
+  providedIn: "root",
+})
+export class MapCatalogService {
+  mapList: Map[] = [];
+  selectedMapPoints: Vec3[] = [];
+  selectedMap: Map = new Map();
 
-    // constructor(public liveMapService: LiveMapService) {
-    // }
+  selectedMapSource: BehaviorSubject<Map>;
+  selectedMapObservable: Observable<Map>;
 
-    // receiveMap(data: any): void {
-    //     this.map_list = [];
-    //     const mapData = JSON.parse(data);
-    //     for(let i = 0; i < mapData.length; i++){
-    //         this.map_list.push(new Map(mapData[i].id, mapData[i].name,mapData[i].date));
-    //     }
-    // }
+  constructor(public socketService: SocketService) {
+    this.selectedMapSource = new BehaviorSubject<Map>(this.selectedMap);
+    this.selectedMapObservable = this.selectedMapSource.asObservable();
 
-    // selectMap(mapId:Number): void{
-    //     this.map_list.forEach((data)=>{
-    //         if(data.id == mapId) this.selectedMap = data;
-    //     });
-    // }
-
-
-    // receiveSelectedMapPoints(pointsData:any): void{
-    //     let points = [];
-    //     for(let i = 0; i < pointsData.length; i++){
-    //         points.push(new Vec3(pointsData[i].x, pointsData[i].y, pointsData[i].z));
-    //     }
-    //     this.liveMapService.setBaseMap(points);
-    // }
+    this.socketService.addEventHandler("MAP_LIST", (data) => {
+      this.receiveMaps(data);
+    });
+    this.socketService.addEventHandler("MAP_POINTS", (data) => {
+      this.receiveSelectedMapPoints(data);
+    });
   }
+
+  receiveMaps(data: any): void {
+    const mapData = JSON.parse(data);
+    this.mapList = [];
+    for (let i in mapData) {
+      this.mapList.push(new Map(mapData[i].id, mapData[i].name, mapData[i].date));
+    }
+  }
+
+  receiveSelectedMapPoints(data: any): void {
+    const pointsData = JSON.parse(data);
+    const slectedMapPoints: Vec3[] = [];
+    for (const point of pointsData) {
+      this.selectedMap.points.push(new Vec3(point.x, point.y, point.z));
+    }
+    this.selectedMap.points = slectedMapPoints;
+  }
+
+  getMapList() {
+    this.socketService.emitEvent("MAP_CATALOG");
+  }
+
+  deleteSelectedMap(mapId: Number) {
+    this.socketService.emitEvent("DELETE_MAP", { id: mapId });
+  }
+
+  getSelectedMap(mapId: Number) {
+    this.socketService.emitEvent("SELECT_MAP", { id: mapId });
+  }
+  
+  public get isMapSelected() : boolean {
+    return this.selectedMap.id !== UNSET_MAP_INDEX;
+  }
+}
