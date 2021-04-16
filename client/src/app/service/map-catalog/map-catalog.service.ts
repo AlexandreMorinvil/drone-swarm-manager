@@ -39,9 +39,10 @@ export class MapCatalogService {
     const pointsData = JSON.parse(data);
     const slectedMapPoints: Vec3[] = [];
     for (const point of pointsData) {
-      this.selectedMap.points.push(new Vec3(point.x, point.y, point.z));
+      slectedMapPoints.push(new Vec3(point.x, point.y, point.z));
     }
     this.selectedMap.points = slectedMapPoints;
+    this.selectedMapSource.next(this.selectedMap);
   }
 
   getMapList() {
@@ -55,8 +56,8 @@ export class MapCatalogService {
   getSelectedMap(mapId: Number) {
     this.socketService.emitEvent("SELECT_MAP", { id: mapId });
   }
-  
-  public get isMapSelected() : boolean {
+
+  public get isMapSelected(): boolean {
     return this.selectedMap.id !== UNSET_MAP_INDEX;
   }
 }

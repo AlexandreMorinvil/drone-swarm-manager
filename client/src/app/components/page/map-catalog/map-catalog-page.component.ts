@@ -24,12 +24,12 @@ export class MapCatalogPageComponent implements OnInit, AfterViewInit {
       if (this.map) {
         this.map.deleteMap();
         this.map.setPlot(true);
+        
         clearInterval(interval);
       }
     }, 100);
 
     this.mapCatalogService.selectedMapSource.subscribe((selectedMap) => {
-      this.map.erasePlot();
       this.map.setBaseMap(selectedMap.points);
     });
   }

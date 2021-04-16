@@ -73,7 +73,7 @@ export class MapComponent {
 
   setBaseMap(points: Vec3[]): void {
     this.wallPoints = points;
-    this.resetMap(false);
+    this.resetMap(true);
   }
 
   addWallPoint(points: Vec3[]): void {
