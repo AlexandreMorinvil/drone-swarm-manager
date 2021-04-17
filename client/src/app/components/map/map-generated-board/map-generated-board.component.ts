@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, ViewChild } from "@angular/core";
-import { LiveMapService } from "@app/service/map/live-map.service";
+import { LiveMapService } from "@app/service/api/map-live/live-map.service";
 import { MapComponent } from "../map/map.component";
 
 @Component({

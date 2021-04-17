@@ -1,8 +1,8 @@
 import { AfterViewInit, Component, OnInit, ViewChild } from "@angular/core";
 import { MatSidenav } from "@angular/material/sidenav";
 import { MapComponent } from "@app/components/map/map/map.component";
-import { MapCatalogService } from "@app/service/map-catalog/map-catalog.service";
-import { SocketService } from "@app/service/socket.service";
+import { MapCatalogService } from "@app/service/api/map-catalog/map-catalog.service";
+import { SocketService } from "@app/service/api/socket.service";
 
 @Component({
   selector: "app-map-catalog-page",

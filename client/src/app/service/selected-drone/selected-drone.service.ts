@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { Drone, UNSET_DRONE_INDEX } from "@app/class/drone";
+import { DroneControlService } from "../api/drone-control/drone-control.service";
 import { DroneListService } from "../api/drone-list/drone-list.service";
-import { SocketService } from "../socket.service";
 
 @Injectable({
   providedIn: "root",
@@ -10,25 +10,24 @@ export class SelectedDroneService {
   private previousDroneId: number = UNSET_DRONE_INDEX;
   private droneId: number = UNSET_DRONE_INDEX;
 
-  constructor(private droneListService: DroneListService, private socketService: SocketService) {}
+  constructor(private droneListService: DroneListService, private droneConrtrolService: DroneControlService) {}
 
   sendToogleLedRequest(): void {
-    this.validateDroneAvailability(this.socketService.sendToogleLedRequest);
+    this.validateDroneAvailability(this.droneConrtrolService.sendToogleLedRequest);
   }
 
   sendTakeOffRequest(): void {
-    this.validateDroneAvailability(this.socketService.sendTakeOffRequest);
+    this.validateDroneAvailability(this.droneConrtrolService.sendTakeOffRequest);
   }
 
   sendReturnToBaseRequest(): void {
-    this.validateDroneAvailability(this.socketService.sendReturnToBaseRequest);
+    this.validateDroneAvailability(this.droneConrtrolService.sendReturnToBaseRequest);
   }
 
   validateDroneAvailability(callback: (droneId: number) => void): boolean {
     this.droneId = this.drone.droneId;
     if (this.droneId !== UNSET_DRONE_INDEX) {
-      callback.call(this.socketService, this.droneId);
-      console.log("call back");
+      callback.call(this.droneConrtrolService, this.droneId);
       return true;
     } else {
       this.unsetSelectedDrone();
@@ -37,7 +36,6 @@ export class SelectedDroneService {
   }
 
   setSelectedDrone(droneId: number): boolean {
-    console.log(droneId);
     this.previousDroneId = this.droneId;
     this.droneId = droneId;
     return this.validateDroneAvailability(() => {});

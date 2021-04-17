@@ -17,8 +17,8 @@ import { DroneSwarmBoardComponent } from "./components/drone/drone-swarm-board/d
 import { MapGeneratedBoardComponent } from "./components/map/map-generated-board/map-generated-board.component";
 import { NavigationBarComponent } from "./components/navigation-bar/navigation-bar.component";
 import { MapComponent } from "./components/map/map/map.component";
-import { MapListComponent } from "./components/map-catalog/map-list/map-list.component";
-import { SelectMapComponent } from "./components/map-catalog/select-map/select-map.component";
+import { MapListComponent } from "./components/map/map-list/map-list.component";
+import { MapSelectedComponent } from "./components/map/map-selected/map-selected.component";
 
 //angular/materials
 import { MatDividerModule } from "@angular/material/divider";
@@ -49,7 +49,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
     MapGeneratedBoardComponent,
     NavigationBarComponent,
     MapListComponent,
-    SelectMapComponent,
+    MapSelectedComponent,
   ],
   imports: [
     BrowserModule,

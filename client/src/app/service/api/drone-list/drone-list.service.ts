@@ -1,19 +1,17 @@
 import { Injectable } from "@angular/core";
-import { io, Socket } from "socket.io-client/build/index";
 import { Drone } from "@app/class/drone";
-import { ServerMode } from "@app/constants/serverMode";
+import { SocketService } from "@app/service/api/socket.service";
 
 @Injectable({
   providedIn: "root",
 })
 export class DroneListService {
-  private socket: Socket;
   droneId: number = 0;
   droneList: Drone[] = [];
   firstIndex: number = 0;
 
-  constructor() {
-    this.socket = io("127.0.0.1:5000");
+  constructor(public socketService: SocketService) {
+    this.socketService.addEventHandler("DRONE_LIST", (data) => { this.receiveData(data) });
   }
 
   public receiveData(data) {
@@ -56,16 +54,5 @@ export class DroneListService {
 
   public getDrone(droneId: number) {
     return this.droneList[droneId - this.firstIndex];
-  }
-
-  public get isConnected(): boolean {
-    return this.socket.connected;
-  }
-
-  public sendModeToServer(modeSelected: ServerMode, numberOfDrone: Number) {
-    this.socket.emit("SET_MODE", {
-      mode_chosen: modeSelected,
-      number_of_drone: numberOfDrone,
-    });
   }
 }

@@ -1,13 +1,13 @@
 import { Component } from "@angular/core";
 import { Map } from "@app/class/map"
-import { MapCatalogService } from "@app/service/map-catalog/map-catalog.service";
+import { MapCatalogService } from "@app/service/api/map-catalog/map-catalog.service";
 
 @Component({
-  selector: "app-select-map",
-  templateUrl: "./select-map.component.html",
-  styleUrls: ["./select-map.component.scss"],
+  selector: "app-map-selected",
+  templateUrl: "./map-selected.component.html",
+  styleUrls: ["./map-selected.component.scss"],
 })
-export class SelectMapComponent{
+export class MapSelectedComponent{
   constructor(public mapCatalogService: MapCatalogService){}
 
   deleteMap(): void {
