@@ -24,30 +24,26 @@ using argos::CCI_RangeAndBearingActuator;
 using std::max;
 using argos::CByteArray;
 
-/*
- * A controller is simply an implementation of the CCI_Controller class.
- */
+
 class CP2P {
  public:
       CP2P(
          CCI_RangeAndBearingSensor* pcRABSens,
          CCI_RangeAndBearingActuator* pcRABAct,
-         CTimer* cTimer);
+         CTimer* cTimer,
+         CMoving* cMoving);
 
       virtual ~CP2P() {}
 
-      float GetAltitudeToAvoidCollision(CVector3 position, int idRobot);
+      PacketP2P GetClosestPacket(CVector3 cPos);
 
-      void sendPacketToOtherRobots(float altitude, int idRobot);
+      void sendPacketToOtherRobots(int idRobot, CVector3 cPos, float speed[3]);
 
  private:
       CCI_RangeAndBearingSensor* m_pcRABSens;
       CCI_RangeAndBearingActuator* m_pcRABAct;
-      CTimer* _cTimer;
-      struct PacketP2P {
-         uint8_t id;
-         float currentAltitude;
-      };
+      CTimer* cTimer;
+      CMoving* cMoving;
 };
 
 

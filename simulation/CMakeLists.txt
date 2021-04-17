@@ -47,13 +47,13 @@ link_directories(${ARGOS_LIBRARY_DIRS})
 # Descend into the controllers directory
 add_subdirectory(controllers)
 
-# add_subdirectory(googletest)
+add_subdirectory(googletest)
 
-# include_directories(googletest/include)
+include_directories(googletest/include)
 
-# add_executable(movingtest test/controllers/sim-alfred/movingtest.cpp)
-# add_executable(sensorstest test/controllers/sim-alfred/sensorstest.cpp)
-# target_link_libraries(movingtest PRIVATE gtest)
-# target_link_libraries(sensorstest PRIVATE gtest)
-# target_link_libraries(movingtest PRIVATE gmock)
-# target_link_libraries(sensorstest PRIVATE gmock)
+add_executable(movingtest test/controllers/sim-alfred/movingtest.cpp)
+add_executable(sensorstest test/controllers/sim-alfred/sensorstest.cpp)
+target_link_libraries(movingtest PRIVATE gtest)
+target_link_libraries(sensorstest PRIVATE gtest)
+target_link_libraries(movingtest PRIVATE gmock)
+target_link_libraries(sensorstest PRIVATE gmock)

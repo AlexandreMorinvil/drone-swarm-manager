@@ -9,6 +9,8 @@
  */
 #ifndef MOVING_H
 #define MOVING_H
+#define CLOSE_DISTANCE 500.0f
+#define NO_COLLISION -999.0f
 
 #include <argos3/plugins/robots/generic/control_interface/ci_positioning_sensor.h>
 #include <argos3/core/control_interface/ci_controller.h>
@@ -24,17 +26,34 @@ using argos::CRadians;
 using argos::CVector3;
 using argos::Real;
 
+struct PacketP2P {
+      uint8_t id;
+      short x;
+      short y;
+      short vx;
+      short vy;
+};
+
 /*
  * A controller is simply an implementation of the CCI_Controller class.
  */
 class CMoving {
  public:
-      CMoving();
+        CMoving();
 
-      virtual ~CMoving() {}
+        virtual ~CMoving() {}
 
-      CVector3* GoInSpecifiedDirection(
-          SensorSide freeSide);
+        CVector3* GoInSpecifiedDirection(
+            SensorSide freeSide);
+
+        float computeAngleToFollow(CVector3 objective, CVector3 cPos);
+
+        float GetAngleToAvoidCollision(
+            PacketP2P packet,
+            CVector3 pos,
+            float speed[3]);
+
+        float computeDistanceBetweenPoints(PacketP2P packetP2P, CVector3 cPos);
 
  private:
 };

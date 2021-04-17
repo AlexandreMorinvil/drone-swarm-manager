@@ -95,8 +95,6 @@ class CSimAlfred : public CCI_Controller {
 
     void setPosVelocity();
 
-    float computeAngleToFollow();
-
  private:
     CCI_CrazyflieDistanceScannerSensor* m_pcDistance;
     CCI_RangeAndBearingSensor* m_pcRABSens;
@@ -123,8 +121,9 @@ class CSimAlfred : public CCI_Controller {
     StateMode stateMode;
     CVector3 objective;
 
-   CVector3 previousPos;
+    CVector3 previousPos;
     CVector3 cPos;
+    PacketP2P packetOverP2PSaved;
 
     int idRobot;
 };
