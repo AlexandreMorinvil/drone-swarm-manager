@@ -19,7 +19,12 @@ export class DroneSwarmBoardComponent {
   sendSwarmTakeOffRequest(): void {
     this.droneControlService.sendTakeOffRequest(ALL_DRONE_INDEX);
   }
+
   sendSwarmReturnToBaseRequest(): void {
     this.droneControlService.sendReturnToBaseRequest(ALL_DRONE_INDEX);
+  }
+
+  sendEmmergencyLandingRequest(): void {
+    this.droneControlService.sendEmergencyLandingRequest(ALL_DRONE_INDEX);
   }
 }

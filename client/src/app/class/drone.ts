@@ -10,10 +10,12 @@ const DECIMALS_TO_DISPLAY: number = 3;
 export enum DroneState {
   STANDBY = 0,
   TAKE_OFF = 1,
-  RETURN_TO_BASE = 2,
-  LANDING = 3,
-  FAIL = 4,
-  UPDATE = 5,
+  FLYING = 2,
+  RETURN_TO_BASE = 3,
+  LANDING = 4,
+  EMERGENCY = 5,
+  FAIL = 6,
+  UPDATE = 7,
 }
 
 export class Drone {
