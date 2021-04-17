@@ -1,6 +1,6 @@
 import { Component } from "@angular/core";
 import { FormControl, Validators } from "@angular/forms";
-import { DroneListService } from "@app/service/api/drone-list/drone-list.service";
+import { EnvironmentService } from "@app/service/api/environment/environment.service";
 import { ServerMode } from "@app/constants/serverMode";
 
 @Component({
@@ -13,10 +13,10 @@ export class HomePageComponent {
   modeSelected: ServerMode = ServerMode.REAL;
   numberOfDrone = new FormControl(1, Validators.min(1));
 
-  constructor(public droneListService: DroneListService) { }
+  constructor(public environmentService: EnvironmentService) { }
   
   sendModeToServer() {
-    this.droneListService.sendModeToServer(this.modeSelected, this.numberOfDrone.value);
+    this.environmentService.sendModeToServer(this.modeSelected, this.numberOfDrone.value);
   }
 
 }

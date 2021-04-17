@@ -1,17 +1,17 @@
 import { TestBed, waitForAsync } from "@angular/core/testing";
-import { LiveMapComponent } from "./live-map.component";
+import { MapComponent } from "./map.component";
 
-describe("LiveMapComponent", () => {
+describe("MapComponent", () => {
   beforeEach(
     waitForAsync(() => {
       TestBed.configureTestingModule({
-        declarations: [LiveMapComponent],
+        declarations: [MapComponent],
       }).compileComponents();
     })
   );
 
   it("should create the component", () => {
-    const fixture = TestBed.createComponent(LiveMapComponent);
+    const fixture = TestBed.createComponent(MapComponent);
     const app = fixture.componentInstance;
     expect(app).toBeTruthy();
   });

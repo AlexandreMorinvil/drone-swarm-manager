@@ -39,7 +39,8 @@ typedef enum {
     kFlying,
     kReturnToBase,
     kLanding,
-    kEmergency
+    kEmergency,
+    kCollisionResolver
   } StateMode;
 
 typedef struct packetRX {

@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { Drone, UNSET_DRONE_INDEX } from "@app/class/drone";
+import { DroneControlService } from "../api/drone-control/drone-control.service";
 import { DroneListService } from "../api/drone-list/drone-list.service";
-import { SocketService } from "../socket.service";
 
 @Injectable({
   providedIn: "root",
@@ -10,25 +10,28 @@ export class SelectedDroneService {
   private previousDroneId: number = UNSET_DRONE_INDEX;
   private droneId: number = UNSET_DRONE_INDEX;
 
-  constructor(private droneListService: DroneListService, private socketService: SocketService) {}
+  constructor(private droneListService: DroneListService, private droneControlService: DroneControlService) {}
 
   sendToogleLedRequest(): void {
-    this.validateDroneAvailability(this.socketService.sendToogleLedRequest);
+    this.validateDroneAvailability(this.droneControlService.sendToogleLedRequest);
   }
 
   sendTakeOffRequest(): void {
-    this.validateDroneAvailability(this.socketService.sendTakeOffRequest);
+    this.validateDroneAvailability(this.droneControlService.sendTakeOffRequest);
   }
 
   sendReturnToBaseRequest(): void {
-    this.validateDroneAvailability(this.socketService.sendReturnToBaseRequest);
+    this.validateDroneAvailability(this.droneControlService.sendReturnToBaseRequest);
+  }
+
+  sendLandRequest(): void {
+    this.validateDroneAvailability(this.droneControlService.sendLandRequest);
   }
 
   validateDroneAvailability(callback: (droneId: number) => void): boolean {
     this.droneId = this.drone.droneId;
     if (this.droneId !== UNSET_DRONE_INDEX) {
-      callback.call(this.socketService, this.droneId);
-      console.log("call back");
+      callback.call(this.droneControlService, this.droneId);
       return true;
     } else {
       this.unsetSelectedDrone();
@@ -37,7 +40,6 @@ export class SelectedDroneService {
   }
 
   setSelectedDrone(droneId: number): boolean {
-    console.log(droneId);
     this.previousDroneId = this.droneId;
     this.droneId = droneId;
     return this.validateDroneAvailability(() => {});
