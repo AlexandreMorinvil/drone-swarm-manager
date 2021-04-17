@@ -112,25 +112,15 @@ def ledToggler(data):
 
 @socketio.on('TAKEOFF')
 def takeOff(data):
+    print("takeoff for", data)
     if (data['id'] == -2):
         for i in drones:
             i.send_data(StateMode.TAKE_OFF.value, "<i")
             logger.info('Take off of {}'.format(i))
 
     else:
-        drones[data['id']].send_data(StateMode.TAKE_OFF.value, "<i")
-        logger.info('Take off of {}'.format(socks[data['id']]))
-
-@socketio.on('EMERGENCY_LANDING')
-def takeOff(data):
-    if (data['id'] == -2):
-        for i in drones:
-            i.send_data(StateMode.EMERGENCY.value, "<i")
-            logger.info('Emergency landing of {}'.format(i))
-    else:
-        drones[data['id']].send_data(StateMode.TAKE_OFF.value, "<i")
-        logger.info('Emergency landing  {}'.format(socks[data['id']]))
-
+        socks[data['id'] - drones[0]._id].send_data(StateMode.TAKE_OFF.value, "<i")
+        logger.info('Take off of {}'.format(socks[data['id'] - drones[0]._id]))
      
 @socketio.on('RETURN_BASE')
 def returnToBase(data):
@@ -139,8 +129,8 @@ def returnToBase(data):
             i.send_data(StateMode.RETURN_TO_BASE.value, "<i")
             logger.info('Return to base of {}'.format(i))
     else:
-        drones[data['id']].send_data(StateMode.RETURN_TO_BASE.value, "<i")
-        logger.info('Return to base of {}'.format(socks[data['id']]))
+        socks[data['id'] - drones[0]._id].send_data(StateMode.RETURN_TO_BASE.value, "<i")
+        logger.info('Return to base of {}'.format(socks[data['id'] - drones[0]._id]))
 
 @socketio.on('MAP_CATALOG')
 def getMapList():
@@ -170,7 +160,7 @@ def deleteMap(data):
 
 def send_data():
     data_to_send = json.dumps([drone.dump() for drone in drones])
-    socketio.emit('drone_data', data_to_send, broadcast=True)
+    socketio.emit('DRONE_LIST', data_to_send, broadcast=True)
     logger.info('send data to client')
 
 def set_interval(func, sec):

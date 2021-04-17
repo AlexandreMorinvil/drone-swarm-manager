@@ -3,7 +3,8 @@ import { MatSelectionList } from "@angular/material/list";
 import { DroneListService } from "@app/service/api/drone-list/drone-list.service";
 import { ControlPageComponent } from "@app/components/page/control/control-page.component";
 import { Drone, UNSET_DRONE_INDEX } from "@app/class/drone";
-import { SelectedDroneService } from "@app/service/selecte-drone/selected-drone.service";
+import { SelectedDroneService } from "@app/service/selected-drone/selected-drone.service";
+import { SocketService } from "@app/service/api/socket.service";
 
 @Component({
   selector: "app-drone-list",
@@ -16,6 +17,7 @@ export class DroneListComponent {
   previousSelectedId: number = UNSET_DRONE_INDEX;
 
   constructor(
+    public socketService: SocketService,
     public droneListService: DroneListService,
     public selectedDroneService: SelectedDroneService,
     public controlPage: ControlPageComponent
@@ -29,11 +31,11 @@ export class DroneListComponent {
   }
 
   public get isConnected(): boolean {
-    return this.droneListService.isConnected;
+    return this.socketService.isConnected;
   }
 
   public get connectionStatus(): string {
-    if (this.droneListService.isConnected) return "CONNECTED : " + this.droneNumber;
+    if (this.socketService.isConnected) return "CONNECTED : " + this.droneNumber;
     else return "DISCONNECTED";
   }
 
