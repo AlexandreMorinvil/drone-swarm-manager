@@ -69,10 +69,11 @@ else:
     drones = []
     
 def createDrones(numberOfDrone):
-    for i in range(numberOfDrone):
-        if mode == Mode.REAL:
-            drones.append(DroneReal("80"))
-        else:
+    if mode == Mode.REAL:
+        drones.append(DroneReal("radio://0/72/250K/E7E7E7E7E7"))
+        drones.append(DroneReal("radio://0/72/250K/E7E7E7E7E5"))
+    else:
+        for i in range(numberOfDrone):
             drones.append(DroneSimulation(default_port + i))
             t = threading.Thread(target=drones[i].waiting_connection, name='waiting_connection')
             t.start()
@@ -131,6 +132,16 @@ def returnToBase(data):
     else:
         socks[data['id'] - drones[0]._id].send_data(StateMode.RETURN_TO_BASE.value, "<i")
         logger.info('Return to base of {}'.format(socks[data['id'] - drones[0]._id]))
+
+@socketio.on('LAND')
+def land(data):
+    if (data['id'] == -2):
+        for i in drones:
+            i.send_data(StateMode.LANDING.value, "<i")
+            logger.info('Landing of {}'.format(i))
+    else:
+        drones[data['id']].send_data(StateMode.LANDING.value, "<i")
+        logger.info('Landing of {}'.format(socks[data['id']]))
 
 @socketio.on('MAP_CATALOG')
 def getMapList():

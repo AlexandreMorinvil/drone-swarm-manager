@@ -29,12 +29,12 @@ class DroneReal(DroneInterface) :
 
         self._cf.appchannel.packet_received.add_callback(self._process_data_received)
 
-        self._cf.open_link("radio://0/" + port + "/250K")
+        self._cf.open_link(port)
 
         self.map_observation_accumulator = MapObservationAccumulator(False)
         self.logger.info('Create drone real in server')
 
-        print('Connecting to %s' % "radio://0/" + port + "/250K")
+        print('Connecting to %s' % "" + port)
 
     def _connected(self, link_uri):
         """ This callback is called form the Crazyflie API when a Crazyflie

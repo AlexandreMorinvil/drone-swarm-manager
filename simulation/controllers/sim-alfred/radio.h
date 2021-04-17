@@ -34,7 +34,8 @@ typedef enum {
     kLanding = 4,
     kEmergency = 5,
     kFail = 6,
-    kUpdate = 7
+    kUpdate = 7,
+    kCollisionResolver = 8
   } StateMode;
 
 

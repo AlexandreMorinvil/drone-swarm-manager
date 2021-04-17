@@ -24,6 +24,10 @@ export class DroneControlService {
     this.socketService.emitEvent("RETURN_BASE", { id: droneId });
   }
 
+  public sendLandRequest(droneId: number): void {
+    this.socketService.emitEvent("LAND", { id: droneId });
+  }
+
   public sendEmergencyLandingRequest(droneId: number): void {
     this.socketService.emitEvent("EMERGENCY_LANDING", { id: droneId });
   }  

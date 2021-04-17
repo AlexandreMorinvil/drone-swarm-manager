@@ -101,6 +101,8 @@ export class Drone {
       case DroneState.UPDATE:
         return "UPDATE";
       case DroneState.TAKE_OFF:
+        return "TAKE OFF";
+      case DroneState.FLYING:
         return "IN MISSION";
       case DroneState.RETURN_TO_BASE:
         return "RETURN";
@@ -108,6 +110,8 @@ export class Drone {
         return "LANDING";
       case DroneState.FAIL:
         return "FAIL";
+      case DroneState.EMERGENCY:
+        return "EMERGENCY"
       default:
         return "IMPOSSIBLE";
     }
