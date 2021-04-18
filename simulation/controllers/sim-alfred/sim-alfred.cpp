@@ -1,5 +1,5 @@
 #include "sim-alfred.h"
-
+#include <argos3/core/utility/logging/argos_log.h>
 
 /****************************************/
 /****************************************/
@@ -12,21 +12,6 @@ void CSimAlfred::setPosVelocity() {
       if (m_uiCurrentStep % 10 == 9) {
          posFinal = cPos;
       }
-}
-
-
-float CSimAlfred::computeAngleToFollow() {
-      float xdiff = objective.GetX() - cPos.GetX();
-      float ydiff = objective.GetY() - cPos.GetY();
-
-      if (std::abs(xdiff) < 0.5 && std::abs(ydiff) < 0.5) {
-         stateMode = kLanding;
-         cTimer->SetTimer(TimerType::kLandingTimer, 100);
-      }
-      if (ydiff < 0) {
-         return (- atan(xdiff/ydiff) + PI_VALUE);
-      }
-      return (- atan(xdiff/ydiff));
 }
 
 
@@ -60,7 +45,7 @@ void CSimAlfred::Init(TConfigurationNode &t_node) {
       cMoving = new CMoving();
       cSensors = new CSensors();
       cTimer = new CTimer();
-      cP2P = new CP2P(m_pcRABSens, m_pcRABAct, cTimer);
+      cP2P = new CP2P(m_pcRABSens, m_pcRABAct, cTimer, cMoving);
       cRadio = new CRadio();
 
       m_pcRNG = CRandom::CreateRNG("argos");
@@ -91,7 +76,8 @@ void CSimAlfred::ControlStep() {
       CRadians yawAngle = CRadians(0.0f);
       CRadians pitchAngle = CRadians(0.0f);
       CRadians rollAngle = CRadians(0.0f);
-      m_pcPos->GetReading().Orientation.ToEulerAngles(yawAngle, pitchAngle, rollAngle);
+      m_pcPos->GetReading().Orientation
+         .ToEulerAngles(yawAngle, pitchAngle, rollAngle);
       float orientationValues[3];
       orientationValues[0] = yawAngle.GetValue()  + M_PI/2;
       orientationValues[1] = pitchAngle.GetValue();
@@ -103,7 +89,6 @@ void CSimAlfred::ControlStep() {
       // Position
       previousPos = cPos;
       cPos = m_pcPos->GetReading().Position;
-      cP2P->sendPacketToOtherRobots(cPos.GetZ(), idRobot);
 
       // Speed
       float speedValues[3];
@@ -111,9 +96,12 @@ void CSimAlfred::ControlStep() {
       speedValues[1] = (cPos.GetY() - previousPos.GetY()) / SECONDS_PER_STEP;
       speedValues[2] = (cPos.GetZ() - previousPos.GetZ()) / SECONDS_PER_STEP;
 
+      cP2P->sendPacketToOtherRobots(idRobot, cPos, speedValues);
+
       // Range distances
       // [ leftDist, backDist, rightDist, frontDist, downDistance, upDistance ]
-      CCI_CrazyflieDistanceScannerSensor::TReadingsMap sDistRead = m_pcDistance->GetReadingsMap();
+      CCI_CrazyflieDistanceScannerSensor::TReadingsMap sDistRead
+         = m_pcDistance->GetReadingsMap();
       auto iterDistRead = sDistRead.begin();
       float sensorValues[6];
       sensorValues[1] = (iterDistRead++)->second;  // Back
@@ -123,12 +111,36 @@ void CSimAlfred::ControlStep() {
       sensorValues[4] = cPos.GetZ();               // Height
       sensorValues[5] = ROOF_HEIGHT - cPos.GetZ(); // Roof distance
 
-      cRadio->sendTelemetry(cPos, stateMode, sBatRead.AvailableCharge, sensorValues, orientationValues, speedValues);
+      cRadio->sendTelemetry(
+         cPos,
+         stateMode,
+         sBatRead.AvailableCharge,
+         sensorValues,
+         orientationValues,
+         speedValues);
 
       // Update StateMode received from ground station
       StateMode* stateModeReceived = cRadio->ReceiveData();
       if (stateModeReceived) {
          stateMode = *stateModeReceived;
+      }
+
+      PacketP2P packetP2P = cP2P->GetClosestPacket(cPos);
+      float yaw = cMoving->GetAngleToAvoidCollision(
+            packetP2P,
+            cPos,
+            speedValues);
+      argos::LOG << yaw << std::endl;
+
+      float distanceBetweenDrones =
+         cMoving->computeDistanceBetweenPoints(packetP2P, cPos*100);
+      if (yaw == NO_COLLISION && stateMode == kCollisionResolver) {
+         stateMode = kTakeOff;
+      } else if (distanceBetweenDrones < 200 && stateMode == kTakeOff && yaw != NO_COLLISION) {
+         stateMode = kCollisionResolver;
+         packetOverP2PSaved = packetP2P;
+      } else if (distanceBetweenDrones > 250 && stateMode == kCollisionResolver) {
+         stateMode = kTakeOff;
       }
 
       cTimer->CountOneCycle();
@@ -139,9 +151,9 @@ void CSimAlfred::ControlStep() {
             break;
          case kTakeOff:
          {
-            if (sBatRead.AvailableCharge < 0.3) {
+            /*if (sBatRead.AvailableCharge < 0.3) {
                stateMode = kReturnToBase;
-            }
+            }*/
             if (m_uiCurrentStep < 20) {  // decolage
                cPos.SetZ(cPos.GetZ() + 0.25f);
                m_pcPropellers->SetAbsolutePosition(cPos);
@@ -149,31 +161,37 @@ void CSimAlfred::ControlStep() {
                if (sensorValues[3] < 130 && sensorValues[3] != -2.0) {
                   m_pcPropellers->SetRelativeYaw(CRadians::PI_OVER_FOUR/2);
                }
+
                CVector3* vector = cMoving->GoInSpecifiedDirection(
                      cSensors->FreeSide(sensorValues));
-               vector->SetZ(cP2P->GetAltitudeToAvoidCollision(cPos, idRobot));
-               // Prevent robot from touching ground
-               if (cPos.GetZ() < 0.2) {
-                  vector->SetZ(0.1);
-               }
                m_pcPropellers->SetRelativePosition(*vector);
             }
             break;
          }
+         case kCollisionResolver:
+         {
+            float yaw = cMoving->GetAngleToAvoidCollision(
+                     packetOverP2PSaved,
+                     cPos,
+                     speedValues);
+            //if (sensorValues[3] > 130 || sensorValues[3] == -2.0) {
+               m_pcPropellers->SetAbsoluteYaw(*new CRadians(yaw));
+            //}
+            CVector3* vector = cMoving->GoInSpecifiedDirection(
+               cSensors->ReturningSide(sensorValues, yaw));
+            m_pcPropellers->SetRelativePosition(*vector);
+            break;
+         } 
          case kReturnToBase:
          {
             if (sensorValues[3] > 130 || sensorValues[3] == -2.0) {
                m_pcPropellers->SetAbsoluteYaw(
-                  *new CRadians(computeAngleToFollow()));
+                  *new CRadians(
+                     cMoving->computeAngleToFollow(objective, cPos)));
             }
-            computeAngleToFollow();
+            float angle = cMoving->computeAngleToFollow(objective, cPos);
             CVector3* vector = cMoving->GoInSpecifiedDirection(
-               cSensors->ReturningSide(sensorValues, computeAngleToFollow()));
-            vector->SetZ(cP2P->GetAltitudeToAvoidCollision(cPos, idRobot));
-            // Prevent robot from touching ground
-            if (cPos.GetZ() < 0.2) {
-               vector->SetZ(0.1);
-            }
+               cSensors->ReturningSide(sensorValues, angle));
             m_pcPropellers->SetRelativePosition(*vector);
             break;
          }
@@ -211,5 +229,5 @@ void CSimAlfred::Reset() {
  * class to instantiate.
  * See also the XML configuration files for an example of how this is used.
  */
-REGISTER_CONTROLLER(CSimAlfred, "demo_pdr_controller")
+REGISTER_CONTROLLER(CSimAlfred, "sim_alfred_controller")
 

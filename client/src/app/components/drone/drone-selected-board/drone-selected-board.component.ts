@@ -16,8 +16,13 @@ export class DroneSelectedBoardComponent {
   sendTakeOffRequest(): void {
     this.selectedDroneService.sendTakeOffRequest();
   }
+
   sendReturnToBaseRequest(): void {
     this.selectedDroneService.sendReturnToBaseRequest();
+  }
+
+  sendLandRequest(): void {
+    this.selectedDroneService.sendLandRequest();
   }
 
   public get drone(): Drone {

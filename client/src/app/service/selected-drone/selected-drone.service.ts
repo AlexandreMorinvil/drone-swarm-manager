@@ -10,24 +10,28 @@ export class SelectedDroneService {
   private previousDroneId: number = UNSET_DRONE_INDEX;
   private droneId: number = UNSET_DRONE_INDEX;
 
-  constructor(private droneListService: DroneListService, private droneConrtrolService: DroneControlService) {}
+  constructor(private droneListService: DroneListService, private droneControlService: DroneControlService) {}
 
   sendToogleLedRequest(): void {
-    this.validateDroneAvailability(this.droneConrtrolService.sendToogleLedRequest);
+    this.validateDroneAvailability(this.droneControlService.sendToogleLedRequest);
   }
 
   sendTakeOffRequest(): void {
-    this.validateDroneAvailability(this.droneConrtrolService.sendTakeOffRequest);
+    this.validateDroneAvailability(this.droneControlService.sendTakeOffRequest);
   }
 
   sendReturnToBaseRequest(): void {
-    this.validateDroneAvailability(this.droneConrtrolService.sendReturnToBaseRequest);
+    this.validateDroneAvailability(this.droneControlService.sendReturnToBaseRequest);
+  }
+
+  sendLandRequest(): void {
+    this.validateDroneAvailability(this.droneControlService.sendLandRequest);
   }
 
   validateDroneAvailability(callback: (droneId: number) => void): boolean {
     this.droneId = this.drone.droneId;
     if (this.droneId !== UNSET_DRONE_INDEX) {
-      callback.call(this.droneConrtrolService, this.droneId);
+      callback.call(this.droneControlService, this.droneId);
       return true;
     } else {
       this.unsetSelectedDrone();
