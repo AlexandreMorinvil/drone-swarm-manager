@@ -231,8 +231,8 @@ export class MapComponent {
     const height = this.max_y - this.min_y;
 
     // Add border to the range
-    this.display_min_x = this.min_x - width / 2 * BORDER_FACTOR;
-    this.display_max_x = this.max_x + width / 2 * BORDER_FACTOR;
+    this.display_min_x = this.min_x - width / 2 * BORDER_FACTOR; 
+    this.display_max_x = this.max_x + width / 2 * BORDER_FACTOR; 
     this.display_min_y = this.min_y - height / 2 * BORDER_FACTOR;
     this.display_max_y = this.max_y + height / 2 * BORDER_FACTOR;
 

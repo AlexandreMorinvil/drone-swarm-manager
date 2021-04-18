@@ -1,6 +1,5 @@
 import { Injectable } from "@angular/core";
 import { Vec3 } from "@app/class/vec3";
-
 import { SocketService } from "../socket.service";
 
 @Injectable({
@@ -16,7 +15,9 @@ export class LiveMapService {
 
   constructor(public socketService: SocketService) {
     this.socketService.addEventHandler("LIVE_MAP_NEW_POINT", (data) => { this.receivePoint(data) } );
-    this.socketService.addEventHandler("LIVE_MAP_BASE_MAP", (data) => { this.receiveBaseMap(data) });
+    this.socketService.addEventHandler("LIVE_MAP_BASE_MAP", (data) => {
+      const pointsData: any = JSON.parse(data);
+      this.receiveBaseMap(pointsData) });
   }
 
   getMustResetMap(): boolean {
@@ -44,9 +45,8 @@ export class LiveMapService {
   }
 
   private receiveBaseMap(data): void {
-    const pointsData: any = JSON.parse(data);
     const baseMap = [];
-    for (let point of pointsData)
+    for (let point of data)
       baseMap.push(new Vec3(point.x, point.y, point.z))
     this.wallPointsToAdd = baseMap;
     this.mustResetRender = true;
