@@ -13,7 +13,6 @@ class ConcreteDroneInterface(DroneInterface):
     def send_data(self, packet, format_packer):
         print('Test')
 
-
 class TestDroneInterfaceMethods(unittest.TestCase):
     droneInterface = ConcreteDroneInterface('port', Vec3(10, 10, 10))
     
@@ -28,7 +27,6 @@ class TestDroneInterfaceMethods(unittest.TestCase):
                 'currentSpeed': Vec3(0,0,0).toJson(),
                 }
         self.assertEqual(data, dataExpected, "DUMP fail")
-
 
 if __name__ == '__main__':
     unittest.main()

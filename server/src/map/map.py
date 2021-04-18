@@ -25,8 +25,8 @@ class Map:
 
     def toJson(self):
         return {
-            name: self.__name,
-            points: self.__points
+            'name': self.__name,
+            'points': self.__points
         }
 
     def end_mission(self):
