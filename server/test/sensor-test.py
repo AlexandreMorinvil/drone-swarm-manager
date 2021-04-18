@@ -19,7 +19,7 @@ class TestSensorMethods(unittest.TestCase):
     easySensorSimul = Sensor(True, 10, 10, 10, 10, 10, 10, 0, 0, 0)  # all angles are null
     midSensorSimul = Sensor(True, rt18, rt18, rt18, rt18, rt18, rt18, math.pi / 4, 0, 0)
 
-    # Option drones
+    # Tests for real drone option
     def testGetEdgeFront(self):
         self.assertEqual(self.easySensor.getEdgeFront(), Vec3(0.01, 0.0, 0.0), "FRONT: easy fail")
         self.assertEqual(self.midSensor.getEdgeFront(), Vec3(0.003, 0.003, 0.0), "FRONT: mid fail : ")
@@ -36,7 +36,7 @@ class TestSensorMethods(unittest.TestCase):
         self.assertEqual(self.easySensor.getEdgeBack(), Vec3(-0.01, 0, 0), "BACK: easy fail")
         self.assertEqual(self.midSensor.getEdgeBack(), Vec3(-0.003, -0.003, 0), "BACK: mid fail : ")
 
-    # Option simulation
+    # Tests for simulation option
     def testGetEdgeFrontSimul(self):
         self.assertEqual(self.easySensorSimul.getEdgeFront(), Vec3(0.1, 0.0, 0.0), "FRONT SIMULATION: easy fail")
         self.assertEqual(self.midSensorSimul.getEdgeFront(), Vec3(0.03, 0.03, 0.0), "FRONT SIMULATION: mid fail : ")
