@@ -8,6 +8,9 @@ from DBconnect import DatabaseConnector
 sys.path.insert(1, os.path.abspath('../'))
 
 class Map:
+
+    RESOLUTION = 0.02
+
     def __init__(self, name, id):
         self.db = DatabaseConnector()
         self.__name = name
@@ -17,6 +20,7 @@ class Map:
         
 
     def addPoint(self, point):
+
         self.__points.append(point)
 
     def setBaseMap(self, points, name="Map Name"):

@@ -23,7 +23,6 @@ class MapHandler:
     class __OnlyOne:
         def __init__(self):
             self.db = DatabaseConnector()
-            self.t = None
             self.current_map = None
             self.is_consuming = True
             self.__databasePoint = []
