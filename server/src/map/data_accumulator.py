@@ -1,4 +1,4 @@
-from map import Map
+import map
 from vec3 import Vec3
 from sensor import Sensor
 from threading import Lock
