@@ -1,10 +1,18 @@
 version: "2"
 services:
   client:
-    container_name: client
+    container_name: alfred-client
     build: client
     ports:
       - 8080:4200
     environment:
       - NODE_ENV=production
-      - VIRTUAL_PORT=4200
+
+  server:
+    container_name: alfred-server
+    build: server
+    ports:
+      - 5000:5000
+    volumes:
+      - ./logs:/usr/src/server/logs
+      - ./map.db:/usr/src/server/map.db
