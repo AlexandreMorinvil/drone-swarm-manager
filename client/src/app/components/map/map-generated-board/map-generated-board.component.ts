@@ -7,7 +7,7 @@ import { MapComponent } from "../map/map.component";
   templateUrl: "./map-generated-board.component.html",
   styleUrls: ["./map-generated-board.component.scss"],
 })
-export class MapGeneratedBoardComponent {
+export class MapGeneratedBoardComponent implements AfterViewInit {
   @ViewChild("liveMap") map: MapComponent;
 
   updateIntervalID: ReturnType<typeof setTimeout>;
@@ -21,7 +21,9 @@ export class MapGeneratedBoardComponent {
 
   updateMap(): void {
     // if (this.liveMapService.getMustResetMap()) this.map.erasePlot();
-    if (this.liveMapService.hasNewPoint()) this.map.addWallPoint(this.liveMapService.givePointsToRender());
+    if (this.liveMapService.hasNewPoint()) {
+      this.map.addWallPoint(this.liveMapService.givePointsToRender());
+    }
   }
 
   ngAfterViewInit() {

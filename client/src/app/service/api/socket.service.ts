@@ -1,7 +1,5 @@
 import { Injectable } from "@angular/core";
 import { io, Socket } from "socket.io-client/build/index";
-import { DroneListService } from "./drone-list/drone-list.service";
-import { ServerMode } from "@app/constants/serverMode";
 @Injectable({
   providedIn: "root",
 })
