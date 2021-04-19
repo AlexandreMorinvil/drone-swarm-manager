@@ -1,0 +1,76 @@
+.box
+{
+  font-size: 1.25rem; /* 20 */
+  background-color: #bfb8e5;
+  position: relative;
+  padding: 20px 20px;
+  text-align: center;
+  display: none;
+}
+
+.box__dragndrop
+{
+  display: inline;
+}
+.box__icon
+{
+  width: 40vw;
+  height: 40vh;
+  fill: #673ab7;
+  display: block;
+  margin-bottom: 40px;
+
+}
+
+.box__file
+{
+  width: 0.1px;
+  height: 0.1px;
+  opacity: 0;
+  overflow: hidden;
+  position: absolute;
+  z-index: -1;
+}
+.box__file + label
+{
+  max-width: 80%;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+  display: inline-block;
+  overflow: hidden;
+  position: center;
+}
+.box__file + label:hover strong,
+.box__file:focus + label strong,
+.box__file.has-focus + label strong
+{
+  color: #8139d3;
+}
+.box__button
+{
+  font-weight: 700;
+  color: #e5edf1;
+  background-color: #39bfd3;
+  padding: 8px 16px;
+  margin: 40px auto 0;
+  position: relative;
+  left: 30px
+}
+.box__button:hover,
+.box__button:focus
+{
+  background-color: #0f3c4b;
+}
+.box__file {
+  display: none;
+}
+.TxtEdit {
+  background-color: darkblue;
+  color: white;
+  width: 55vw;
+  height: 55vh;
+}
+.fileTabs {
+  display: block;
+}

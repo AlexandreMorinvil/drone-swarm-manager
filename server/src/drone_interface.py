@@ -98,3 +98,6 @@ class DroneInterface(ABC):
     @abstractmethod
     def get_vBat(self):
         pass
+
+    def get_state(self):
+        return self._state

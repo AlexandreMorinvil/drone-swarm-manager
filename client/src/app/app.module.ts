@@ -37,7 +37,9 @@ import { MatRadioModule } from '@angular/material/radio';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatStepperModule } from '@angular/material/stepper';
-
+import { FileUploadComponent } from "./components/file-upload/file-upload.component";
+import {MatSlideToggleModule} from '@angular/material/slide-toggle';
+import {MatTabsModule} from '@angular/material/tabs';
 
 @NgModule({
   declarations: [
@@ -55,6 +57,7 @@ import { MatStepperModule } from '@angular/material/stepper';
     MapListComponent,
     MapSelectedComponent,
     DronePositionComponent,
+    FileUploadComponent,
   ],
   imports: [
     BrowserModule,
@@ -76,7 +79,11 @@ import { MatStepperModule } from '@angular/material/stepper';
     MatRadioModule,
     FormsModule,
     ReactiveFormsModule,
-    MatStepperModule
+    MatStepperModule,
+    MatDialogModule,
+    MatSlideToggleModule,
+    MatTabsModule,
+    FormsModule,
   ],
   providers: [],
   bootstrap: [AppComponent],

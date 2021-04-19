@@ -1,0 +1,40 @@
+<!-- Credits to https://css-tricks.com/drag-and-drop-file-uploading/ -->
+Upload<mat-slide-toggle
+class="slideSelector"
+[(ngModel)]="isEdit"
+(change)="toggleInput($event)"
+color= "primary">
+Edit
+</mat-slide-toggle>
+<form class="box" method="" action="" enctype="multipart/form-data">
+<div class="box__input" >
+  <input change class="box__file" type="file" id="file" data-multiple-caption="{count} files selected" multiple (click)="inputFiles($event)"/>
+  <label for="file"><strong>Choose a file</strong><span class="box__dragndrop"> or drag it here</span>.</label>
+  <svg class="box__icon" xmlns="http://www.w3.org/2000/svg" width="50" height="43" viewBox="0 0 50 43">
+    <path
+      d="M48.4 26.5c-.9 0-1.7.7-1.7 1.7v11.6h-43.3v-11.6c0-.9-.7-1.7-1.7-1.7s-1.7.7-1.7 1.7v13.2c0 .9.7 1.7 1.7 1.7h46.7c.9 0 1.7-.7 1.7-1.7v-13.2c0-1-.7-1.7-1.7-1.7zm-24.5 6.1c.3.3.8.5 1.2.5.4 0 .9-.2 1.2-.5l10-11.6c.7-.7.7-1.7 0-2.4s-1.7-.7-2.4 0l-7.1 8.3v-25.3c0-.9-.7-1.7-1.7-1.7s-1.7.7-1.7 1.7v25.3l-7.1-8.3c-.7-.7-1.7-.7-2.4 0s-.7 1.7 0 2.4l10 11.6z"></path>
+  </svg>
+</div><mat-selection-list #fileLi>
+  <ng-container *ngFor="let file of getFiles()">
+    {{file.name}}
+  </ng-container>
+</mat-selection-list>
+  <p>
+    Options selected: {{fileLi.selectedOptions.selected.length}}
+  </p>
+</form> 
+<div *ngIf="isEdit">
+  Light &nbsp; 
+<mat-slide-toggle
+class = "DarkMode"
+[(ngModel)]="isDark"
+(change)="toggleMode($event)"
+color= "primary">Dark</mat-slide-toggle>
+</div>
+<mat-tab-group mat-stretch-tabs class="fileTabs">
+  <ng-container *ngFor="let file of fileEditArray">
+  <mat-tab label="{{file.name}}"> <textarea id="{{file.name}}" class="TxtEdit" [(value)]="file.text" (change)="onTextEdit()" spellcheck="false">  </textarea></mat-tab>
+  </ng-container>
+</mat-tab-group>
+  <button mat-raised-button color="primary" (click)="clear()">Clear</button>
+  <button mat-raised-button color="primary" mat-dialog-close [disabled]="disableSend" (click)="submitUpdate()">UPDATE SOFTWARE</button>
