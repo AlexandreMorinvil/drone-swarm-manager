@@ -7,8 +7,8 @@ const TOTAL_WIDTH: number = 700;
 const TOTAL_HEIGHT: number = 500;
 
 const BORDER_FACTOR: number = 0.1;
-const MIN_WIDTH: number = 10;
-const MIN_HEIGHT: number = 10;
+const MIN_WIDTH: number = 2;
+const MIN_HEIGHT: number = 2;
 
 const NUMBER_TICKS: number = 10;
 const GRID_OPACITY: number = 0.25;
@@ -231,8 +231,8 @@ export class MapComponent {
     const height = this.max_y - this.min_y;
 
     // Add border to the range
-    this.display_min_x = this.min_x - width / 2 * BORDER_FACTOR;
-    this.display_max_x = this.max_x + width / 2 * BORDER_FACTOR;
+    this.display_min_x = this.min_x - width / 2 * BORDER_FACTOR; 
+    this.display_max_x = this.max_x + width / 2 * BORDER_FACTOR; 
     this.display_min_y = this.min_y - height / 2 * BORDER_FACTOR;
     this.display_max_y = this.max_y + height / 2 * BORDER_FACTOR;
 

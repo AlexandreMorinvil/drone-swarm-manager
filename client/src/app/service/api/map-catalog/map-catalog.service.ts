@@ -20,28 +20,28 @@ export class MapCatalogService {
     this.selectedMapObservable = this.selectedMapSource.asObservable();
 
     this.socketService.addEventHandler("MAP_LIST", (data) => {
-      this.receiveMaps(data);
+      const mapData = JSON.parse(data);
+      this.receiveMaps(mapData);
     });
     this.socketService.addEventHandler("MAP_POINTS", (data) => {
-      this.receiveSelectedMapPoints(data);
+      const pointsData = JSON.parse(data);
+      this.receiveSelectedMapPoints(pointsData);
     });
   }
 
-  receiveMaps(data: any): void {
-    const mapData = JSON.parse(data);
+  receiveMaps(mapData: any): void {
     this.mapList = [];
     for (let i in mapData) {
       this.mapList.push(new Map(mapData[i].id, mapData[i].name, mapData[i].date));
     }
   }
 
-  receiveSelectedMapPoints(data: any): void {
-    const pointsData = JSON.parse(data);
-    const slectedMapPoints: Vec3[] = [];
+  receiveSelectedMapPoints(pointsData: any): void {
+    const selectedMapPoints: Vec3[] = [];
     for (const point of pointsData) {
-      slectedMapPoints.push(new Vec3(point.x, point.y, point.z));
+      selectedMapPoints.push(new Vec3(point.x, point.y, point.z));
     }
-    this.selectedMap.points = slectedMapPoints;
+    this.selectedMap.points = selectedMapPoints;
     this.selectedMapSource.next(this.selectedMap);
   }
 

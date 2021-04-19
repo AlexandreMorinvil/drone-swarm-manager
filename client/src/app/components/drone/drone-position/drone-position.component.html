@@ -1,0 +1,38 @@
+<mat-card>
+    <mat-card-header>
+      <mat-card-title>Please enter relative positions (in cm)</mat-card-title>
+      <mat-card-subtitle>All drones should have same orientation</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+    </mat-card-content>
+    <mat-card-actions>
+    </mat-card-actions>
+</mat-card>
+
+<div class="drone-list">
+<mat-vertical-stepper [linear]=true #stepper>
+    <div *ngFor="let formControl of formArray.controls; index as i">
+        <mat-step [stepControl]="formControl">
+            <form [formGroup]="formControl">
+              <ng-template matStepLabel>Drone {{i+1}}</ng-template>
+              <mat-form-field appearance="fill" class="drone-list">
+                <mat-label>Address</mat-label>
+                <input matInput type="string" required formControlName="address"> 
+                </mat-form-field>
+                <mat-form-field appearance="fill" class="drone-list">
+                    <mat-label>Position in x</mat-label>
+                    <input matInput type="number" required formControlName="x"> 
+                </mat-form-field>
+                <mat-form-field appearance="fill" class="drone-list">
+                    <mat-label>Position in y</mat-label>
+                    <input matInput type="number" required formControlName="y"> 
+                </mat-form-field>
+              <div *ngIf="numberOfDrone!=1">
+                <button mat-button matStepperNext class="next-button">Next</button>
+              </div>
+            </form>
+          </mat-step>    
+    </div>
+</mat-vertical-stepper>
+<button mat-button (click)=closeModal() class="validate-button">Validate</button> 
+</div>

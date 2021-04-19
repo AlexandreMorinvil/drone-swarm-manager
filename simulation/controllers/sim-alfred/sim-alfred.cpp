@@ -120,9 +120,9 @@ void CSimAlfred::ControlStep() {
          speedValues);
 
       // Update StateMode received from ground station
-      StateMode* stateModeReceived = cRadio->ReceiveData();
-      if (stateModeReceived) {
-         stateMode = *stateModeReceived;
+      StateMode stateModeReceived = cRadio->ReceiveData();
+      if (stateModeReceived != StateMode::kStandby) {
+         stateMode = stateModeReceived;
       }
 
       PacketP2P packetP2P = cP2P->GetClosestPacket(cPos);
@@ -200,6 +200,8 @@ void CSimAlfred::ControlStep() {
              && cTimer->GetTimer(TimerType::kLandingTimer) < 0) {
                CVector3* test = new CVector3(0, 0, -0.1);
                m_pcPropellers->SetRelativePosition(*test);
+            } else {
+               stateMode = kStandby;
             }
             break;
       }

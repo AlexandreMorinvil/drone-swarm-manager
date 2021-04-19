@@ -1,5 +1,7 @@
 {
     "files.associations": {
-        "iterator": "cpp"
+        "iterator": "cpp",
+        "cmath": "c",
+        "sensor.h": "c"
     }
 }

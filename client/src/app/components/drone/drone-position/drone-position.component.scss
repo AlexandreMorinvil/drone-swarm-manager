@@ -1,0 +1,23 @@
+.drone-list {
+    display: flex;
+    justify-content: center;
+}
+
+.next-button {
+    display: block;
+    margin: auto;
+}
+
+mat-card {
+    margin-bottom: 20px;
+}
+
+.validate-button {
+    display: block;
+    margin: auto;
+    width: 150px;
+    background-color: #593697;
+    color: white;
+    font-family: Roboto,Helvetica Neue,sans-serif;
+    font-size: 16px;
+  }
