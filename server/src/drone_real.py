@@ -125,3 +125,6 @@ class DroneReal(DroneInterface) :
         
         if(self._vbat < 3.5):
             return 0
+
+    def close_connection(self):
+        self._cf.close_link()
