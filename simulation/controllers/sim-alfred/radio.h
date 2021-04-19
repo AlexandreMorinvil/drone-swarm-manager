@@ -45,7 +45,9 @@ typedef enum {
     attitude = 2,
     velocity = 3,
     distance = 4,
-    orientation = 5
+    orientation = 5,
+    switchState = 6,
+    setInitPos = 7,
 } PacketType;
 
 struct PacketPosition {
@@ -86,6 +88,12 @@ struct PacketOrientation {
     float yaw;
 } __attribute__((packed));
 
+struct PacketRX {
+    PacketType packetType;
+    float firstPayload;
+    float secondPayload;
+} __attribute__((packed));
+
 class CRadio {
  public:
       CRadio();
@@ -96,7 +104,7 @@ class CRadio {
 
       void sendTelemetry(CVector3 pos, StateMode stateMode, float vBat, float rangeValues[], float orientationValues[], float speed[]);
 
-      StateMode* ReceiveData();
+      StateMode ReceiveData();
 
  private:
       int sock, valRead, n;

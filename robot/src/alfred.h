@@ -25,12 +25,14 @@
 #define DEBUG_MODULE "HELLOWORLD"
 
 typedef enum {
-    tx,
-    position,
-    attitude,
-    velocity,
-    distance,
-    orientation
+    kTx,
+    kPosition,
+    kAttitude,
+    kVelocity,
+    kDistance,
+    kOrientation,
+    kSwitchState,
+    kSetInitPos,
 } PacketType;
 
 typedef enum {
@@ -44,7 +46,9 @@ typedef enum {
   } StateMode;
 
 typedef struct packetRX {
-  StateMode stateMode;
+  int packetType;
+  float firstPayload;
+  float secondPayload;
 } __attribute__((packed)) packetRX;
 
 typedef struct PacketTX {

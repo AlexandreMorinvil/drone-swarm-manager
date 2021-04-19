@@ -52,6 +52,8 @@ static xTimerHandle timerSwitchState;
 static xTimerHandle timerTimeoutPacket;
 StateMode stateMode = kStandby;
 float newAltitudeZ = 0.0f;
+float initPosX = 0.0;
+float initPosY = 0.0;
 
 uint8_t getId() {
   uint64_t address = configblockGetRadioAddress();
@@ -68,7 +70,12 @@ P2PPacket initializeP2PPacket() {
 
 
 void processRXPacketReceived(struct packetRX rxPacket){
-  stateMode = rxPacket.stateMode;
+  if (rxPacket.packetType == (int)kSwitchState) {
+    stateMode = (int)rxPacket.firstPayload;
+  } else if (rxPacket.packetType == (int)kSetInitPos) {
+    initPosX = rxPacket.firstPayload;
+    initPosY = rxPacket.secondPayload;
+  }
 }
 
 void setObjective(float x, float y, float z) {
@@ -89,17 +96,17 @@ void sendInfosToBase() {
   packetTX.vbat = logGetFloat(logGetVarId("pm", "vbat"));
   packetTX.stateMode = (int) stateMode;
   // packetTX.rssiToBase = logGetInt(logGetVarId("radio", "rssi"));
-  packetTX.packetType = (int) tx;
+  packetTX.packetType = (int) kTx;
 
-  packetPosition.x = logGetFloat(logGetVarId("stateEstimate", "x"));
-  packetPosition.y = logGetFloat(logGetVarId("stateEstimate", "y"));
+  packetPosition.x = logGetFloat(logGetVarId("stateEstimate", "x")) + initPosX;
+  packetPosition.y = logGetFloat(logGetVarId("stateEstimate", "y")) + initPosY;
   packetPosition.z = logGetFloat(logGetVarId("stateEstimate", "z"));
-  packetPosition.packetType = (int) position;
+  packetPosition.packetType = (int) kPosition;
 
   packetVelocity.px = logGetFloat(logGetVarId("stateEstimate", "vx"));
   packetVelocity.py = logGetFloat(logGetVarId("stateEstimate", "vy"));
   packetVelocity.pz = logGetFloat(logGetVarId("stateEstimate", "vz"));
-  packetVelocity.packetType = (int) velocity;
+  packetVelocity.packetType = (int) kVelocity;
 
   packetDistance.front = logGetUint(logGetVarId("range", "front"));
   packetDistance.back = logGetUint(logGetVarId("range", "back"));
@@ -107,9 +114,9 @@ void sendInfosToBase() {
   packetDistance.left = logGetUint(logGetVarId("range", "left"));
   packetDistance.right = logGetUint(logGetVarId("range", "right"));
   packetDistance.zrange = logGetUint(logGetVarId("range", "zrange"));
-  packetDistance.packetType = (int) distance;
+  packetDistance.packetType = (int) kDistance;
 
-  packetOrientation.packetType = (int) orientation;
+  packetOrientation.packetType = (int) kOrientation;
   packetOrientation.roll  = 0.0f;
   packetOrientation.pitch = 0.0f;
   packetOrientation.yaw   = logGetFloat(logGetVarId("stabilizer", "yaw"))
@@ -130,8 +137,8 @@ void sendInfoToOtherRobots() {
   packetOverP2P.id = getId();
   packetOverP2P.vx = logGetFloat(logGetVarId("stateEstimate", "vx"))*100;
   packetOverP2P.vy = logGetFloat(logGetVarId("stateEstimate", "vy"))*100;
-  packetOverP2P.x = logGetFloat(logGetVarId("stateEstimate", "x"))*100;
-  packetOverP2P.y = logGetFloat(logGetVarId("stateEstimate", "y"))*100;
+  packetOverP2P.x = (logGetFloat(logGetVarId("stateEstimate", "x"))+initPosX)*100;
+  packetOverP2P.y = (logGetFloat(logGetVarId("stateEstimate", "y"))+initPosY)*100;
   memcpy(&p_reply.data, &packetOverP2P, sizeof(packetOverP2P));
   p_reply.size = sizeof(packetOverP2P);
   radiolinkSendP2PPacketBroadcast(&p_reply);
@@ -162,11 +169,11 @@ float yaw = 0.0;
 PacketOverP2P packetOverP2PSaved;
 
 void p2pcallbackHandler(P2PPacket *p) {
-  xTimerReset(timerTimeoutPacket, M2T(1000));
+  xTimerReset(timerTimeoutPacket, M2T(2000));
   PacketOverP2P packetOverP2P;
   memcpy(&packetOverP2P, p->data, sizeof(packetOverP2P));
-  float x = logGetFloat(logGetVarId("stateEstimate", "x"));
-  float y = logGetFloat(logGetVarId("stateEstimate", "y"));
+  float x = logGetFloat(logGetVarId("stateEstimate", "x")) + initPosX;
+  float y = logGetFloat(logGetVarId("stateEstimate", "y")) + initPosY;
   float z = logGetFloat(logGetVarId("stateEstimate", "z"));
   Vector3 cPos;
   cPos.x = x*100;
@@ -183,11 +190,11 @@ void p2pcallbackHandler(P2PPacket *p) {
   if (yaw == NO_COLLISION && stateMode == kCollisionResolver) {
     ledseqStop(&seq_lock);
     stateMode = kFlying;
-  } else if (distance <= 120 && stateMode == kFlying && yaw != NO_COLLISION) {
+  } else if (distance <= 110 && stateMode == kFlying && yaw != NO_COLLISION) {
     ledseqRun(&seq_lock);
     stateMode = kCollisionResolver;
     packetOverP2PSaved = packetOverP2P;
-  } else if (distance > 150 && stateMode == kCollisionResolver) {
+  } else if (distance > 130 && stateMode == kCollisionResolver) {
     ledseqStop(&seq_lock);
     stateMode = kFlying;
   }
@@ -224,11 +231,15 @@ void switchState() {
         if (logGetFloat(logGetVarId("stateEstimate", "z")) > elevation) {
           stateMode = kFlying;
           xTimerStart(timerSendRobots, 100);
+
+          // Apply a correction on value read
+          //initPosX-=cPos.x;
+          //initPosY-=cPos.y;
         }
         break;
       case kFlying:
-        if (sensorValues[3] < 850) {
-          yaw = 100.0f;
+        if (sensorValues[3] < 700) {
+          yaw = 170.0f;
         } else {
           yaw = 0.0f;
         }
@@ -238,6 +249,9 @@ void switchState() {
         yaw = 0.0f;
         break;
       case kCollisionResolver:
+        /*cPos.x = cPos.x*100;
+        cPos.y = cPos.y*100;
+        cPos.z = cPos.z*100;*/
         yaw =
           GetAngleToAvoidCollision(packetOverP2PSaved, cPos, speedValues)
           * (180.0f/3.14f);
@@ -288,13 +302,13 @@ void appMain() {
   xTimerStart(timerSendBase, 100);
   sendInfosToBase();
 
-  timerSendRobots = xTimerCreate("sendInfoToOtherRobots", M2T(100), pdTRUE, NULL, sendInfoToOtherRobots);
+  timerSendRobots = xTimerCreate("sendInfoToOtherRobots", M2T(200), pdTRUE, NULL, sendInfoToOtherRobots);
 
   timerSwitchState = xTimerCreate("switchState", M2T(100), pdTRUE, NULL, switchState);
   xTimerStart(timerSwitchState, 100);
   switchState();
 
-  timerTimeoutPacket = xTimerCreate("timeoutPacket", M2T(1000), pdFALSE, NULL, timeoutPacket);
+  timerTimeoutPacket = xTimerCreate("timeoutPacket", M2T(2000), pdFALSE, NULL, timeoutPacket);
 
   paramSetInt(paramGetVarId("commander", "enHighLevel"), 1);
 
