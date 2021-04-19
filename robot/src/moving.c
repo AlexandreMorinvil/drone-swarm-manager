@@ -37,14 +37,18 @@ float ComputeAngleToFollow(Vector3 objective, Vector3 cPos) {
   float ydiff = objective.y - cPos.y;
 
   float yaw = 0.0;
-
-  if (xdiff < 0) {
-    yaw = PI_VALUE - atan(ydiff/xdiff);
+  if (xdiff > 0.0f) {
+    if (ydiff > 0.0f) {
+        yaw = atan(ydiff/xdiff);
+    } else {
+        yaw = atan(ydiff/xdiff);
+    }
   } else {
-    yaw = atan(ydiff/xdiff);
-  }
-  if (ydiff < 0) {
-    yaw = - yaw;
+    if (ydiff > 0.0f) {
+        yaw = atan(ydiff/xdiff) - PI_VALUE;
+    } else {
+        yaw = atan(ydiff/xdiff) + PI_VALUE;
+    }
   }
   return yaw;
 }

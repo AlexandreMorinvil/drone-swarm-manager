@@ -10,14 +10,14 @@ import struct
 
 class DroneSimulation(DroneInterface) : 
 
-    def __init__(self, port, initialPos=Vec3()):
-        super().__init__(port, initialPos)
+    def __init__(self, address, initialPos=Vec3()):
+        super().__init__(address, initialPos)
         self.logsConfig = LogsConfig()
         self.logger = self.logsConfig.logger('DroneSimulation')
 
         # listen for incoming connections (server mode) with one connection at a time
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.bind(('localhost', port))
+        self.sock.bind(('localhost', address))
         self.sock.listen()
         self.logger.info('Create drone simulation in server')
 
@@ -33,9 +33,8 @@ class DroneSimulation(DroneInterface) :
         self.logger.info('connection from {}'.format(self.client_address))
         self.receive_data()
 
-    def send_data(self, packet, format_packer):
-        data = struct.pack(format_packer, packet)
-        self.connection.send(data)
+    def _send_data(self, packet):
+        self.connection.send(packet)
         
     def receive_data(self):
         self.logger.info('Receive data from argos id s{}'.format(id))
@@ -49,4 +48,5 @@ class DroneSimulation(DroneInterface) :
         t2 = threading.Thread(target=self.receive_data, args=(), name="receive_data_{}".format(id))
         t2.start
     
-    
+    def get_vBat(self):
+        return self._vbat

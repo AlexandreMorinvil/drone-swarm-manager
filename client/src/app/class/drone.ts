@@ -1,4 +1,4 @@
-import { Vec3 } from "@app/class/vec3";
+import { Vec2, Vec3 } from "@app/class/vec3";
 
 export const UNSET_DRONE_INDEX: number = -1;
 export const ALL_DRONE_INDEX: number = -2;
@@ -20,6 +20,7 @@ export enum DroneState {
 
 export class Drone {
   droneId: number;
+  initRealPos: Vec3 = new Vec3(0,0,0);
   private state: DroneState;
   private batteryLevel: number;
   private isConnected: Boolean;
@@ -68,6 +69,10 @@ export class Drone {
 
   getScalarSpeed(): string {
     return Math.sqrt(this.currentSpeed.x ** 2 + this.currentSpeed.y ** 2 + this.currentSpeed.z ** 2).toFixed(DECIMALS_TO_DISPLAY);
+  }
+
+  getPosition(): Vec3 {
+    return this.currentPosition;
   }
 
   getPositionnX(): string {
@@ -119,5 +124,20 @@ export class Drone {
 
   getSpeed(): Vec3 {
     return this.currentSpeed;
+  }
+}
+
+export class MinimalDrone {
+  id: number;
+  address: string;
+  initRealPos: Vec2;
+
+  constructor(
+    _id: number = 0,
+    _address: string = "",
+    _initRealPos = new Vec2(0.0, 0.0)) {
+    this.id = _id;
+    this.address = _address;
+    this.initRealPos = _initRealPos;
   }
 }

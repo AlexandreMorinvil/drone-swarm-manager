@@ -7,8 +7,8 @@ const TOTAL_WIDTH: number = 700;
 const TOTAL_HEIGHT: number = 500;
 
 const BORDER_FACTOR: number = 0.1;
-const MIN_WIDTH: number = 10;
-const MIN_HEIGHT: number = 10;
+const MIN_WIDTH: number = 2;
+const MIN_HEIGHT: number = 2;
 
 const NUMBER_TICKS: number = 10;
 const GRID_OPACITY: number = 0.25;
