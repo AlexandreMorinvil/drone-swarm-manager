@@ -11,7 +11,6 @@ from setup_logging import LogsConfig
 from map_handler import MapHandler
 from map_catalog import MapCatalog
 from DBconnect import DatabaseConnector
-from enum import Enum
 from drone_interface import StateMode
 from drone_simulation import DroneSimulation
 from drone_real import DroneReal
@@ -26,19 +25,14 @@ import json
 import socketio
 import logging
 
+
+
+from drone_list import DroneList
+from environment import Environment
 from utility import set_interval
 
 
-log = logging.getLogger('werkzeug')
-log.setLevel(logging.ERROR)
-
-
 Payload.max_decode_packets = 0xFFFFF
-
-
-class Mode(Enum):
-    REAL = 0
-    SIMULATION = 1
 
 
 logsConfig = LogsConfig()
@@ -47,85 +41,37 @@ logger = logsConfig.logger('server')
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins='*')
 
-default_port = 5015
-
-mode = Mode.SIMULATION
-
-# Initialize the low-level drivers (don't list the debug drivers)
-cflib.crtp.init_drivers(enable_debug_driver=False)
-# Scan for Crazyflies and use the first one found
-logger.info('Scanning interfaces for Crazyflies...')
-available = cflib.crtp.scan_interfaces()
-logger.info('Crazyflies found:')
-
-drones = []
-initPos = []
-
-
-def createDrones(numberOfDrone):
-    for i in range(numberOfDrone):
-        if mode == Mode.REAL:
-            initPosVec3 = Vec3(initPos[i]['x'], initPos[i]['y'])
-            drones.append(DroneReal(initPos[i]['address'], initPosVec3))
-        else:
-            drones.append(DroneSimulation(default_port + i))
-            t = threading.Thread(
-                target=drones[i].waiting_connection, name='waiting_connection')
-            t.start()
-            logger.info('Connection to port {}'.format(default_port + i))
-
-
-def deleteDrones():
-    if (mode == Mode.SIMULATION):
-        for i in drones:
-            if hasattr(i, "connection"):
-                i.connection.close()
-            i.sock.shutdown(2)
-            i.sock.close()
-            del i
-    else:
-        for i in drones:
-            i.close_connection()
-    drones.clear()
-
 
 @socketio.on('SET_MODE')
 def setMode(data):
-    deleteDrones()
     mode = data['mode_chosen']
-    numberOfDrone = data['number_of_drone']
-    if (mode == Mode.SIMULATION.value):
+    number_drones = data['number_of_drone']
+
+
+    DroneList.delete_drones()
+
+    # Set the environment's mode
+    Environment.set_mode(mode)
+
+    if (Environment.is_in_simulation()):
         dronesAreCreated = False
         while not dronesAreCreated:
             try:
-                createDrones(int(numberOfDrone))
+                DroneList.createDrones(int(number_drones))
                 dronesAreCreated = True
             except:
-                deleteDrones()
+                DroneList.delete_drones()
                 dronesAreCreated = False
-        call(['scripts/start-simulation.sh', '{}'.format(numberOfDrone)])
+        Environment.launch_simulation(number_drones)
+        # call(['scripts/start-simulation.sh', '{}'.format(number_drones)])
     else:
-        createDrones(int(numberOfDrone))
-
-    if (mode == Mode.REAL):
-        logger.info('Mode time')
-    else:
-        logger.info('Mode simulation')
+        DroneList.createDrones(int(number_drones))
 
 
 @socketio.on('INITIAL_POSITION')
 def set_real_position(data):
     initPos.clear()
     initPos.extend(data)
-
-
-@socketio.on('TOGGLE_LED')
-def ledToggler(data):
-    print(data['id'])
-    drones[data['id']].toggleLED()
-    print("LED TOGGLER")
-    logger.info('ledTogger function executed with data {}'.format(data['id']))
-
 
 @socketio.on('SWITCH_STATE')
 def land(data):
@@ -175,12 +121,12 @@ def startUpdate():
         if (drone.get_state() != StateMode.STANDBY.value):
             socketio.emit("FAILED_UPDATE")
             return
-    numberOfDrone = len(drones)
-    deleteDrones()
+    number_drones = len(drones)
+    DroneList.delete_drones()
     for address in initPos:
         if (call(['scripts/update-robot.sh', '{}'.format(address['address'])]) == 1):
             socketio.emit("FAILED_UPDATE")
-    createDrones(numberOfDrone)
+    DroneList.createDrones(number_drones)
 
 
 @socketio.on('ReqSource')
@@ -195,11 +141,15 @@ def sendSources():
 
 
 def send_data():
-    data_to_send = json.dumps([drone.dump() for drone in drones])
+    data_to_send = DroneList.dumps() #json.dumps([drone.dump() for drone in drones])
     socketio.emit('DRONE_LIST', data_to_send, broadcast=True)
     logger.info('send data to client')
 
 def main():
+
+    # Disable the werkzeug log generated in the server
+    log = logging.getLogger('werkzeug')
+    log.setLevel(logging.ERROR)
 
     # Initialize the database
     database_initializer = DatabaseConnector()
@@ -211,11 +161,19 @@ def main():
         target=map_handler.send_point, args=(socketio,), name='send_new_points')
     thread_map_handler.start()
 
+    # Initialze the environement
+    environement = Environment()
+
+    # Initialize the drone list
+    drone_list = DroneList()
+
     set_interval(send_data, 0.5)
     app.run(host='0.0.0.0', port=5000)
+    print(" ================================== ON SE REND ICI ==================================")
+
     while True:
-        if mode == Mode.SIMULATION:
-            for i in range(numberOfDrone):
+        if Environment.is_in_simulation():
+            for i in range(number_drones):
                 if (drones[i].data_received != None):
                     drones[i].start_receive_data()
 

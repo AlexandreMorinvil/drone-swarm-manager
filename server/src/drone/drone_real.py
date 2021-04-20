@@ -39,6 +39,9 @@ class DroneReal(DroneInterface) :
         packet = struct.pack("<iff", PacketType.SET_INIT_POS.value, self._startPos.x, self._startPos.y)
         self._send_data(packet)
 
+    def __del__(self):
+        self.close_connection()
+
     def _connected(self, link_uri):
         """ This callback is called form the Crazyflie API when a Crazyflie
         has been connected and the TOCs have been downloaded."""

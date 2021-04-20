@@ -12,8 +12,10 @@ class DroneSimulation(DroneInterface) :
 
     def __init__(self, address, initialPos=Vec3()):
         super().__init__(address, initialPos)
+
+        # Initialize the logger
         self.logsConfig = LogsConfig()
-        self.logger = self.logsConfig.logger('DroneSimulation')
+        self.logger = self.logsConfig.logger('DroneSimulation {}'.format(address))
 
         # listen for incoming connections (server mode) with one connection at a time
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -23,6 +25,12 @@ class DroneSimulation(DroneInterface) :
 
         # Initialize the live map handler
         self.map_observation_accumulator = MapObservationAccumulator(True)
+    
+    def __del__(self):
+        if hasattr(self, "connection"):
+            self.connection.close()
+        self.sock.shutdown(2)
+        self.sock.close()
 
     def waiting_connection(self):
         # wait for a connection
