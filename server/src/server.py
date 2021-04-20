@@ -28,7 +28,10 @@ log.setLevel(logging.ERROR)
 sys.path.append(os.path.abspath('./src/map'))
 from map_handler import MapHandler
 from setup_logging import LogsConfig
+from subprocess import call
+from engineio.payload import Payload
 
+Payload.max_decode_packets = 0xFFFFF
 class Mode(Enum):
     REAL = 0
     SIMULATION = 1
@@ -89,6 +92,9 @@ def deleteDrones():
             i.sock.shutdown(2)
             i.sock.close()
             del i
+    else:
+        for i in drones:
+            i.close_connection()
     drones.clear()
 
 @socketio.on('SET_MODE')
@@ -105,7 +111,7 @@ def setMode(data):
             except:
                 deleteDrones()
                 dronesAreCreated = False
-        call(['./start-simulation.sh', '{}'.format(numberOfDrone)])
+        call(['scripts/start-simulation.sh', '{}'.format(numberOfDrone)])
     else:
         createDrones(int(numberOfDrone))
 
@@ -153,6 +159,34 @@ def deleteMap(data):
     map_list = json.dumps([map_catalog.map_list_to_Json(map) for map in maps])
     socketio.emit('MAP_LIST', map_list)
 
+@socketio.on('SEND_FILE')
+def receiveFile(data):
+    file = open('../../robot/src/' + data['name'], 'wb')
+    file.write(data['content'])
+
+@socketio.on('UPDATE')
+def startUpdate():
+    for drone in drones:
+        if (drone.get_state() != StateMode.STANDBY.value):
+            socketio.emit("FAILED_UPDATE")
+            return
+    numberOfDrone = len(drones)
+    deleteDrones()
+    for address in initPos:
+        if (call(['scripts/update-robot.sh', '{}'.format(address['address'])]) == 1):
+            socketio.emit("FAILED_UPDATE")
+    createDrones(numberOfDrone)
+
+@socketio.on('ReqSource')
+def sendSources() :
+    for root, dirs, files in os.walk('../../robot/src/'):
+        for filename in files:
+            f=open('../../robot/src/'+filename)
+            socketio.emit('old_src',{
+                'name': filename,
+                'data': f.read()
+            })
+
 def send_data():
     data_to_send = json.dumps([drone.dump() for drone in drones])
     socketio.emit('DRONE_LIST', data_to_send, broadcast=True)
@@ -177,9 +211,8 @@ if __name__ == '__main__':
     thread_map_handler = threading.Thread(target=map_handler.send_point, args=(socketio,), name='send_new_points')
     thread_map_handler.start()
         
-    #createDrones(2)
     set_interval(send_data, 1)
-    app.run()
+    app.run(host='0.0.0.0', port=5000)
     while True:
         if mode == Mode.SIMULATION:
             for i in range(numberOfDrone):

@@ -1,6 +1,8 @@
 import { Component } from "@angular/core";
 import { ALL_DRONE_INDEX } from "@app/class/drone";
 import { DroneControlService } from "@app/service/api/drone-control/drone-control.service";
+import {MatDialog, MatDialogModule, MatDialogRef} from "@angular/material/dialog"
+import { FileUploadComponent } from "@app/components/file-upload/file-upload.component";
 
 @Component({
   selector: "app-drone-swarm-board",
@@ -9,7 +11,7 @@ import { DroneControlService } from "@app/service/api/drone-control/drone-contro
 })
 export class DroneSwarmBoardComponent {
 
-  constructor(public droneControlService: DroneControlService) {
+  constructor(public droneControlService: DroneControlService, public dialog: MatDialog) {
   }
 
   sendSwarmToggleLedRequest(): void {
@@ -27,4 +29,11 @@ export class DroneSwarmBoardComponent {
   sendEmmergencyLandingRequest(): void {
     this.droneControlService.sendEmergencyLandingRequest(ALL_DRONE_INDEX);
   }
+  
+  openUpdateDialog(): void {
+    const dialogRef = this.dialog.open(FileUploadComponent, {
+      backdropClass: 'bdrop'
+    });
+  }
+
 }
