@@ -139,11 +139,6 @@ def getMapList():
     map_list = json.dumps([map_catalog.map_list_to_Json(map) for map in maps])
     socketio.emit('MAP_LIST', map_list)
 
-@socketio.on('END_MISSION')
-def endOfMission(data):
-    mapHandler = MapHandler()
-    mapHandler.current_map.end_mission()
-
 @socketio.on('SELECT_MAP')
 def getMapPoints(data):
     map_catalog = MapCatalog()

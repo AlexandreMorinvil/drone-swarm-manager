@@ -1,5 +1,4 @@
 from vec3 import Vec3
-import math
 import sys
 import os
 from DBconnect import DatabaseConnector
@@ -12,11 +11,11 @@ class Map:
 
     RESOLUTION = 0.05
 
-    def __init__(self, name, id):
+    def __init__(self, name, id, time):
         self.db = DatabaseConnector()
+        self.id = id
         self.__name = name
         self.__points = {}
-        self.id = id
         self._endMission = False
 
     def addPoint(self, point):
@@ -34,24 +33,26 @@ class Map:
         # Return the point saved
         return point_to_add
 
+    def is_point_present(self, point):
+
+        # Verify whether or not the point is already present in the map
+        return point.x in self.__points and point.y in self.__points[point.x]
+
+    def get_points(self):
+        return [Vec3(row, column).to_json() for row in map for column in map[row]]
+
     def round_point(self, point):
+        
+        # Round the position of the point to the closest point which is a multiple of the RESOLUTION
         rounded_point = point.mul(1/Map.RESOLUTION)
         rounded_point = rounded_point.round()
         rounded_point = rounded_point.mul(Map.RESOLUTION)
         return rounded_point
 
-    def is_point_present(self, point):
-        return point.x in self.__points and point.y in self.__points[point.x]
-
-    def get_points(self):
-        return [Vec3(row, column) for row in map for column in map[row]]
-
 
     def to_json(self):
+        points = self.get_points()
         return {
             name: self.__name,
-            points: self.get_points()
+            points: [point.to_json() for point in points]
         }
-
-    def end_mission(self):
-        self.db.update_map(self.id, self.__databasePoint)
