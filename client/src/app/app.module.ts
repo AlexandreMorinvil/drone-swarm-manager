@@ -20,6 +20,8 @@ import { MapComponent } from "./components/map/map/map.component";
 import { MapListComponent } from "./components/map/map-list/map-list.component";
 import { MapSelectedComponent } from "./components/map/map-selected/map-selected.component";
 
+import { DronePositionComponent } from "./components/drone/drone-position/drone-position.component";
+
 //angular/materials
 import { MatDividerModule } from "@angular/material/divider";
 import { MatListModule } from "@angular/material/list";
@@ -33,7 +35,11 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatRadioModule } from '@angular/material/radio';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatStepperModule } from '@angular/material/stepper';
+import { FileUploadComponent } from "./components/file-upload/file-upload.component";
+import {MatSlideToggleModule} from '@angular/material/slide-toggle';
+import {MatTabsModule} from '@angular/material/tabs';
 
 @NgModule({
   declarations: [
@@ -50,6 +56,8 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
     NavigationBarComponent,
     MapListComponent,
     MapSelectedComponent,
+    DronePositionComponent,
+    FileUploadComponent,
   ],
   imports: [
     BrowserModule,
@@ -60,6 +68,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
     MatListModule,
     MatButtonModule,
     HttpClientModule,
+    MatDialogModule,
     MatIconModule,
     MatSidenavModule,
     MatToolbarModule,
@@ -70,6 +79,11 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
     MatRadioModule,
     FormsModule,
     ReactiveFormsModule,
+    MatStepperModule,
+    MatDialogModule,
+    MatSlideToggleModule,
+    MatTabsModule,
+    FormsModule,
   ],
   providers: [],
   bootstrap: [AppComponent],

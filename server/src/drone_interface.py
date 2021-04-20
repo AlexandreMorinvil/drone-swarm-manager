@@ -19,6 +19,8 @@ class PacketType(Enum):
     VELOCITY = 3
     DISTANCE = 4
     ORIENTATION = 5
+    SWITCH_STATE = 6
+    SET_INIT_POS = 7
 
 class StateMode(Enum):
     STANDBY = 0
@@ -35,7 +37,7 @@ class DroneInterface(ABC):
     # Static variable
     id_counter = 0
 
-    def __init__(self, port, initialPos=Vec3()):
+    def __init__(self, address, initialPos=Vec3()):
         self._id = DroneInterface.id_counter
         DroneInterface.id_counter += 1
         self._startPos = initialPos
@@ -47,12 +49,12 @@ class DroneInterface(ABC):
         self.led = True
 
     def dump(self):
-        posAbs = self._startPos + self.currentPos
+        #posAbs = self._startPos + self.currentPos
         return {'id': self._id,
                 'state': self._state,
-                'vbat': self._vbat,
+                'vbat': self.get_vBat(),
                 'isConnected': self._isConnected,
-                'currentPos': posAbs.toJson(),
+                'currentPos': self.currentPos.toJson(),
                 'currentSpeed': self._speed.toJson(),
                 }
 
@@ -86,5 +88,16 @@ class DroneInterface(ABC):
             self._speed.z = z_speed
 
     @abstractmethod
-    def send_data(self, packet, format_packer):
+    def _send_data(self, packet):
         pass
+
+    def switch_state(self, stateMode):
+        packet = struct.pack("<if", PacketType.SWITCH_STATE.value, stateMode)
+        self._send_data(packet)
+
+    @abstractmethod
+    def get_vBat(self):
+        pass
+
+    def get_state(self):
+        return self._state

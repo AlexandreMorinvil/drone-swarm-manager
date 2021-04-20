@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
+    "start": "ng serve --host 0.0.0.0",
     "build": "ng build",
     "test": "ng test",
     "coverage": "ng test --code-coverage --sourceMap=true",
@@ -24,8 +24,8 @@
     "@angular/platform-browser-dynamic": "~11.1.1",
     "@angular/router": "~11.1.1",
     "angular": "^1.8.2",
-    "d3": "^6.5.0",
     "angular-material-icons": "^0.7.1",
+    "d3": "^6.5.0",
     "material-design-icons": "^3.0.1",
     "rxjs": "~6.5.4",
     "socket.io-client": "^3.1.1",

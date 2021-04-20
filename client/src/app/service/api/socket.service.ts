@@ -1,7 +1,5 @@
 import { Injectable } from "@angular/core";
 import { io, Socket } from "socket.io-client/build/index";
-import { DroneListService } from "./drone-list/drone-list.service";
-import { ServerMode } from "@app/constants/serverMode";
 @Injectable({
   providedIn: "root",
 })
@@ -13,7 +11,7 @@ export class SocketService {
   }
 
   public initSocket() {
-    this.socket = io("127.0.0.1:5000");
+    this.socket = io(window.location.hostname + ":5000");
   }
 
   public addEventHandler(eventName: string, callbackFunction: (data: any) => void): void {
@@ -28,4 +26,14 @@ export class SocketService {
   public get isConnected(): boolean {
     return this.socket.connected;
   }
+
+  /**
+     * Use this function  from the service attached to your component to add event you want to listen to
+     * @param name name of the event
+     * @param func the function to be executed
+     */
+   public onEvent(name: string, func : Function): void {
+    this.socket.on(name, func);
+  }
+
 }

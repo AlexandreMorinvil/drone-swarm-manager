@@ -1,6 +1,9 @@
 import { Injectable } from "@angular/core";
-import { Drone } from "@app/class/drone";
 import { SocketService } from "@app/service/api/socket.service";
+import { io, Socket } from "socket.io-client/build/index";
+import { Drone, MinimalDrone } from "@app/class/drone";
+import { ServerMode } from "@app/constants/serverMode";
+import { Vec2, Vec3 } from "@app/class/vec3";
 
 @Injectable({
   providedIn: "root",
@@ -9,6 +12,8 @@ export class DroneListService {
   droneId: number = 0;
   droneList: Drone[] = [];
   firstIndex: number = 0;
+  mode: ServerMode;
+  numberOfDrones: Number = 0;
 
   constructor(public socketService: SocketService) {
     this.socketService.addEventHandler("DRONE_LIST", (data) => { this.receiveData(data) });
@@ -54,5 +59,9 @@ export class DroneListService {
 
   public getDrone(droneId: number) {
     return this.droneList[droneId - this.firstIndex];
+  }
+
+  public getPositions(): Vec3[] {
+    return this.droneList.map( (v:Drone) => v.getPosition()) 
   }
 }

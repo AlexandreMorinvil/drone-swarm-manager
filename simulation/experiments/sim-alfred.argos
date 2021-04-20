@@ -170,7 +170,7 @@
   <!-- * Visualization * -->
   <!-- ****************** -->
   <visualization>
-    <qt-opengl>
+    <qt-opengl autoplay="true">
       <camera>
       <placements>
         <placement index="0" position="0,0,5"

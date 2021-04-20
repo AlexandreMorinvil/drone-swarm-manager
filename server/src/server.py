@@ -28,7 +28,10 @@ log.setLevel(logging.ERROR)
 sys.path.append(os.path.abspath('./src/map'))
 from map_handler import MapHandler
 from setup_logging import LogsConfig
+from subprocess import call
+from engineio.payload import Payload
 
+Payload.max_decode_packets = 0xFFFFF
 class Mode(Enum):
     REAL = 0
     SIMULATION = 1
@@ -62,18 +65,19 @@ print('Crazyflies found:')
 
 if (mode == Mode.REAL):
     logger.info('Mode time')
-    drones = []
-    
 else:
     logger.info('Mode simulation')
-    drones = []
-    
+
+
+drones = []
+initPos = []
+
 def createDrones(numberOfDrone):
-    if mode == Mode.REAL:
-        drones.append(DroneReal("radio://0/72/250K/E7E7E7E7E7"))
-        drones.append(DroneReal("radio://0/72/250K/E7E7E7E7E5"))
-    else:
-        for i in range(numberOfDrone):
+    for i in range(numberOfDrone):
+        if mode == Mode.REAL:
+            initPosVec3 = Vec3(initPos[i]['x'], initPos[i]['y'])
+            drones.append(DroneReal(initPos[i]['address'], initPosVec3))
+        else:
             drones.append(DroneSimulation(default_port + i))
             t = threading.Thread(target=drones[i].waiting_connection, name='waiting_connection')
             t.start()
@@ -81,12 +85,16 @@ def createDrones(numberOfDrone):
             
 
 def deleteDrones():
-    for i in drones:
-        if hasattr(i, "connection"):
-            i.connection.close()
-        i.sock.shutdown(2)
-        i.sock.close()
-        del i
+    if (mode == Mode.SIMULATION):
+        for i in drones:
+            if hasattr(i, "connection"):
+                i.connection.close()
+            i.sock.shutdown(2)
+            i.sock.close()
+            del i
+    else:
+        for i in drones:
+            i.close_connection()
     drones.clear()
 
 @socketio.on('SET_MODE')
@@ -94,15 +102,24 @@ def setMode(data):
     deleteDrones()
     mode = data['mode_chosen']
     numberOfDrone = data['number_of_drone']
-    dronesAreCreated = False
-    while not dronesAreCreated:
-        try:
-            createDrones(int(numberOfDrone))
-            dronesAreCreated = True
-        except:
-            deleteDrones()
-            dronesAreCreated = False
-    call(['./start-simulation.sh', '{}'.format(numberOfDrone)])
+    if (mode == Mode.SIMULATION.value):
+        dronesAreCreated = False
+        while not dronesAreCreated:
+            try:
+                createDrones(int(numberOfDrone))
+                dronesAreCreated = True
+            except:
+                deleteDrones()
+                dronesAreCreated = False
+        call(['scripts/start-simulation.sh', '{}'.format(numberOfDrone)])
+    else:
+        createDrones(int(numberOfDrone))
+
+@socketio.on('INITIAL_POSITION')
+def set_real_position(data):
+    initPos.clear()
+    initPos.extend(data)
+
 
 @socketio.on('TOGGLE_LED')
 def ledToggler(data):
@@ -111,37 +128,15 @@ def ledToggler(data):
     print("LED TOGGLER")
     logger.info('ledTogger function executed with data {}'.format(data['id']))
 
-@socketio.on('TAKEOFF')
-def takeOff(data):
-    print("takeoff for", data)
-    if (data['id'] == -2):
-        for i in drones:
-            i.send_data(StateMode.TAKE_OFF.value, "<i")
-            logger.info('Take off of {}'.format(i))
-
-    else:
-        socks[data['id'] - drones[0]._id].send_data(StateMode.TAKE_OFF.value, "<i")
-        logger.info('Take off of {}'.format(socks[data['id'] - drones[0]._id]))
-     
-@socketio.on('RETURN_BASE')
-def returnToBase(data):
-    if (data['id'] == -2):
-        for i in drones:
-            i.send_data(StateMode.RETURN_TO_BASE.value, "<i")
-            logger.info('Return to base of {}'.format(i))
-    else:
-        socks[data['id'] - drones[0]._id].send_data(StateMode.RETURN_TO_BASE.value, "<i")
-        logger.info('Return to base of {}'.format(socks[data['id'] - drones[0]._id]))
-
-@socketio.on('LAND')
+@socketio.on('SWITCH_STATE')
 def land(data):
     if (data['id'] == -2):
         for i in drones:
-            i.send_data(StateMode.LANDING.value, "<i")
+            i.switch_state(data['state'])
             logger.info('Landing of {}'.format(i))
     else:
-        drones[data['id']].send_data(StateMode.LANDING.value, "<i")
-        logger.info('Landing of {}'.format(socks[data['id']]))
+        drones[data['id']].switch_state(data['state'])
+        logger.info('Switch state of {} to {} mode'.format(socks[data['id'], StateMode(data['state'])]))
 
 @socketio.on('MAP_CATALOG')
 def getMapList():
@@ -169,6 +164,34 @@ def deleteMap(data):
     map_list = json.dumps([map_catalog.map_list_to_Json(map) for map in maps])
     socketio.emit('MAP_LIST', map_list)
 
+@socketio.on('SEND_FILE')
+def receiveFile(data):
+    file = open('../../robot/src/' + data['name'], 'wb')
+    file.write(data['content'])
+
+@socketio.on('UPDATE')
+def startUpdate():
+    for drone in drones:
+        if (drone.get_state() != StateMode.STANDBY.value):
+            socketio.emit("FAILED_UPDATE")
+            return
+    numberOfDrone = len(drones)
+    deleteDrones()
+    for address in initPos:
+        if (call(['scripts/update-robot.sh', '{}'.format(address['address'])]) == 1):
+            socketio.emit("FAILED_UPDATE")
+    createDrones(numberOfDrone)
+
+@socketio.on('ReqSource')
+def sendSources() :
+    for root, dirs, files in os.walk('../../robot/src/'):
+        for filename in files:
+            f=open('../../robot/src/'+filename)
+            socketio.emit('old_src',{
+                'name': filename,
+                'data': f.read()
+            })
+
 def send_data():
     data_to_send = json.dumps([drone.dump() for drone in drones])
     socketio.emit('DRONE_LIST', data_to_send, broadcast=True)
@@ -193,9 +216,8 @@ if __name__ == '__main__':
     thread_map_handler = threading.Thread(target=map_handler.send_point, args=(socketio,), name='send_new_points')
     thread_map_handler.start()
         
-    createDrones(2)
     set_interval(send_data, 1)
-    app.run()
+    app.run(host='0.0.0.0', port=5000)
     while True:
         if mode == Mode.SIMULATION:
             for i in range(numberOfDrone):

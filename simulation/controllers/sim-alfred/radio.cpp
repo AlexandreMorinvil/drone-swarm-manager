@@ -79,11 +79,16 @@ void CRadio::sendTelemetry(CVector3 pos, StateMode stateMode, float vBat, float 
 }
 
 
-StateMode* CRadio::ReceiveData() {
+StateMode CRadio::ReceiveData() {
     char buffer[1024];
-    StateMode* stateModeReceived = nullptr;
+    PacketRX* rxPacketReceived = nullptr;
+    StateMode stateMode = StateMode::kStandby;
     if (recv(sock , buffer, sizeof(buffer), 0) != -1) {
-        stateModeReceived = reinterpret_cast<StateMode*>(buffer);
+        rxPacketReceived = reinterpret_cast<PacketRX*>(buffer);
+        std::cout << rxPacketReceived->packetType << std::endl;
+        if (rxPacketReceived->packetType == PacketType::switchState) {
+            stateMode = static_cast<StateMode>(rxPacketReceived->firstPayload);
+        }
     }
-    return stateModeReceived;
+    return stateMode;
 }

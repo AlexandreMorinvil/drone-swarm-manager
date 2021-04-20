@@ -57,7 +57,7 @@ SensorSide ReturningSide(float sensorValues[4], float angle) {
     SensorSide* prioList = prioritise(angle);
     for (unsigned i =0 ; i < 2; ++i) {
         int index = (int)(prioList[i]);
-        if (sensorValues[index] > 2* CRITICAL_VALUE ||
+        if (sensorValues[index] > 2*CRITICAL_VALUE ||
             sensorValues[index] == -2)
             return prioList[i];
     }
