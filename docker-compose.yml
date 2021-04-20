@@ -16,3 +16,4 @@ services:
     volumes:
       - ./logs:/usr/src/server/logs
       - ./map.db:/usr/src/server/map.db
+      - ../robot:/usr/src/robot
