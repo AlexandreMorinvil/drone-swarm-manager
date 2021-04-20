@@ -47,13 +47,13 @@ def setMode(data):
     mode = data['mode_chosen']
     number_drones = data['number_of_drone']
 
-
     DroneList.delete_drones()
 
     # Set the environment's mode
     Environment.set_mode(mode)
 
     if (Environment.is_in_simulation()):
+        print("==================== DÉBUT : ÇA A BIEN REÇU LE SIGNAL : ON SE REND ICI ==================================")
         dronesAreCreated = False
         while not dronesAreCreated:
             try:
@@ -143,7 +143,6 @@ def sendSources():
 def send_data():
     data_to_send = DroneList.dumps() #json.dumps([drone.dump() for drone in drones])
     socketio.emit('DRONE_LIST', data_to_send, broadcast=True)
-    logger.info('send data to client')
 
 def main():
 
@@ -167,15 +166,11 @@ def main():
     # Initialize the drone list
     drone_list = DroneList()
 
+    # Initialize the drone state transmission
     set_interval(send_data, 0.5)
-    app.run(host='0.0.0.0', port=5000)
-    print(" ================================== ON SE REND ICI ==================================")
 
-    while True:
-        if Environment.is_in_simulation():
-            for i in range(number_drones):
-                if (drones[i].data_received != None):
-                    drones[i].start_receive_data()
+    # Initialize the serveur's API process
+    app.run(host='0.0.0.0', port=5000)
 
 if __name__ == '__main__':
     main()

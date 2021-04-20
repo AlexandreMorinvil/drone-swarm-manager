@@ -5,6 +5,7 @@ sys.path.append(os.path.abspath('./log'))
 
 # Add dependecies
 import json
+import threading
 from drone_interface import StateMode
 from drone_simulation import DroneSimulation
 from drone_real import DroneReal
@@ -34,20 +35,23 @@ class DroneList:
             DroneList.logger = self.logsConfig.logger('DroneList')
 
             # Indicate the initialization as completed
-            Environment.is_drone_list_initialized = True
-
+            DroneList.is_drone_list_initialized = True
 
     @classmethod
     def dumps(cls):
         json.dumps([drone.dump() for drone in cls.drones])
 
     @classmethod
-    def createDrones(cls, number_drones):
+    def createDrones(cls, number_drones, mode):
+        print("================================== ON SE REND ICI ==================================")
         for i in range(number_drones):
+            print("1")
             if Environment.mode == Mode.REAL:
+                print("== REAL")
                 initPosVec3 = Vec3(initPos[i]['x'], initPos[i]['y'])
                 drones.append(DroneReal(initPos[i]['address'], initPosVec3))
             else:
+                print("== Else")
                 drones.append(DroneSimulation(cls.default_port + i))
                 t = threading.Thread(
                     target=drones[i].waiting_connection, name='waiting_connection')
@@ -61,6 +65,10 @@ class DroneList:
             del drone
         cls.drones.clear()
         cls.logger.info('Deleted all drones from the drone list')
+
+    @classmethod
+    def activate_drones(cls):
+        return drones.length
 
     @classmethod
     def get_number_drones(cls):
