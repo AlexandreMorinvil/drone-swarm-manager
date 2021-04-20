@@ -17,10 +17,8 @@ class Vec3:
     def mul(self, mulp: float):
         return Vec3(self.x * mulp, self.y * mulp, self.z * mulp)
 
-    def round():
-        self.x = round(self.x)
-        self.y = round(self.y)
-        self.z = round(self.z)
+    def round(self):
+        return Vec3(int(self.x), int(self.y), int(self.z))
 
     def toJson(self):
         return {

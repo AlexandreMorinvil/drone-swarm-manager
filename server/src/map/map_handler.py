@@ -36,19 +36,21 @@ class MapHandler:
 
 
         def send_base_map(self):
-            json_map = self.current_map.toJson()
+            json_map = self.current_map.to_json()
             MapHandler.socketio.emit('LIVE_BASE_MAP', json_map, broadcast=True)
 
         def send_point(self, socketio_socket):
             while self.is_consuming:
+                if self.current_map == None:
+                    self.initialize_map()
                 point = MapObservationAccumulator.provide_point()
-                self.__databasePoint.append(point)
-                socketio_socket.emit('LIVE_MAP_NEW_POINT', json.dumps(point.toJson()), broadcast=True)
-                self.save_point()
+                point_to_report = self.current_map.addPoint(point)
+                if point_to_report:
+                    self.__databasePoint.append(point_to_report)
+                    socketio_socket.emit('LIVE_MAP_NEW_POINT', json.dumps(point.toJson()), broadcast=True)
+                    self.save_point()
                 
         def save_point(self):
-            if self.current_map == None:
-                self.initialize_map()
             if len(self.__databasePoint) >= 20 :
                 self.db.update_map(self.current_map.id, self.__databasePoint)
                 self.__databasePoint = []
