@@ -63,9 +63,9 @@ Some external code source has been used :
 ### Build :
 Clone projet with `--recursive` argument
 
-For server, client and simulation buils, follow their respective README
+For server, client and simulation buils, yout can follow their respective README
 
-To load our custom code in the robot. Go to robot directory with `cd robot` and build firmware with `cd crazyflie-firmware && make PLATFORM=cf2`. Then build actual code with `make && makecload`
+You can start the whole system with `./start-alfred` command
 
 ## Contributors :
 [Farid El Fakhry](https://gitlab.com/farid.elfakhry)
