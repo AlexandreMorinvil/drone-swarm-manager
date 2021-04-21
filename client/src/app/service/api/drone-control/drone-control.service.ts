@@ -31,5 +31,5 @@ export class DroneControlService {
   public sendEmergencyLandingRequest(droneId: number): void {
     this.socketService.emitEvent("SWITCH_STATE",
       { id: droneId,  state: DroneState.EMERGENCY});
-  }  
+  }
 }

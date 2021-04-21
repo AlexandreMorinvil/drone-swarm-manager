@@ -25,6 +25,10 @@ export class DroneSwarmBoardComponent {
   sendEmmergencyLandingRequest(): void {
     this.droneControlService.sendEmergencyLandingRequest(ALL_DRONE_INDEX);
   }
+
+  sendLandingRequest(): void {
+    this.droneControlService.sendLandRequest(ALL_DRONE_INDEX);
+  }
   
   openUpdateDialog(): void {
     const dialogRef = this.dialog.open(FileUploadComponent, {

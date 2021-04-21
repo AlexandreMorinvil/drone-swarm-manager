@@ -9,7 +9,7 @@ from sensor import Sensor
 from vec3 import Vec3
 import cflib
 from cflib.crazyflie import Crazyflie
-from drone_interface import DroneInterface, PacketType
+from drone_interface import DroneInterface, PacketType, StateMode
 from vec3 import Vec3
 from data_accumulator import MapObservationAccumulator
 from setup_logging import LogsConfig
@@ -64,8 +64,13 @@ class DroneReal(DroneInterface) :
         self._cf.appchannel.send_packet(packet)
 
     def get_vBat(self):
+        # Offset vBat when flying
+        if (self._state != StateMode.STANDBY.value):
+            self._vbat = self._vbat + 0.3
+
         if(self._vbat <= 4.3 and self._vbat >= 4.2):
             return 1
+            
         if(self._vbat <4.2 and self._vbat >= 4.15):
             return 0.95
         
