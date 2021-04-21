@@ -2,7 +2,7 @@ import sqlite3
 
 class DatabaseConnector:
     def __init__(self): 
-        self._conn = sqlite3.connect('../map.db', check_same_thread=False)
+        self._conn = sqlite3.connect('../db/map.db', check_same_thread=False)
         self._c = self._conn.cursor()
 
     def create_table(self):

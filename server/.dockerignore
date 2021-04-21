@@ -3,4 +3,4 @@
 *docker-compose*
 __pycache__
 .vscode
-.log
+logs/*

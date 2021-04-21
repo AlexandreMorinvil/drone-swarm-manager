@@ -1,8 +1,6 @@
 from map import Map
 import json
 import socketio
-from flask import Flask
-from flask_socketio import *
 
 from vec3 import Vec3
 from DBconnect import DatabaseConnector
@@ -17,9 +15,6 @@ import os
 # Using the singleton desing pattern
 class MapHandler:
 
-    # Initialize Socket to send data
-    app = Flask(__name__)
-    socketio = SocketIO(app ,cors_allowed_origins='*')
     class __OnlyOne:
         def __init__(self):
             self.db = DatabaseConnector()

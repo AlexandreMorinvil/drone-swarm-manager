@@ -10,10 +10,11 @@ services:
 
   server:
     container_name: alfred-server
+    network_mode: host
     build: server
     ports:
       - 5000:5000
     volumes:
       - ./logs:/usr/src/server/logs
-      - ./map.db:/usr/src/server/map.db
+      - ./db:/usr/src/server/db
       - ../robot:/usr/src/robot

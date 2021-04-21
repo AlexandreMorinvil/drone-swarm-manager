@@ -1,13 +1,14 @@
 import logging
-import socketio
 import json
 from vec3 import Vec3
 import threading
 import sys
+import os
+
 import argparse
 from subprocess import call
 from flask import Flask, jsonify, render_template
-from flask_socketio import *
+from flask_socketio import SocketIO
 import cflib
 from cflib.crazyflie import Crazyflie
 from drone_real import DroneReal

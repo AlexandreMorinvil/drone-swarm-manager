@@ -2,17 +2,10 @@ FROM python:3.8-buster
 
 WORKDIR /usr/src/server
 
-RUN apt-get update && \
-    apt-get install pipenv -y && \
-    export SHELL=/bin/bash
-
-COPY Pipfile ./
-COPY Pipfile.lock ./
-RUN pipenv install --system --deploy --ignore-pipfile
-
+RUN pip3 install requests flask python-socketio flask-socketio flask-restful cflib
 COPY . .
 EXPOSE 5000
 
-CMD pipenv shell && \
-    cd src/ && \
+CMD cd src/ && \
     python3 ./server.py simulation
+    
