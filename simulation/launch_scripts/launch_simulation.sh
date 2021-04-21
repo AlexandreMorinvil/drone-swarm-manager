@@ -3,7 +3,8 @@
 # To launch the simulation
 cd /root/simulation
 cd ./experiments
-./wallGen.out
+g++ wallGen.cpp -o randomWalls.out
+./randomWalls.out
 cd /root/simulation/build
 cmake ..
 make
