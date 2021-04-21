@@ -10,6 +10,10 @@
 
 
 ## Launch using shell scripts (will generate random walls each time): 
-1. run launchX11.sh with x11docker : `$ source launch_scripts/launchX11.sh`
-2. open bash in the containe (see steps 5-6 of running using shell commands)
-3. start simulation with randomly generated walls : `$ /root/simulation/launch_scripts && source launch_simulation.sh`
+1. Run launchX11.sh with x11docker : `$ source launch_scripts/launchX11.sh`
+2. Open bash in the containe (see steps 5-6 of running using shell commands)
+3. Start simulation with randomly generated walls : `$ /root/simulation/launch_scripts && source launch_simulation.sh`
+
+## Run all simulation tests (in container):
+1. In container:  $` cd /root/simulation/build`
+2. Run all tests:  $` ./launch_all_tests.sh`
