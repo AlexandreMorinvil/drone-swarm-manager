@@ -120,14 +120,6 @@ def set_real_position(data):
     initPos.clear()
     initPos.extend(data)
 
-
-@socketio.on('TOGGLE_LED')
-def ledToggler(data):
-    print(data['id'])
-    drones[data['id']].toggleLED()
-    print("LED TOGGLER")
-    logger.info('ledTogger function executed with data {}'.format(data['id']))
-
 @socketio.on('SWITCH_STATE')
 def land(data):
     if (data['id'] == -2):

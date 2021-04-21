@@ -9,7 +9,7 @@ describe("DroneSelectedBoardComponent", () => {
   let droneControlServiceSpy : jasmine.SpyObj<DroneControlService>;
   beforeEach(
     waitForAsync(() => {
-      droneControlServiceSpy= jasmine.createSpyObj('droneControlService', ['sendToogleLedRequest', 'sendTakeOffRequest','sendReturnToBaseRequest','sendEmergencyLandingRequest']);
+      droneControlServiceSpy= jasmine.createSpyObj('droneControlService', ['sendTakeOffRequest','sendReturnToBaseRequest','sendEmergencyLandingRequest']);
       TestBed.configureTestingModule({
         declarations: [DroneSwarmBoardComponent],
         providers: [
@@ -27,11 +27,6 @@ describe("DroneSelectedBoardComponent", () => {
 
   it("should create the component", () => {
     expect(component).toBeTruthy();
-  });
-
-  it("should call sendToogleLedRequest of droneControlService", ()=> {
-    component.sendSwarmToggleLedRequest();
-    expect(droneControlServiceSpy.sendToogleLedRequest).toHaveBeenCalledWith(ALL_DRONE_INDEX);
   });
 
   it("should call sendTakeOffRequest of droneControlService", ()=> {

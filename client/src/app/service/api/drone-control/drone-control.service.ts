@@ -9,10 +9,6 @@ export class DroneControlService {
   constructor(public socketService: SocketService) {
   }
 
-  public sendToogleLedRequest(droneId: number): void {
-    this.socketService.emitEvent("TOGGLE_LED", { id: droneId });
-  }
-
   public sendTakeOffRequest(droneId: number): void {
     this.socketService.emitEvent("SWITCH_STATE",
       { id: droneId,  state: DroneState.TAKE_OFF});
