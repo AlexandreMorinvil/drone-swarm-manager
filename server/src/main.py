@@ -8,62 +8,37 @@ sys.path.append(os.path.abspath('./map'))
 
 # Add dependencies
 from api_drone import api_control_switch_state
+from api_environment import api_environment_set_mode, api_environment_set_real_position
 from api_map import api_map_get_map_list, api_map_get_map_points, api_map_delete_map
+from api_update import api_update_receive_file, api_update_start_update, api_update_send_sources
+
+import cflib
+import logging
+import socketio
+import threading
 
 from engineio.payload import Payload
 from setup_logging import LogsConfig
 from map_handler import MapHandler
-from map_catalog import MapCatalog
 from DBconnect import DatabaseConnector
-from drone_interface import StateMode
 from cflib.crazyflie import Crazyflie
-import cflib
 from flask_socketio import *
 from flask import Flask, jsonify, render_template
-from subprocess import call
-import threading
-import json
-import socketio
-import logging
-
-
-
 from drone_list import DroneList
 from environment import Environment
 from utility import set_interval
 
-
-Payload.max_decode_packets = 0xFFFFF
-
-
-logsConfig = LogsConfig()
-logger = logsConfig.logger('main')
-
+# Initializing the socketio socket
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins='*')
 
-
 @socketio.on('SET_MODE')
-def setMode(data):
-    mode = data['mode_chosen']
-    number_drones = data['number_of_drone']
-
-    DroneList.delete_drones()
-
-    # Set the environment's mode
-    Environment.set_mode(mode)
-
-    if (Environment.is_in_simulation()):
-        DroneList.createDrones(int(number_drones), mode)
-        Environment.launch_simulation(number_drones)
-    else:
-        DroneList.createDrones(int(number_drones))
-
+def set_mode(data):
+    api_environment_set_mode(data)
 
 @socketio.on('INITIAL_POSITION')
 def set_real_position(data):
-    DroneList.initial_posisitions.clear()
-    DroneList.initial_posisitions.extend(data)
+    api_environment_set_real_position(data)
 
 @socketio.on('SWITCH_STATE')
 def switch_state(data):
@@ -84,35 +59,20 @@ def delete_map(data):
     data_to_return = api_map_delete_map(data)
     socketio.emit('MAP_LIST', data_to_return)
 
-
 @socketio.on('SEND_FILE')
-def receiveFile(data):
-    file = open('../../robot/src/' + data['name'], 'wb')
-    file.write(data['content'])
+def receive_file(data):
+    api_update_receive_file(data)
 
 @socketio.on('UPDATE')
-def startUpdate():
-    for drone in drones:
-        if (drone.get_state() != StateMode.STANDBY.value):
-            socketio.emit("FAILED_UPDATE")
-            return
-    number_drones = len(drones)
-    DroneList.delete_drones()
-    for address in initial_posisitions:
-        if (call(['scripts/update-robot.sh', '{}'.format(address['address'])]) == 1):
-            socketio.emit("FAILED_UPDATE")
-    DroneList.createDrones(number_drones)
+def start_update():
+    is_successful = api_update_start_update()
+    if not is_successful:
+        socketio.emit("FAILED_UPDATE")
 
-@socketio.on('ReqSource')
+@socketio.on('REQUEST_SOURCE')
 def sendSources():
-    for root, dirs, files in os.walk('../../robot/src/'):
-        for filename in files:
-            f = open('../../robot/src/'+filename)
-            socketio.emit('old_src', {
-                'name': filename,
-                'data': f.read()
-            })
-
+    data_to_send = api_update_send_sources()
+    socketio.emit('OLD_SOURCE', data_to_send)
 
 def api_drone_list_send_fleet():
     data_to_send = DroneList.dumps()
@@ -120,9 +80,12 @@ def api_drone_list_send_fleet():
 
 def main():
 
-    # Disable the werkzeug log generated in the server
+    # Initialize the logs
+    logsConfig = LogsConfig()
+    logger = logsConfig.logger('main')
     log = logging.getLogger('werkzeug')
     log.setLevel(logging.ERROR)
+    logger.info('Starting the application')
 
     # Initialize the database
     database_initializer = DatabaseConnector()
@@ -133,6 +96,9 @@ def main():
     thread_map_handler = threading.Thread(
         target=map_handler.send_point, args=(socketio,), name='send_new_points')
     thread_map_handler.start()
+
+    # Initialize the maximum payload for the file update
+    Payload.max_decode_packets = 0xFFFFF
 
     # Initialze the environement
     environement = Environment()

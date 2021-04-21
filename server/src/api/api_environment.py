@@ -1,33 +1,30 @@
 # Add paths toward dependecies in different subdirectories
 import os
 import sys
-sys.path.append(os.path.abspath('./map'))
+sys.path.append(os.path.abspath('./drone'))
 sys.path.append(os.path.abspath('./log'))
 
 # Add dependencies
-import json
-from map_catalog import MapCatalog
-from map_handler import MapHandler
+from drone_list import DroneList
+from environment import Environment
 from setup_logging import LogsConfig
 
 logsConfig = LogsConfig()
-logger = logsConfig.logger('ApiMap')
+logger = logsConfig.logger('EnvironmentApi')
 
-def api_map_get_map_list():
-    map_catalog = MapCatalog()
-    maps = map_catalog.get_map_list()
-    return json.dumps([map_catalog.map_list_to_Json(map) for map in maps])
+def api_environment_set_mode(data):
+    mode = data['mode_chosen']
+    number_drones = data['number_of_drone']
 
-def api_map_get_map_points(data):
-    id = data['id']
-    map_catalog = MapCatalog()
-    return map_catalog.get_select_map(id)
+    DroneList.delete_drones()
+    Environment.set_mode(mode)
 
-def api_map_delete_map(data):
-    id = data['id']
-    map_catalog = MapCatalog()
-    map_catalog.delete_map(id)
-    maps = map_catalog.get_map_list()
-    return json.dumps([map_catalog.map_list_to_Json(map) for map in maps])
-    
-    
+    if (Environment.is_in_simulation()):
+        DroneList.createDrones(int(number_drones), mode)
+        Environment.launch_simulation(number_drones)
+    else:
+        DroneList.createDrones(int(number_drones))
+
+def api_environment_set_real_position(data):
+    DroneList.initial_posisitions.clear()
+    DroneList.initial_posisitions.extend(data)
