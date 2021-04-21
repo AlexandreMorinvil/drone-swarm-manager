@@ -1,14 +1,16 @@
 # Add paths toward dependecies in different subdirectories
+import os
+import sys
+sys.path.append(os.path.abspath('./log'))
+
+# Add dependencies
 from setup_logging import LogsConfig
 from environment import Environment
 from drone_real import DroneReal
 from drone_simulation import DroneSimulation
-from drone_interface import StateMode
+from drone_interface import DroneInterface, StateMode
 import threading
 import json
-import os
-import sys
-sys.path.append(os.path.abspath('./log'))
 
 # Add dependecies
 
@@ -68,8 +70,8 @@ class DroneList:
         cls.logger.info('Deleted all drones from the drone list')
 
     @classmethod
-    def activate_drones(cls):
-        return drones.length
+    def get_drone_from_id(cls, id):
+        return cls.drones[id - DroneInterface.id_counter]
 
     @classmethod
     def get_number_drones(cls):

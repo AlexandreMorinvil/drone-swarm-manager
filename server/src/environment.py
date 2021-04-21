@@ -1,3 +1,8 @@
+# Add paths toward dependecies in different subdirectories
+import os
+import sys
+sys.path.append(os.path.abspath('./log'))
+
 # Add dependecies
 from enum import Enum
 from setup_logging import LogsConfig
