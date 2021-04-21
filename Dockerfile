@@ -54,8 +54,9 @@ RUN chmod +x /root/argos3/build_simulator/argos_post_install.sh &&\
     ./root/argos3/build_simulator/argos_post_install.sh &&\
     echo "\nsource /root/argos3/build_simulator/setup_env.sh\n" >> /.bashrc
 
+
 #################################
-#          YOUR CODE            #
+#          SIMULATION CODE      #
 #################################
 
 # Add dummy argument to force rebuild starting from that point
@@ -67,7 +68,7 @@ RUN cd /root &&\
     cd /root/simulation
 
 WORKDIR /root/simulation
-COPY . .
+COPY /simulation/ .
 
 # Build code
 RUN cd /root/simulation &&\
@@ -75,3 +76,24 @@ RUN cd /root/simulation &&\
     cd build &&\
     cmake -DCMAKE_BUILD_TYPE=Debug .. &&\
     make -j $(nproc)
+
+##################################################################
+#               INTEGRATION OF THE SERVER'S CODE                 #
+##################################################################
+
+#RUN apt-get install -y python3
+
+RUN apt-get update && apt install -y curl \
+    python3 \
+    python3-distutils
+
+
+RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py \
+    && python3 get-pip.py
+
+RUN pip3 install requests flask python-socketio flask-socketio flask-restful cflib
+COPY server/ /root/
+EXPOSE 5000
+
+CMD cd /root/src/ && \
+    nohup python3 ./server.py simulation &
