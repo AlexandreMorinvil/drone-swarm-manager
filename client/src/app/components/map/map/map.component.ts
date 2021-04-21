@@ -7,8 +7,8 @@ const TOTAL_WIDTH: number = 700;
 const TOTAL_HEIGHT: number = 500;
 
 const BORDER_FACTOR: number = 0.1;
-const MIN_WIDTH: number = 100;
-const MIN_HEIGHT: number = 100;
+const MIN_WIDTH: number = 2;
+const MIN_HEIGHT: number = 2;
 
 const NUMBER_TICKS: number = 10;
 const GRID_OPACITY: number = 0.25;
@@ -18,8 +18,6 @@ const GRID_OPACITY: number = 0.25;
   styleUrls: ["./map.component.scss"],
 })
 export class MapComponent {
-  currentRate = 8;
-  title = "D3 Barchart with Angular 10";
   width: number = 0;
   height: number = 0;
   margin = { top: 30, right: 30, bottom: 30, left: 30 };
@@ -39,6 +37,7 @@ export class MapComponent {
   gAxis: d3.Selection<HTMLElement>;
   clipPath: d3.Selection<HTMLElement>;
   gWall: d3.Selection<HTMLElement>;
+  gDrone: d3.Selection<HTMLElement>;
 
   zoom: any;
   xScale: any;
@@ -47,6 +46,9 @@ export class MapComponent {
   yAxis: any;
 
   wallPoints: Vec3[] = [];
+  dronePoints: Vec3[] = [];
+
+  isFirstTime: Boolean = true;
 
   valueToIncrease: number = 0;
 
@@ -58,65 +60,66 @@ export class MapComponent {
     this.max_x = MIN_WIDTH / 2;
     this.min_y = -MIN_HEIGHT / 2;
     this.max_y = MIN_HEIGHT / 2;
-
-    const interval: ReturnType<typeof setTimeout> = setInterval(() => {
-      this.addWallPoint(
-        new Vec3(this.valueToIncrease, this.valueToIncrease / 2, 0)
-      );
-      this.valueToIncrease += 1;
-    }, 10);
-
-    setTimeout(() => {
-      clearInterval(interval);
-    }, 13000);
   }
 
   ngOnInit() {
-    this.setPlot();
+    this.setPlot(true);
   }
 
-  resetMap(): void {
+  resetMap(isFirstTime = false): void {
     this.deleteMap();
-    this.setPlot();
+    this.setPlot(isFirstTime);
   }
 
   setBaseMap(points: Vec3[]): void {
     this.wallPoints = points;
-    this.resetMap();
+    this.resetMap(true);
   }
 
-  addWallPoint(point: Vec3): void {
+  addWallPoint(points: Vec3[]): void {
     let hasBordersChanged: Boolean = false;
-    if (point.x > this.max_x) {
-      this.max_x = point.x;
+
+    const xMinAdded:number = d3.min(points, (d: Vec3) => d.x);
+    const xMaxAdded:number = d3.max(points, (d: Vec3) => d.x);
+    const yMinAdded:number = d3.min(points, (d: Vec3) => d.y);
+    const yMaxAdded:number = d3.max(points, (d: Vec3) => d.y);
+
+    if (xMaxAdded > this.max_x) {
+      this.max_x = xMaxAdded;
       hasBordersChanged = true;
     }
-    if (point.x < this.min_x) {
-      this.min_x = point.x;
+    if (xMinAdded < this.min_x) {
+      this.min_x = xMinAdded;
       hasBordersChanged = true;
     }
-    if (point.y > this.max_y) {
-      this.max_y = point.y;
+    if (yMaxAdded > this.max_y) {
+      this.max_y = yMaxAdded;
       hasBordersChanged = true;
     }
-    if (point.y < this.min_y) {
-      this.min_y = point.y;
+    if (yMinAdded < this.min_y) {
+      this.min_y = yMinAdded;
       hasBordersChanged = true;
     }
-    this.wallPoints.push(point);
+    this.wallPoints.push(...points);
     if (hasBordersChanged) this.updateAxisRange();
     this.drawWalls();
   }
 
-  private setPlot(): void {
-    this.initSvg(true);
+  updateDronePositions(dronePositions: Vec3[]): void {
+    this.dronePoints = dronePositions;
+    this.drawDrones();
+  }
+
+  setPlot(isFirstTime = false): void {
+    this.initSvg(isFirstTime);
     this.updateAxisRange(true);
     this.drawAxis();
     this.drawWalls();
+    this.drawDrones();
   }
 
   private initSvg(isFirstTime = false): void {
-    if (isFirstTime)
+    if (isFirstTime) {
       this.chart = d3
         .select("#map")
         .append("svg")
@@ -124,6 +127,8 @@ export class MapComponent {
         .attr("height", "100%")
         .attr("viewBox", [0, 0, TOTAL_WIDTH, TOTAL_HEIGHT])
         .attr("fill", "white");
+      this.isFirstTime = false;
+    }
 
     this.gAxis = this.chart
       .append("g")
@@ -167,14 +172,40 @@ export class MapComponent {
         "clip-path",
         "url(#clip)"
       );
+
+      this.gWall = this.gMain
+      .append("g")
+      .attr("id", "wall-points")
+      .attr(
+        "transform",
+        "translate(" + this.margin.left + "," + this.margin.top + ")",
+        "clip-path",
+        "url(#clip)"
+      );
+
+      this.gDrone = this.gMain
+        .append("g")
+        .attr("id", "drone-points")
+        .attr(
+          "transform",
+          "translate(" + this.margin.left + "," + this.margin.top + ")",
+          "clip-path",
+          "url(#clip)"
+        );
   }
 
-  private deleteMap(): void {
-    this.chart.selectAll("#map > *").remove();
+  deleteMap(): void {
+    d3.select("#map").selectAll("*").remove();
+    this.isFirstTime = true;
   }
 
-  private erasePlot(): void {
+  erasePlot(): void {
     this.chart.selectAll("#wall-points > *").remove();
+    this.eraseDrones();
+  }
+
+  private eraseDrones(): void {
+    this.chart.selectAll("#drone-points > *").remove();
   }
 
   private computeGlobalDataRange() {
@@ -193,24 +224,24 @@ export class MapComponent {
   }
 
   private computeGlobalDisplayRange() {
-    const avg_x = (this.max_x - this.min_x) / 2;
-    const avg_y = (this.max_y - this.min_y) / 2;
-
-    // Add border to the range
-    this.display_min_x = this.min_x - avg_x * BORDER_FACTOR;
-    this.display_max_x = this.max_x + avg_x * BORDER_FACTOR;
-    this.display_min_y = this.min_y - avg_y * BORDER_FACTOR;
-    this.display_max_y = this.max_y + avg_y * BORDER_FACTOR;
+    const avg_x = (this.max_x + this.min_x) / 2;
+    const avg_y = (this.max_y + this.min_y) / 2;
 
     const width = this.max_x - this.min_x;
     const height = this.max_y - this.min_y;
 
+    // Add border to the range
+    this.display_min_x = this.min_x - width / 2 * BORDER_FACTOR; 
+    this.display_max_x = this.max_x + width / 2 * BORDER_FACTOR; 
+    this.display_min_y = this.min_y - height / 2 * BORDER_FACTOR;
+    this.display_max_y = this.max_y + height / 2 * BORDER_FACTOR;
+
     // Readjust borders to the minimum accepted dimensions
-    if (this.max_x - this.min_x < MIN_WIDTH) {
+    if (width < MIN_WIDTH) {
       this.display_min_x = avg_x - MIN_WIDTH / 2;
       this.display_max_x = avg_x + MIN_WIDTH / 2;
     }
-    if (this.max_y - this.min_y < MIN_HEIGHT) {
+    if (height < MIN_HEIGHT) {
       this.display_min_y = avg_y - MIN_HEIGHT / 2;
       this.display_max_y = avg_y + MIN_HEIGHT / 2;
     }
@@ -238,13 +269,14 @@ export class MapComponent {
       .range([0, this.width]);
     this.yScale = d3
       .scaleLinear()
-      .domain([this.display_min_y, this.display_max_y])
+      .domain([this.display_max_y, this.display_min_y])
       .range([0, this.height]);
 
     // Redraw map
     this.drawAxis();
     this.erasePlot();
     this.drawWalls();
+    this.drawDrones();
   }
 
   private drawAxis(): void {
@@ -280,5 +312,18 @@ export class MapComponent {
       .attr("cy", (d) => this.yScale(d.y))
       .attr("r", 1.5)
       .style("fill", "#69b3a2");
+  }
+
+  private drawDrones(): void {
+    this.eraseDrones();
+    this.gDrone
+      .selectAll("circle")
+      .data(this.dronePoints)
+      .enter()
+      .append("circle")
+      .attr("cx", (d) => this.xScale(d.x))
+      .attr("cy", (d) => this.yScale(d.y))
+      .attr("r", 2)
+      .style("fill", "#1111ff");
   }
 }

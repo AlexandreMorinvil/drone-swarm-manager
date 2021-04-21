@@ -1,10 +1,6 @@
 # vecteur 3d
 class Vec3:
-    x = 0
-    y = 0
-    z = 0
-
-    def __init__(self, x, y, z):
+    def __init__(self, x=0, y=0, z=0):
         self.x = x
         self.y = y
         self.z = z
@@ -21,8 +17,8 @@ class Vec3:
     def mul(self, mulp: float):
         return Vec3(self.x * mulp, self.y * mulp, self.z * mulp)
 
-    def toVec2(self):
-        self.z = 0
+    def round(self):
+        return Vec3(int(self.x), int(self.y), int(self.z))
 
     def toJson(self):
         return {

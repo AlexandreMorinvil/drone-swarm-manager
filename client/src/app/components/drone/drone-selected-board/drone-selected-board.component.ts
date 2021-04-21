@@ -1,6 +1,6 @@
 import { Component } from "@angular/core";
 import { Drone } from "@app/class/drone";
-import { SelectedDroneService } from "@app/service/selecte-drone/selected-drone.service";
+import { SelectedDroneService } from "@app/service/selected-drone/selected-drone.service";
 @Component({
   selector: "app-drone-selected-board",
   templateUrl: "./drone-selected-board.component.html",
@@ -9,15 +9,16 @@ import { SelectedDroneService } from "@app/service/selecte-drone/selected-drone.
 export class DroneSelectedBoardComponent {
   constructor(public selectedDroneService: SelectedDroneService) {}
 
-  sendToggleLedRequest(): void {
-    this.selectedDroneService.sendToogleLedRequest();
-  }
-
   sendTakeOffRequest(): void {
     this.selectedDroneService.sendTakeOffRequest();
   }
+
   sendReturnToBaseRequest(): void {
     this.selectedDroneService.sendReturnToBaseRequest();
+  }
+
+  sendLandRequest(): void {
+    this.selectedDroneService.sendLandRequest();
   }
 
   public get drone(): Drone {

@@ -32,3 +32,9 @@ _in the case there is no Pipfile and Pipfile.lock, they will be created_
 >
 This will uninstall the package and update the Pipfile
 
+### Run all tests in test directory
+>python -m unittest discover test
+
+### Run a specific test file
+>python test_file_name.py 
+

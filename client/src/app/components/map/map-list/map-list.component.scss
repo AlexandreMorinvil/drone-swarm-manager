@@ -1,0 +1,43 @@
+.map-list {
+    height: 83vh;
+    overflow-y: auto;
+}
+.map-name {
+    font-size: 18px;
+    align-items: center;
+}
+
+.map-card:hover {
+    -webkit-filter: brightness(90%);
+    filter: brightness(90%);
+}
+
+.map-card {
+    background-color: lightgrey;
+    border: #818181 solid 1px;
+    margin:2px
+}
+
+.map-id-area {
+    color: black;
+}
+
+.title {
+    border-radius: 0%;
+}
+.sidebar-title {
+    text-align: center;
+}
+
+.map-creation-date-area {
+    margin: 3px;
+}
+
+.map-date{
+    color: black;
+    padding: 5px;
+}
+
+.map-icon{
+    height: 1.5em;
+}

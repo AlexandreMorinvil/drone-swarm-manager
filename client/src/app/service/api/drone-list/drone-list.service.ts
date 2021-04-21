@@ -1,21 +1,22 @@
 import { Injectable } from "@angular/core";
+import { SocketService } from "@app/service/api/socket.service";
 import { io, Socket } from "socket.io-client/build/index";
-import { Drone } from "@app/class/drone";
+import { Drone, MinimalDrone } from "@app/class/drone";
+import { ServerMode } from "@app/constants/serverMode";
+import { Vec2, Vec3 } from "@app/class/vec3";
+
 @Injectable({
   providedIn: "root",
 })
 export class DroneListService {
-  private socket: Socket;
   droneId: number = 0;
   droneList: Drone[] = [];
+  firstIndex: number = 0;
+  mode: ServerMode;
+  numberOfDrones: Number = 0;
 
-  constructor() {
-    this.initSocket();
-  }
-
-  public initSocket() {
-    this.socket = io("127.0.0.1:5000");
-    this.socket.on("drone_data", (data) => this.receiveData(data));
+  constructor(public socketService: SocketService) {
+    this.socketService.addEventHandler("DRONE_LIST", (data) => { this.receiveData(data) });
   }
 
   public receiveData(data) {
@@ -24,11 +25,11 @@ export class DroneListService {
   }
 
   public updateList(droneData: any): void {
+
+    this.firstIndex = (droneData[0]) ? droneData[0].id : this.firstIndex;
     for (let i = 0; i < droneData.length; i++) {
       // Parse the drone
       const currentId = droneData[i].id;
-      console.log("currentId" + currentId);
-      console.log("state : " + droneData[i].state);
       const updatedDrone = new Drone(
         droneData[i].id,
         droneData[i].state,
@@ -43,8 +44,10 @@ export class DroneListService {
       // If the drone order does not correspond, we add the drone in the right order
       else if (this.droneList[i].getDroneId() !== currentId) this.droneList.splice(i, 1, updatedDrone);
       // Otherwise, we update the drone
-      else this.droneList[currentId].updateDrone(updatedDrone);
+      else this.droneList[currentId - this.firstIndex].updateDrone(updatedDrone);
     }
+
+
     if (this.droneList.length !== droneData.length) {
       this.droneList = this.droneList.slice(0, droneData.length);
     }
@@ -55,11 +58,10 @@ export class DroneListService {
   }
 
   public getDrone(droneId: number) {
-    return this.droneList[droneId];
+    return this.droneList[droneId - this.firstIndex];
   }
-  
-  public get isConnected() : boolean {
-    return this.socket.connected;
+
+  public getPositions(): Vec3[] {
+    return this.droneList.map( (v:Drone) => v.getPosition()) 
   }
-  
 }

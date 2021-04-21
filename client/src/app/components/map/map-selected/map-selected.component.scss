@@ -1,0 +1,14 @@
+@import '@angular/material/prebuilt-themes/purple-green.css';
+
+.select-map{
+    display: flex;
+    flex-direction: column;
+    background-color: rgb(228, 228, 228);
+}
+
+
+.delete-select-map,
+.disable-delete-button {
+    margin: 5px;
+}
+
