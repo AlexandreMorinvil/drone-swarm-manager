@@ -74,4 +74,6 @@ RUN cd /root/simulation &&\
     mkdir build &&\
     cd build &&\
     cmake -DCMAKE_BUILD_TYPE=Debug .. &&\
-    make -j $(nproc)
+    make -j $(nproc) &&\
+    cp /root/simulation/test/controllers/sim-alfred/launch_all_tests.sh /root/simulation/build &&\
+    chmod +x launch_all_tests.sh
