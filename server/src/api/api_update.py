@@ -9,6 +9,7 @@ from drone_interface import StateMode
 from drone_list import DroneList
 from setup_logging import LogsConfig
 from subprocess import call
+from environment import Mode
 
 logsConfig = LogsConfig()
 logger = logsConfig.logger('ApiControl')
@@ -34,7 +35,7 @@ def api_update_start_update():
             return False
 
     # Recreate drones        
-    DroneList.createDrones(number_drones)
+    DroneList.createDrones(number_drones, Mode.REAL.value)
     return True
 
 def api_update_send_sources():

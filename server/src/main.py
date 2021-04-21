@@ -31,6 +31,7 @@ from utility import set_interval
 # Initializing the socketio socket
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins='*')
+cflib.crtp.init_drivers(enable_debug_driver=False)
 
 @socketio.on('SET_MODE')
 def set_mode(data):
