@@ -47,20 +47,19 @@ class DroneList:
         return json.dumps([drone.dump() for drone in cls.drones])
 
     @classmethod
-    def createDrones(cls, number_drones, mode, initial_posisitions=None):
+    def createDrones(cls, number_drones, mode):
         for i in range(number_drones):
             if Environment.is_in_simulation():
                 cls.drones.append(DroneSimulation(cls.default_port + i))
-                # print(cls.drones)
                 t = threading.Thread(
                     target=cls.drones[i].waiting_connection, name='waiting_connection')
                 t.start()
                 cls.logger.info(
                     'Connection to port {}'.format(cls.default_port + i))
             else:
-                initial_posisitions_vec3 = Vec3(initial_posisitions[i]['x'], initial_posisitions[i]['y'])
+                initial_posisitions_vec3 = Vec3(DroneList.initial_posisitions[i]['x'], DroneList.initial_posisitions[i]['y'])
                 cls.drones.append(
-                    DroneReal(initial_posisitions[i]['address'], initial_posisitions_vec3))
+                    DroneReal(DroneList.initial_posisitions[i]['address'], initial_posisitions_vec3))
 
     @classmethod
     def delete_drones(cls):
