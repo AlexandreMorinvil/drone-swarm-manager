@@ -44,17 +44,8 @@ socketio = SocketIO(app ,cors_allowed_origins='*')
 
 default_port = 5015
 
-# Select mode in commande line
-parser =  argparse.ArgumentParser()
-parser.add_argument('mode', default='real', choices=['simulation', 'real'], help='Type simulation to launch simulation mode and type real to run server with real drones')
-args = parser.parse_args()
+mode = Mode.REAL.value
 
-if (args.mode == 'simulation'):
-    mode = Mode.SIMULATION
-    print('mode simulation')
-elif (args.mode == 'real'):
-    mode = Mode.REAL
-    print('mode real')
     
 # Initialize the low-level drivers (don't list the debug drivers)
 cflib.crtp.init_drivers(enable_debug_driver=False)
@@ -63,7 +54,7 @@ print('Scanning interfaces for Crazyflies...')
 available = cflib.crtp.scan_interfaces()
 print('Crazyflies found:')
 
-if (mode == Mode.REAL):
+if (mode == Mode.REAL.value):
     logger.info('Mode time')
 else:
     logger.info('Mode simulation')
@@ -72,9 +63,9 @@ else:
 drones = []
 initPos = []
 
-def createDrones(numberOfDrone):
+def createDrones(mode, numberOfDrone):
     for i in range(numberOfDrone):
-        if mode == Mode.REAL:
+        if mode == Mode.REAL.value:
             initPosVec3 = Vec3(initPos[i]['x'], initPos[i]['y'])
             drones.append(DroneReal(initPos[i]['address'], initPosVec3))
         else:
@@ -84,36 +75,35 @@ def createDrones(numberOfDrone):
             logger.info('Connection to port {}'.format(default_port + i))
             
 
-def deleteDrones():
-    if (mode == Mode.SIMULATION):
-        for i in drones:
-            if hasattr(i, "connection"):
-                i.connection.close()
+def deleteDrones(mode):
+    for i in drones:
+        if hasattr(i, "connection"):
+            i.connection.close()
+        if hasattr(i, "sock"):
             i.sock.shutdown(2)
             i.sock.close()
-            del i
-    else:
-        for i in drones:
+        if hasattr(i, "close_connection"):
             i.close_connection()
+        del i
     drones.clear()
 
 @socketio.on('SET_MODE')
 def setMode(data):
-    deleteDrones()
     mode = data['mode_chosen']
+    deleteDrones(mode)
     numberOfDrone = data['number_of_drone']
     if (mode == Mode.SIMULATION.value):
         dronesAreCreated = False
         while not dronesAreCreated:
             try:
-                createDrones(int(numberOfDrone))
+                createDrones(mode, int(numberOfDrone))
                 dronesAreCreated = True
             except:
-                deleteDrones()
+                deleteDrones(mode)
                 dronesAreCreated = False
         call(['scripts/start-simulation.sh', '{}'.format(numberOfDrone)])
     else:
-        createDrones(int(numberOfDrone))
+        createDrones(mode, int(numberOfDrone))
 
 @socketio.on('INITIAL_POSITION')
 def set_real_position(data):
@@ -128,7 +118,7 @@ def land(data):
             logger.info('Landing of {}'.format(i))
     else:
         drones[data['id'] - drones[0]._id].switch_state(data['state'])
-        logger.info('Switch state of {} to {} mode'.format(socks[data['id'] - drones[0]._id], StateMode(data['state'])))
+        logger.info('Switch state of {} to {} mode'.format(drones[data['id'] - drones[0]._id], StateMode(data['state'])))
 
 @socketio.on('MAP_CATALOG')
 def getMapList():
@@ -168,11 +158,11 @@ def startUpdate():
             socketio.emit("FAILED_UPDATE")
             return
     numberOfDrone = len(drones)
-    deleteDrones()
+    deleteDrones(Mode.REAL.value)
     for address in initPos:
         if (call(['scripts/update-robot.sh', '{}'.format(address['address'])]) == 1):
             socketio.emit("FAILED_UPDATE")
-    createDrones(numberOfDrone)
+    createDrones(Mode.REAL.value, numberOfDrone)
 
 @socketio.on('ReqSource')
 def sendSources() :

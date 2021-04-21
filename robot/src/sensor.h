@@ -13,14 +13,14 @@
 #include<stdint.h>
 #include <stdlib.h>
 #include <fcntl.h> 
-
+ 
 typedef enum { 
     kLeft, kBack, kRight, kFront, kDefault
 } SensorSide;
-
+  
 SensorSide* prioritise(float angle);
 SensorSide FreeSide(float sensorValues[4]);
 SensorSide CriticalProximity(float sensorValues[4]);
 SensorSide ReturningSide(float sensorValues[4], float angle);
- 
+
 #endif
