@@ -218,7 +218,7 @@ void switchState() {
         commanderSetSetpoint(&setpoint, 1);
         yaw = 0.0f;
 
-        if (logGetUint(logGetVarId("pm", "vbat")) <= LOW_VOLTAGE) {
+        if (logGetFloat(logGetVarId("pm", "vbat")) <= LOW_VOLTAGE) {
           stateMode = kReturnToBase;
         }
         break;
@@ -255,7 +255,7 @@ void switchState() {
         if (rssi < RSSI_CLOSE
           && fabs(cPos.x) - 1 < 0
           && fabs(cPos.y) - 1 < 0) {
-          stateMode = kLanding;
+          stateMode = kEmergency;
         }
         break;
 
