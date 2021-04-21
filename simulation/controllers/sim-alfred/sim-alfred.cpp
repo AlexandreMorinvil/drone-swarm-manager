@@ -193,6 +193,9 @@ void CSimAlfred::ControlStep() {
             CVector3* vector = cMoving->GoInSpecifiedDirection(
                cSensors->ReturningSide(sensorValues, angle));
             m_pcPropellers->SetRelativePosition(*vector);
+            if (sqrt(pow(cPos.GetX(), 2) + pow(cPos.GetY(), 2)) <= 2) {
+               stateMode = kReturnToBase;
+            }
             break;
          }
          case kLanding:
