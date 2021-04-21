@@ -26,7 +26,7 @@ export class DroneListService {
 
   public updateList(droneData: any): void {
 
-    this.firstIndex = droneData[0].id;
+    this.firstIndex = (droneData[0]) ? droneData[0].id : this.firstIndex;
     for (let i = 0; i < droneData.length; i++) {
       // Parse the drone
       const currentId = droneData[i].id;

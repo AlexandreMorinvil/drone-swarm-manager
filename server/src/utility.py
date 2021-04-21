@@ -1,3 +1,5 @@
+import threading
+
 def set_interval(func, sec):
     def func_wrapper():
         set_interval(func, sec) 

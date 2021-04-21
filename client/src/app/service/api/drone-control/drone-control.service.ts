@@ -14,10 +14,6 @@ export class DroneControlService {
       { id: droneId,  state: DroneState.TAKE_OFF});
   }
 
-  public sendEndOfMission(): void{
-    this.socketService.emitEvent("END_MISSION")
-  }
-
   public sendReturnToBaseRequest(droneId: number): void {
     this.socketService.emitEvent("SWITCH_STATE",
       { id: droneId,  state: DroneState.RETURN_TO_BASE});

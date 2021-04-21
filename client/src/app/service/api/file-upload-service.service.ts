@@ -12,7 +12,7 @@ export class FileUploadService {
   
   constructor(private ss: SocketService) {
     ss.initSocket();
-    this.ss.onEvent('old_src', (file) => {
+    this.ss.onEvent('OLD_SOURCE', (file) => {
       this.serverFiles.push({ 'name': file['name'], 'text': file['data'] });
     });
     this.ss.onEvent('FAILED_UPDATE', () => {
@@ -46,7 +46,7 @@ export class FileUploadService {
   public getCurrentCode() {
     this.serverFiles.length = 0;
     // emit an event to trigger the response from server
-    this.ss.emitEvent('ReqSource');
+    this.ss.emitEvent('REQUEST_SOURCE');
 
   }
   public clear() {

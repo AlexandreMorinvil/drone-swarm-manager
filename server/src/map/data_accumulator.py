@@ -1,15 +1,12 @@
-import map
+# Add paths toward dependecies in different subdirectories
+import sys
+import os
+sys.path.append(os.path.abspath('./src'))
+
 from vec3 import Vec3
 from sensor import Sensor
 from threading import Lock
 from queue import Queue
-
-import sys
-import os
-
-# Add paths toward dependecies in different subdirectories
-sys.path.append(os.path.abspath('./src'))
-
 
 class MapObservationAccumulator:
     
@@ -75,7 +72,5 @@ class MapObservationAccumulator:
 
     @classmethod
     def provide_point(cls):
-        # cls.consume_lock.acquire()
         last_point = cls.queue.get()
-        # cls.consume_lock.release()
         return last_point
