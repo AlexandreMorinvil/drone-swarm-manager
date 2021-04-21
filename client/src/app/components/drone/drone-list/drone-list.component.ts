@@ -5,6 +5,7 @@ import { ControlPageComponent } from "@app/components/page/control/control-page.
 import { Drone, UNSET_DRONE_INDEX } from "@app/class/drone";
 import { SelectedDroneService } from "@app/service/selected-drone/selected-drone.service";
 import { SocketService } from "@app/service/api/socket.service";
+import { Vec3 } from "@app/class/vec3";
 
 @Component({
   selector: "app-drone-list",
@@ -45,6 +46,10 @@ export class DroneListComponent {
 
   public get droneNumber(): number {
     return this.droneListService.getDroneNumber();
+  }
+
+  public get dronesListSize(): number {
+    return this.drones.length;
   }
 
   
