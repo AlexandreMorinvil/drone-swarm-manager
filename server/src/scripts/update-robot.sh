@@ -6,7 +6,7 @@ RobotRelPath='../../../robot'
 
 # start from here
 cd $SCRIPTPATH
-cd ~/Documents/crazyflie-lib-python
+cd ../crazyflie-lib-python
 source venv/bin/activate
 
 cd $SCRIPTPATH
