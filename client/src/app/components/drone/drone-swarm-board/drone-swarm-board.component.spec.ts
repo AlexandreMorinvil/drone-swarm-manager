@@ -2,18 +2,22 @@ import { ComponentFixture, TestBed, waitForAsync } from "@angular/core/testing";
 import { DroneControlService } from "@app/service/api/drone-control/drone-control.service";
 import { DroneSwarmBoardComponent } from "./drone-swarm-board.component";
 import { ALL_DRONE_INDEX } from "@app/class/drone";
+import { MatDialog } from "@angular/material/dialog";
 
-describe("DroneSelectedBoardComponent", () => {
+describe("DroneSwarmBoardComponent", () => {
   let component: DroneSwarmBoardComponent;
   let fixture: ComponentFixture<DroneSwarmBoardComponent>;
   let droneControlServiceSpy : jasmine.SpyObj<DroneControlService>;
+  let dialogSpy : jasmine.SpyObj<MatDialog>;
   beforeEach(
     waitForAsync(() => {
-      droneControlServiceSpy= jasmine.createSpyObj('droneControlService', ['sendTakeOffRequest','sendReturnToBaseRequest','sendEmergencyLandingRequest']);
+      dialogSpy = jasmine.createSpyObj('dialog', ['open'])
+      droneControlServiceSpy= jasmine.createSpyObj('droneControlService', ['sendTakeOffRequest','sendReturnToBaseRequest','sendEmergencyLandingRequest','sendLandRequest']);
       TestBed.configureTestingModule({
         declarations: [DroneSwarmBoardComponent],
         providers: [
           {provide: DroneControlService, useValue: droneControlServiceSpy},
+          {provide: MatDialog, useValue: dialogSpy},
         ],
       }).compileComponents();
     })

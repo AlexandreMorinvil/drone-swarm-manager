@@ -26,7 +26,7 @@ describe("MapGeneratedBoardComponent", () => {
     fixture = TestBed.createComponent(MapGeneratedBoardComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
-    component.liveMapService = liveMapServiceStub;   
+    component['liveMapService'] = liveMapServiceStub;   
   });
 
   it("should create the component", () => {
@@ -34,7 +34,7 @@ describe("MapGeneratedBoardComponent", () => {
   });
 
   it("should call add point of map if there's new points", () => {
-    component.liveMapService.wallPointsToAdd = [new Vec3(0,0,0)];
+    component['liveMapService'].wallPointsToAdd = [new Vec3(0,0,0)];
     const addWallPoinSpy = spyOn(component.map, "addWallPoint");
     component.updateMap();
     expect(addWallPoinSpy).toHaveBeenCalled();

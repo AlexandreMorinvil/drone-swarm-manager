@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { DroneState } from '@app/class/drone';
 import { SocketService } from '../socket.service';
 
 import { DroneControlService } from './drone-control.service';
@@ -20,6 +21,6 @@ describe('DroneControlService', () => {
 
   it('should call the emitEvent when a function is call', () =>{
     service.sendTakeOffRequest(2);
-    expect(socketServiceSpy.emitEvent).toHaveBeenCalledWith("TAKEOFF",{id : 2});
+    expect(socketServiceSpy.emitEvent).toHaveBeenCalledWith("SWITCH_STATE", {id : 2, state: DroneState.TAKE_OFF});
   });
 });

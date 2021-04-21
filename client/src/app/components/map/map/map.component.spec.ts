@@ -77,10 +77,10 @@ describe("MapComponent", () => {
     component.max_x = 10;
     component.max_y = 10;
     computeGlobalDisplayRangeSpy.call(component);
-    expect(component.display_min_x).toEqual(1);
-    expect(component.display_min_y).toEqual(1);
-    expect(component.display_max_x).toEqual(11);
-    expect(component.display_max_y).toEqual(11);
+    expect(component.display_min_x).toEqual(1.6);
+    expect(component.display_min_y).toEqual(1.6);
+    expect(component.display_max_x).toEqual(10.4);
+    expect(component.display_max_y).toEqual(10.4);
 
   });
 
@@ -92,9 +92,9 @@ describe("MapComponent", () => {
     component.max_y = 10;
     computeGlobalDisplayRangeSpy.call(component);
     expect(component.display_min_x).toEqual(1.1);
-    expect(component.display_min_y).toEqual(-4);
+    expect(component.display_min_y).toEqual(-3.4);
     expect(component.display_max_x).toEqual(20.9);
-    expect(component.display_max_y).toEqual(16);
+    expect(component.display_max_y).toEqual(15.4);
   });
   
   it("updateAxisRange should redraw map", () => {
