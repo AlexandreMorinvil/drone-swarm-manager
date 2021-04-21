@@ -1,23 +1,25 @@
 # Add paths toward dependecies in different subdirectories
+from setup_logging import LogsConfig
+from environment import Environment
+from drone_real import DroneReal
+from drone_simulation import DroneSimulation
+from drone_interface import StateMode
+import threading
+import json
 import os
 import sys
 sys.path.append(os.path.abspath('./log'))
 
 # Add dependecies
-import json
-import threading
-from drone_interface import StateMode
-from drone_simulation import DroneSimulation
-from drone_real import DroneReal
-from environment import Environment
-from setup_logging import LogsConfig
 
 # Singleton Drone list
+
+
 class DroneList:
 
     # Singleton attributes
     drones = []
-    initPos = []
+    initial_posisitions = []
     default_port = 5015
     is_drone_list_initialized = False
 
@@ -25,7 +27,7 @@ class DroneList:
     logsConfig = None
     logger = None
 
-    def __init__(self, drone_list = []):
+    def __init__(self, drone_list=[]):
         if not DroneList.is_drone_list_initialized:
             # Initialize the drone list
             DroneList.drone_list = drone_list
@@ -39,30 +41,29 @@ class DroneList:
 
     @classmethod
     def dumps(cls):
-        json.dumps([drone.dump() for drone in cls.drones])
+        return json.dumps([drone.dump() for drone in cls.drones])
 
     @classmethod
     def createDrones(cls, number_drones, mode):
-        print("================================== ON SE REND ICI ==================================")
         for i in range(number_drones):
-            print("1")
-            if Environment.mode == Mode.REAL:
-                print("== REAL")
-                initPosVec3 = Vec3(initPos[i]['x'], initPos[i]['y'])
-                drones.append(DroneReal(initPos[i]['address'], initPosVec3))
-            else:
-                print("== Else")
-                drones.append(DroneSimulation(cls.default_port + i))
+            if Environment.is_in_simulation():
+                cls.drones.append(DroneSimulation(cls.default_port + i))
+                # print(cls.drones)
                 t = threading.Thread(
-                    target=drones[i].waiting_connection, name='waiting_connection')
+                    target=cls.drones[i].waiting_connection, name='waiting_connection')
                 t.start()
-                cls.logger.info('Connection to port {}'.format(cls.default_port + i))
+                cls.logger.info(
+                    'Connection to port {}'.format(cls.default_port + i))
+            else:
+                initial_posisitions_vec3 = Vec3(initial_posisitions[i]['x'], initial_posisitions[i]['y'])
+                cls.drones.append(
+                    DroneReal(initial_posisitions[i]['address'], initial_posisitions_vec3))
 
     @classmethod
     def delete_drones(cls):
         """Disconnect the drones brefore resetting the list"""
         for drone in cls.drones:
-            del drone
+            drone.delete()
         cls.drones.clear()
         cls.logger.info('Deleted all drones from the drone list')
 

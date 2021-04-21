@@ -53,15 +53,16 @@ def setMode(data):
     Environment.set_mode(mode)
 
     if (Environment.is_in_simulation()):
-        print("==================== DÉBUT : ÇA A BIEN REÇU LE SIGNAL : ON SE REND ICI ==================================")
-        dronesAreCreated = False
-        while not dronesAreCreated:
-            try:
-                DroneList.createDrones(int(number_drones))
-                dronesAreCreated = True
-            except:
-                DroneList.delete_drones()
-                dronesAreCreated = False
+        DroneList.createDrones(int(number_drones), mode)
+
+        # dronesAreCreated = False
+        # while not dronesAreCreated:
+        #     try:
+        #         DroneList.createDrones(int(number_drones))
+        #         dronesAreCreated = True
+        #     except:
+        #         DroneList.delete_drones()
+        #         dronesAreCreated = False
         Environment.launch_simulation(number_drones)
         # call(['scripts/start-simulation.sh', '{}'.format(number_drones)])
     else:
@@ -70,8 +71,8 @@ def setMode(data):
 
 @socketio.on('INITIAL_POSITION')
 def set_real_position(data):
-    initPos.clear()
-    initPos.extend(data)
+    DroneList.initial_posisitions.clear()
+    DroneList.initial_posisitions.extend(data)
 
 @socketio.on('SWITCH_STATE')
 def land(data):
@@ -123,7 +124,7 @@ def startUpdate():
             return
     number_drones = len(drones)
     DroneList.delete_drones()
-    for address in initPos:
+    for address in initial_posisitions:
         if (call(['scripts/update-robot.sh', '{}'.format(address['address'])]) == 1):
             socketio.emit("FAILED_UPDATE")
     DroneList.createDrones(number_drones)

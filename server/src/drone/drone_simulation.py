@@ -19,18 +19,25 @@ class DroneSimulation(DroneInterface) :
 
         # listen for incoming connections (server mode) with one connection at a time
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.sock.setsockopt( socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.sock.bind(('localhost', address))
         self.sock.listen()
         self.logger.info('Create drone simulation in server')
 
         # Initialize the live map handler
         self.map_observation_accumulator = MapObservationAccumulator(True)
+
+        # Observation thread initialization
+        self.t2 = None
     
-    def __del__(self):
-        if hasattr(self, "connection"):
-            self.connection.close()
-        self.sock.shutdown(2)
-        self.sock.close()
+    def delete(self):
+        try:
+            if hasattr(self, "connection"):
+                self.connection.close()
+            self.sock.shutdown(2)
+            self.sock.close()
+        except:
+            pass
 
     def waiting_connection(self):
         # wait for a connection
@@ -47,14 +54,13 @@ class DroneSimulation(DroneInterface) :
     def receive_data(self):
         self.logger.info('Receive data from argos id s{}'.format(id))
         while True:
-            self.connection.settimeout(5.0)
-            self.data_received = self.connection.recv(16)
-            self.data_received += bytearray(16 - len(self.data_received)) 
-            self._process_data_received(self.data_received)
-    
-    def start_receive_data(self):
-        t2 = threading.Thread(target=self.receive_data, args=(), name="receive_data_{}".format(id))
-        t2.start
+            try:
+                self.connection.settimeout(5.0)
+                self.data_received = self.connection.recv(16)
+                self.data_received += bytearray(16 - len(self.data_received)) 
+                self._process_data_received(self.data_received)
+            except:
+                pass
     
     def get_vBat(self):
         return self._vbat
