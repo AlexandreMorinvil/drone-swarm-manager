@@ -1,8 +1,35 @@
 @import '@angular/material/prebuilt-themes/deeppurple-amber.css';
-span{
-    padding: 15px;
+
+.home-link-page:hover,
+.map-catalog-link:hover,
+.control-page-link:hover {
+    cursor: pointer;
+    background-color: rgb(94, 38, 146);
+    
 }
 
-span:hover {
-    cursor: pointer;
+.home-link-page,
+.map-catalog-link, .control-page-link {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 11px;
+}
+
+.home-title {
+    padding:5px;
+}
+
+.map-icon, .drone-icon {
+    filter:invert(100%);
+    height: 24px;
+    padding-top: 5px;
+}
+
+.map-title, .control-title {
+    padding:5px;
+}
+.bdrop {
+  background-color: #bbbbbbf2;
+  backdrop-filter: blur(4px);
 }

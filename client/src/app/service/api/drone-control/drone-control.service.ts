@@ -1,29 +1,31 @@
 import { Injectable } from "@angular/core";
-import { io, Socket } from "socket.io-client/build/index";
+import { DroneState } from "@app/class/drone";
+import { SocketService } from "@app/service/api/socket.service";
 
 @Injectable({
   providedIn: "root",
 })
 export class DroneControlService {
-  private socket: Socket;
-
-  constructor() {
-    this.initSocket();
-  }
-
-  public initSocket() {
-    this.socket = io("127.0.0.1:5000");
-  }
-
-  public sendToogleLedRequest(droneId: number): void {
-    this.socket.emit("TOGGLE_LED", { id: droneId });
+  constructor(public socketService: SocketService) {
   }
 
   public sendTakeOffRequest(droneId: number): void {
-    this.socket.emit("TAKEOFF", { id: droneId });
+    this.socketService.emitEvent("SWITCH_STATE",
+      { id: droneId,  state: DroneState.TAKE_OFF});
   }
 
   public sendReturnToBaseRequest(droneId: number): void {
-    this.socket.emit("RETURN_BASE", { id: droneId });
+    this.socketService.emitEvent("SWITCH_STATE",
+      { id: droneId,  state: DroneState.RETURN_TO_BASE});
+  }
+
+  public sendLandRequest(droneId: number): void {
+    this.socketService.emitEvent("SWITCH_STATE",
+      { id: droneId,  state: DroneState.LANDING});
+  }
+
+  public sendEmergencyLandingRequest(droneId: number): void {
+    this.socketService.emitEvent("SWITCH_STATE",
+      { id: droneId,  state: DroneState.EMERGENCY});
   }
 }

@@ -1,0 +1,184 @@
+<?xml version="1.0" ?>
+
+<!-- *************************************************** -->
+<!-- * A fully commented XML is diffusion_1.xml. Refer * -->
+<!-- * to it to have full information about what       * -->
+<!-- * these options mean.                             * -->
+<!-- *************************************************** -->
+
+<argos-configuration>
+
+  <!-- ************************* -->
+  <!-- * General configuration * -->
+  <!-- ************************* -->
+  <framework>
+    <system threads="0" />
+    <experiment length="0"
+                ticks_per_second="10"
+                random_seed="123" />
+  </framework>
+
+  <!-- *************** -->
+  <!-- * Controllers * -->
+  <!-- *************** -->
+  <controllers>
+
+    <sim_alfred_controller id="ssc"
+                                 library="build/controllers/sim-alfred/libsim-alfred">
+      <actuators>
+        <range_and_bearing  implementation="default" />
+        <quadrotor_position implementation="default" />
+      </actuators>
+      <sensors>
+        <crazyflie_distance_scanner implementation="rot_z_only"  show_rays="true" />
+        <positioning            implementation="default"/>
+	<battery implementation="default"/>
+	<range_and_bearing implementation="medium" medium="rab" />
+      </sensors>
+      <params>
+      </params>
+    </sim_alfred_controller>
+
+  </controllers>
+
+
+
+  <!-- *********************** -->
+  <!-- * Arena configuration * -->
+  <!-- *********************** -->
+  <arena size="10, 10, 2" center="0,0,0">
+
+    <box id="wall_north" size="10,0.1,2" movable="false">
+      <body position="0,5,0" orientation="0,0,0" />
+    </box>
+    <box id="wall_south" size="10,0.1,2" movable="false">
+      <body position="0,-5,0" orientation="0,0,0" />
+    </box>
+    <box id="wall_east" size="0.1,10,2" movable="false">
+      <body position="5,0,0" orientation="0,0,0" />
+    </box>
+    <box id="wall_west" size="0.1,10,2" movable="false">
+      <body position="-5,0,0" orientation="0,0,0" />
+    </box>
+    <!-- walls insertion starts here -->
+    <box id= " wall0" size="0.100000,0.800000,2" movable="false">
+      <body position="-1.251522, 0.703534, 0" orientation="0,0,0" />
+    </box>
+    <box id= " wall1" size="0.800000,0.100000,2" movable="false">
+      <body position="-2.364703, 4.628976, 0" orientation="0,0,0" />
+    </box>
+    <box id= " wall2" size="0.100000,0.800000,2" movable="false">
+      <body position="3.247568, -2.723218, 0" orientation="0,0,0" />
+    </box>
+    <box id= " wall3" size="0.100000,0.800000,2" movable="false">
+      <body position="4.197547, -3.291687, 0" orientation="0,0,0" />
+    </box>
+    <box id= " wall4" size="0.100000,0.800000,2" movable="false">
+      <body position="3.479141, -1.598391, 0" orientation="0,0,0" />
+    </box>
+    <box id= " wall5" size="0.100000,0.800000,2" movable="false">
+      <body position="-2.581159, 3.885492, 0" orientation="0,0,0" />
+    </box>
+    <box id= " wall6" size="0.800000,0.100000,2" movable="false">
+      <body position="3.811547, 1.333953, 0" orientation="0,0,0" />
+    </box>
+    <box id= " wall7" size="0.100000,1.800000,2" movable="false">
+      <body position="3.404977, -2.415947, 0" orientation="0,0,0" />
+    </box>
+    <box id= " wall8" size="1.800000,0.100000,2" movable="false">
+      <body position="0.724961, 2.970827, 0" orientation="0,0,0" />
+    </box>
+    <box id= " wall9" size="0.100000,0.800000,2" movable="false">
+      <body position="2.501290, -4.405213, 0" orientation="0,0,0" />
+    </box>
+    <box id= " wall10" size="0.800000,0.100000,2" movable="false">
+      <body position="-0.267371, -0.129616, 0" orientation="0,0,0" />
+    </box>
+    <box id= " wall11" size="0.800000,0.100000,2" movable="false">
+      <body position="0.115095, 2.763811, 0" orientation="0,0,0" />
+    </box>
+    <box id= " wall12" size="0.800000,0.100000,2" movable="false">
+      <body position="-0.775782, 0.451039, 0" orientation="0,0,0" />
+    </box>
+    <box id= " wall13" size="0.800000,0.100000,2" movable="false">
+      <body position="-0.633688, 3.498401, 0" orientation="0,0,0" />
+    </box>
+    <box id= " wall14" size="0.100000,1.800000,2" movable="false">
+      <body position="-0.202960, 1.947044, 0" orientation="0,0,0" />
+    </box>
+    <box id= " wall15" size="0.800000,0.100000,2" movable="false">
+      <body position="1.695885, -3.450172, 0" orientation="0,0,0" />
+    </box>
+    <box id= " wall16" size="0.800000,0.100000,2" movable="false">
+      <body position="-0.716336, -0.649494, 0" orientation="0,0,0" />
+    </box>
+    <box id= " wall17" size="0.100000,0.800000,2" movable="false">
+      <body position="1.883229, 3.756386, 0" orientation="0,0,0" />
+    </box>
+    <box id= " wall18" size="0.100000,0.800000,2" movable="false">
+      <body position="3.286586, 0.588974, 0" orientation="0,0,0" />
+    </box>
+    <box id= " wall19" size="1.800000,0.100000,2" movable="false">
+      <body position="0.910018, -4.506089, 0" orientation="0,0,0" />
+    </box>
+    <box id= " wall20" size="0.800000,0.100000,2" movable="false">
+      <body position="-2.754419, 3.929728, 0" orientation="0,0,0" />
+    </box>
+    <box id= " wall21" size="0.100000,1.800000,2" movable="false">
+      <body position="0.791093, -0.281205, 0" orientation="0,0,0" />
+    </box>
+    <box id= " wall22" size="0.100000,1.800000,2" movable="false">
+      <body position="-3.312036, 2.824858, 0" orientation="0,0,0" />
+    </box>
+    <box id= " wall23" size="0.800000,0.100000,2" movable="false">
+      <body position="3.315889, -4.518488, 0" orientation="0,0,0" />
+    </box>
+    <box id= " wall24" size="0.100000,0.800000,2" movable="false">
+      <body position="0.400280, 0.973709, 0" orientation="0,0,0" />
+    </box>
+    <!-- walls insertion ends here -->
+    <distribute>
+      <position method="uniform" min="-3,-1,0" max="3,1,0" />
+      <orientation method="uniform" min="0,0,0" max="360,0,0" />
+      <entity quantity="4" max_trials="100">
+        <crazyflie id="s">
+          <controller config="ssc" />
+          <battery model="time_motion" delta="1e-3" pos_delta="1e-3"  orient_delta="1e-3"/>
+        </crazyflie>
+      </entity>
+    </distribute>
+
+  </arena>
+
+  <!-- ******************* -->
+  <!-- * Physics engines * -->
+  <!-- ******************* -->
+  <physics_engines>
+    <pointmass3d id="pm3d" />
+    <dynamics2d id="dyn2d" />
+  </physics_engines>
+
+  <!-- ********* -->
+  <!-- * Media * -->
+  <!-- ********* -->
+  <media>
+    <range_and_bearing id="rab" />
+    <led id="leds" />
+  </media>
+
+  <!-- ****************** -->
+  <!-- * Visualization * -->
+  <!-- ****************** -->
+  <visualization>
+    <qt-opengl autoplay="true">
+      <camera>
+      <placements>
+        <placement index="0" position="0,0,5"
+                   look_at="0,0,0" up="-1,180,0" 
+                   lens_focal_length="20" />
+        </placements>
+      </camera>
+    </qt-opengl>
+  </visualization>
+
+</argos-configuration>
