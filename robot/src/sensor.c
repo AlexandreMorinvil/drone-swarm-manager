@@ -52,8 +52,6 @@ SensorSide CriticalProximity(float sensorValues[4]) {
 
 
 SensorSide ReturningSide(float sensorValues[4], float angle) {
-    SensorSide closeSens = CriticalProximity(sensorValues);
-    if (closeSens == kDefault) return closeSens;
     SensorSide* prioList = prioritise(angle);
     for (unsigned i =0 ; i < 2; ++i) {
         int index = (int)(prioList[i]);

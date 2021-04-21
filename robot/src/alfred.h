@@ -18,11 +18,27 @@
 #include "moving.h"
 #include "sensor.h"
 #include "crtp_commander_high_level.h"
+#include "commander.h"
 
 #include "debug.h"
 
 #define NON_BLOCKING 0
 #define DEBUG_MODULE "HELLOWORLD"
+#define LOW_VOLTAGE 3.5f
+#define RSSI_CLOSE 45
+#define PI_OVER_8 0.4
+#define PI_OVER_4 0.8
+#define DISTANCE_AVOID_COLLISION 200
+#define FRONT_CLOSE 750
+
+#define LEFT 0
+#define BACK 1
+#define RIGHT 2
+#define FRONT 3
+
+#define X 0
+#define Y 1
+#define Z 2
 
 typedef enum {
     kTx,

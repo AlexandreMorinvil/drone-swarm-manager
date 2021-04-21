@@ -127,8 +127,8 @@ def land(data):
             i.switch_state(data['state'])
             logger.info('Landing of {}'.format(i))
     else:
-        drones[data['id']].switch_state(data['state'])
-        logger.info('Switch state of {} to {} mode'.format(socks[data['id'], StateMode(data['state'])]))
+        drones[data['id'] - drones[0]._id].switch_state(data['state'])
+        logger.info('Switch state of {} to {} mode'.format(socks[data['id'] - drones[0]._id], StateMode(data['state'])))
 
 @socketio.on('MAP_CATALOG')
 def getMapList():

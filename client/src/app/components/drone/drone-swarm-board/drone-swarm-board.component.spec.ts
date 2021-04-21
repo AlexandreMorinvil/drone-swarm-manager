@@ -43,4 +43,9 @@ describe("DroneSelectedBoardComponent", () => {
     component.sendEmmergencyLandingRequest();
     expect(droneControlServiceSpy.sendEmergencyLandingRequest).toHaveBeenCalledWith(ALL_DRONE_INDEX);
   });
+
+  it("should call sendLandingRequest of droneControlService", ()=> {
+    component.sendLandingRequest();
+    expect(droneControlServiceSpy.sendLandRequest).toHaveBeenCalledWith(ALL_DRONE_INDEX);
+  });
 });
