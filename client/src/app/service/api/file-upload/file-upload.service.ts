@@ -1,7 +1,5 @@
 import { Injectable } from '@angular/core';
-import { files } from 'jszip';
-import { connectableObservableDescriptor } from 'rxjs/internal/observable/ConnectableObservable';
-import { SocketService } from './socket.service';
+import { SocketService } from '@app/service/api/socket.service';
 
 @Injectable({
   providedIn: 'root'

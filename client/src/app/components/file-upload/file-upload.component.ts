@@ -1,8 +1,6 @@
-import { Component, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { io, Socket } from 'socket.io-client/build/index';
-import { SocketService } from '@app/service/api/socket.service';
-import { FileUploadService } from '@app/service/api/file-upload-service.service';
-import { file } from 'jszip';
+import { Component, HostListener, OnDestroy } from '@angular/core';
+import { FileUploadService } from '@app/service/api/file-upload/file-upload.service';
+
 @Component({
   selector: 'app-file-upload',
   templateUrl: './file-upload.component.html',

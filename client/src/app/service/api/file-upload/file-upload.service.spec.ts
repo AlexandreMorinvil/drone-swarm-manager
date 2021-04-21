@@ -1,8 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 
-import { FileUploadService } from './file-upload-service.service';
-import { SocketService } from './socket.service'
-fdescribe('FileUploadServiceService', () => {
+import { FileUploadService } from './file-upload.service';
+import { SocketService } from '../socket.service'
+describe('FileUploadServiceService', () => {
   let service: FileUploadService;
   let ss: SocketService;
   const mockFile = new File(['hi'], 'hi')
