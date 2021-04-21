@@ -14,10 +14,6 @@ export class DroneSwarmBoardComponent {
   constructor(public droneControlService: DroneControlService, public dialog: MatDialog) {
   }
 
-  sendSwarmToggleLedRequest(): void {
-    this.droneControlService.sendToogleLedRequest(ALL_DRONE_INDEX);
-  }
-
   sendSwarmTakeOffRequest(): void {
     this.droneControlService.sendTakeOffRequest(ALL_DRONE_INDEX);
   }
@@ -28,6 +24,10 @@ export class DroneSwarmBoardComponent {
 
   sendEmmergencyLandingRequest(): void {
     this.droneControlService.sendEmergencyLandingRequest(ALL_DRONE_INDEX);
+  }
+
+  sendLandingRequest(): void {
+    this.droneControlService.sendLandRequest(ALL_DRONE_INDEX);
   }
   
   openUpdateDialog(): void {

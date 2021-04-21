@@ -12,10 +12,6 @@ export class SelectedDroneService {
 
   constructor(private droneListService: DroneListService, private droneControlService: DroneControlService) {}
 
-  sendToogleLedRequest(): void {
-    this.validateDroneAvailability(this.droneControlService.sendToogleLedRequest);
-  }
-
   sendTakeOffRequest(): void {
     this.validateDroneAvailability(this.droneControlService.sendTakeOffRequest);
   }

@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 2.8.12)
 project(argos3_examples)
+include(CTest)
 
 if(APPLE)
   option(ASAN "Use Clang Address Sanitizer in Debug builds")
@@ -43,6 +44,9 @@ include_directories(${CMAKE_SOURCE_DIR} ${ARGOS_INCLUDE_DIRS} ${LUA_INCLUDE_DIR}
 
 # Set ARGoS link dir
 link_directories(${ARGOS_LIBRARY_DIRS})
+
+# Enable testing for the project
+enable_testing()
 
 # Descend into the controllers directory
 add_subdirectory(controllers)

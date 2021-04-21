@@ -9,7 +9,7 @@ describe("DroneSelectedBoardComponent", () => {
   let droneControlServiceSpy : jasmine.SpyObj<DroneControlService>;
   beforeEach(
     waitForAsync(() => {
-      droneControlServiceSpy= jasmine.createSpyObj('droneControlService', ['sendToogleLedRequest', 'sendTakeOffRequest','sendReturnToBaseRequest','sendEmergencyLandingRequest']);
+      droneControlServiceSpy= jasmine.createSpyObj('droneControlService', ['sendTakeOffRequest','sendReturnToBaseRequest','sendEmergencyLandingRequest']);
       TestBed.configureTestingModule({
         declarations: [DroneSwarmBoardComponent],
         providers: [
@@ -29,11 +29,6 @@ describe("DroneSelectedBoardComponent", () => {
     expect(component).toBeTruthy();
   });
 
-  it("should call sendToogleLedRequest of droneControlService", ()=> {
-    component.sendSwarmToggleLedRequest();
-    expect(droneControlServiceSpy.sendToogleLedRequest).toHaveBeenCalledWith(ALL_DRONE_INDEX);
-  });
-
   it("should call sendTakeOffRequest of droneControlService", ()=> {
     component.sendSwarmTakeOffRequest();
     expect(droneControlServiceSpy.sendTakeOffRequest).toHaveBeenCalledWith(ALL_DRONE_INDEX);
@@ -47,5 +42,10 @@ describe("DroneSelectedBoardComponent", () => {
   it("should call sendEmergencyLandingRequest of droneControlService", ()=> {
     component.sendEmmergencyLandingRequest();
     expect(droneControlServiceSpy.sendEmergencyLandingRequest).toHaveBeenCalledWith(ALL_DRONE_INDEX);
+  });
+
+  it("should call sendLandingRequest of droneControlService", ()=> {
+    component.sendLandingRequest();
+    expect(droneControlServiceSpy.sendLandRequest).toHaveBeenCalledWith(ALL_DRONE_INDEX);
   });
 });

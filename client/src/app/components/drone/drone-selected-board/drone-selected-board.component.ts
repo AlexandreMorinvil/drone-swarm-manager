@@ -9,10 +9,6 @@ import { SelectedDroneService } from "@app/service/selected-drone/selected-drone
 export class DroneSelectedBoardComponent {
   constructor(public selectedDroneService: SelectedDroneService) {}
 
-  sendToggleLedRequest(): void {
-    this.selectedDroneService.sendToogleLedRequest();
-  }
-
   sendTakeOffRequest(): void {
     this.selectedDroneService.sendTakeOffRequest();
   }

@@ -7,17 +7,17 @@ import { DroneSelectedBoardComponent } from "./drone-selected-board.component";
 describe("DroneSelectedBoardComponent", () => {
   let component: DroneSelectedBoardComponent  ;
   let fixture: ComponentFixture<DroneSelectedBoardComponent>;
-  let selectedDroneServiceSpy: SelectedDroneService;
+  let selectedDroneServiceStub: SelectedDroneService;
   let droneListSpy : jasmine.SpyObj<DroneListService>;
   let droneControlServiceStub : DroneControlService = {} as DroneControlService;
   beforeEach(
     waitForAsync(() => {
       droneListSpy = jasmine.createSpyObj('droneListService', ['getDrone']);
-      selectedDroneServiceSpy = new SelectedDroneService(droneListSpy, droneControlServiceStub);
+      selectedDroneServiceStub = new SelectedDroneService(droneListSpy, droneControlServiceStub);
       TestBed.configureTestingModule({
         declarations: [DroneSelectedBoardComponent],
         providers: [
-          {provide: SelectedDroneService, useValue: selectedDroneServiceSpy},
+          {provide: SelectedDroneService, useValue: selectedDroneServiceStub},
         ],
       }).compileComponents();
     })
@@ -27,27 +27,21 @@ describe("DroneSelectedBoardComponent", () => {
     fixture = TestBed.createComponent(DroneSelectedBoardComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
-    component.selectedDroneService = selectedDroneServiceSpy;
+    component.selectedDroneService = selectedDroneServiceStub;
   });
 
   it("should create the component", () => {
     expect(component).toBeTruthy();
   });
 
-  it("should call sendToogledRequest of selectedDroneService", () => {
-    const sendToggleLedRequestSpy = spyOn(selectedDroneServiceSpy, 'sendToogleLedRequest');
-    component.sendToggleLedRequest();
-    expect(sendToggleLedRequestSpy).toHaveBeenCalled();
-  });
-
   it("should call sendTakeOffRequest of selectedDroneService", () => {
-    const sendTakeOffRequestSpy = spyOn(selectedDroneServiceSpy, 'sendTakeOffRequest');
+    const sendTakeOffRequestSpy = spyOn(selectedDroneServiceStub, 'sendTakeOffRequest');
     component.sendTakeOffRequest();
     expect(sendTakeOffRequestSpy).toHaveBeenCalled();
   });
 
   it("should call sendReturnToBaseRequest of selectedDroneService", () => {
-    const sendReturnToBaseRequestSpy = spyOn(selectedDroneServiceSpy, 'sendReturnToBaseRequest');
+    const sendReturnToBaseRequestSpy = spyOn(selectedDroneServiceStub, 'sendReturnToBaseRequest');
     component.sendReturnToBaseRequest();
     expect(sendReturnToBaseRequestSpy).toHaveBeenCalled();
   });

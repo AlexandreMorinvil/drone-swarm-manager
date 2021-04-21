@@ -4,13 +4,14 @@ import sys
 sys.path.append(os.path.abspath('./log'))
 
 # Add dependencies
+import threading
+import json
 from setup_logging import LogsConfig
 from environment import Environment
 from drone_real import DroneReal
 from drone_simulation import DroneSimulation
 from drone_interface import DroneInterface, StateMode
-import threading
-import json
+from vec3 import Vec3
 
 # Add dependecies
 
@@ -46,7 +47,7 @@ class DroneList:
         return json.dumps([drone.dump() for drone in cls.drones])
 
     @classmethod
-    def createDrones(cls, number_drones, mode):
+    def createDrones(cls, number_drones, mode, initial_posisitions=None):
         for i in range(number_drones):
             if Environment.is_in_simulation():
                 cls.drones.append(DroneSimulation(cls.default_port + i))

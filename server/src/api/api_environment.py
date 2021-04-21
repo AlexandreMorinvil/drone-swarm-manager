@@ -23,7 +23,7 @@ def api_environment_set_mode(data):
         DroneList.createDrones(int(number_drones), mode)
         Environment.launch_simulation(number_drones)
     else:
-        DroneList.createDrones(int(number_drones))
+        DroneList.createDrones(int(number_drones), mode)
 
 def api_environment_set_real_position(data):
     DroneList.initial_posisitions.clear()

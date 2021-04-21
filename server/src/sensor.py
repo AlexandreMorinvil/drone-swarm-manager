@@ -1,6 +1,7 @@
 from math import pi, sin, cos
 from vec3 import Vec3
 
+NUMBER_OF_DECIMALS = 2
 
 class Sensor:
 
@@ -38,9 +39,9 @@ class Sensor:
             return None
 
         coord = Vec3(0, 0, 0)
-        coord.x = round(self.front * cos(self.pitch) * cos(self.yaw), 8)
-        coord.y = round(self.front * cos(self.pitch) * sin(self.yaw), 8)
-        coord.z = round(self.front * sin(self.pitch), 8)
+        coord.x = round(self.front * cos(self.pitch) * cos(self.yaw), NUMBER_OF_DECIMALS)
+        coord.y = round(self.front * cos(self.pitch) * sin(self.yaw), NUMBER_OF_DECIMALS)
+        coord.z = round(self.front * sin(self.pitch), NUMBER_OF_DECIMALS)
         return coord.mul(self.DISTANCE_FACTOR)
 
     def getEdgeLeft(self) -> Vec3:
@@ -48,9 +49,9 @@ class Sensor:
             return None
 
         coord = Vec3(0, 0, 0)
-        coord.x = -round(self.left * cos(self.roll) * sin(self.yaw), 8)
-        coord.y = round(self.left * cos(self.roll) * cos(self.yaw), 8)
-        coord.z = -round(self.left * sin(self.roll), 8)
+        coord.x = -round(self.left * cos(self.roll) * sin(self.yaw), NUMBER_OF_DECIMALS)
+        coord.y = round(self.left * cos(self.roll) * cos(self.yaw), NUMBER_OF_DECIMALS)
+        coord.z = -round(self.left * sin(self.roll), NUMBER_OF_DECIMALS)
         return coord.mul(self.DISTANCE_FACTOR)
 
     def getEdgeRight(self) -> Vec3:
@@ -58,9 +59,9 @@ class Sensor:
             return None
 
         coord = Vec3(0, 0, 0)
-        coord.x = round(self.right * cos(self.roll) * sin(self.yaw), 8)
-        coord.y = -round(self.right * cos(self.roll) * cos(self.yaw), 8)
-        coord.z = round(self.right * sin(self.roll), 8)
+        coord.x = round(self.right * cos(self.roll) * sin(self.yaw), NUMBER_OF_DECIMALS)
+        coord.y = -round(self.right * cos(self.roll) * cos(self.yaw), NUMBER_OF_DECIMALS)
+        coord.z = round(self.right * sin(self.roll), NUMBER_OF_DECIMALS)
         return coord.mul(self.DISTANCE_FACTOR)
 
     def getEdgeBack(self) -> Vec3:
@@ -68,7 +69,7 @@ class Sensor:
             return None
 
         coord = Vec3(0, 0, 0)
-        coord.x = -round(self.back * cos(self.pitch) * cos(self.yaw), 8)
-        coord.y = -round(self.back * cos(self.pitch) * sin(self.yaw), 8)
-        coord.z = -round(self.back * sin(self.pitch), 8)
+        coord.x = -round(self.back * cos(self.pitch) * cos(self.yaw), NUMBER_OF_DECIMALS)
+        coord.y = -round(self.back * cos(self.pitch) * sin(self.yaw), NUMBER_OF_DECIMALS)
+        coord.z = -round(self.back * sin(self.pitch), NUMBER_OF_DECIMALS)
         return coord.mul(self.DISTANCE_FACTOR)

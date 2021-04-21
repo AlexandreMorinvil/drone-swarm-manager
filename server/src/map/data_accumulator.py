@@ -3,7 +3,6 @@ import sys
 import os
 sys.path.append(os.path.abspath('./src'))
 
-from map import Map
 from vec3 import Vec3
 from sensor import Sensor
 from threading import Lock
