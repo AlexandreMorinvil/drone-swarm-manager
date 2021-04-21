@@ -21,7 +21,6 @@ export class MapGeneratedBoardComponent implements AfterViewInit {
   }
 
   updateMap(): void {
-    // if (this.liveMapService.getMustResetMap()) this.map.erasePlot();
     if (this.liveMapService.hasNewPoint()) this.map.addWallPoint(this.liveMapService.givePointsToRender());
     this.map.updateDronePositions(this.droneListService.getPositions());
   }
