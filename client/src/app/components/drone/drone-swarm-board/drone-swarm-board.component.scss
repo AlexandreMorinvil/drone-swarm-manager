@@ -1,1 +1,13 @@
 @import '@angular/material/prebuilt-themes/purple-green.css';
+
+button {
+    width: 220px;
+    min-width: none;
+    margin-top: 18px;
+}
+
+.action-button {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+}

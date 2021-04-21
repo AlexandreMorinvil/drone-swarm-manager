@@ -1,5 +1,10 @@
 @import "@angular/material/prebuilt-themes/deeppurple-amber.css";
 
+.drone_list {
+  height: 83vh;
+  overflow: auto;
+}
+
 .title-card {
   margin: 2px;
 }
